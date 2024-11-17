@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Report</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="style/backStar.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="style/firebase-init.js"></script>
+    <style>
+        .filter-input {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 5px;
+    border-radius: 10px; /* Add this line for border-radius */
+    border: 1px solid #ddd; /* Optional: Add a border for better visibility */
+}
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: radial-gradient(ellipse at bottom, #0d1d31 0%, #0c0d13 100%);
+            color: white;
+            overflow: hidden;
+        }
+        .card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            color: white;
+        }
+        .filter-input {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card text-bg-primary mb-3">
+            <!-- Button to Open Modal -->     
+            <div class="d-flex justify-content-between align-items-center">
+                <!-- Back Button with Icon -->
+                <a href="#" class="btn btn-lg btn-outline-light me-2" style="border-radius: 50px;" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <!-- Header Section -->
+                <div class="d-flex justify-content-between align-items-center">
+                    <p id="greetingMessage" class="mb-0">Welcome, Admin!</p>
+                </div>
+                <button id="logoutButton" class="btn btn-light" style="border-radius: 70px; font-size: small;">Log Out</button>
+            </div>
+        </div>
+        
+        <!-- User Report Section -->
+        <div class="text-light">
+            <div class="mb-3">
+                <h5 id="userCountHeader">All Users</h5>
+            </div>
+            <!-- Loading Spinner -->
+            <center>
+                <div id="loadingSpinner" class="spinner-border text-light text-center" style="display: none;" role="status">
+                    <span class="sr-only"></span>
+                </div>
+            </center>
+            <!-- Table will be loaded here -->
+            <div class="table" id="userList" style="display:none;">
+                <!-- User data will be dynamically loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Authentication State Check
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                // Fetch and display the admin's first name
+                const firstName = user.displayName ? user.displayName.split(' ')[0] : 'Admin';
+                document.getElementById("greetingMessage").innerHTML = `Hello, <b>${firstName}</b>!`;
+
+                // Verify if the user has admin privileges
+                firebase.database().ref(`users/${user.uid}/role`).once('value').then((snapshot) => {
+                    if (snapshot.val() === 'admin') {
+                        // Load user data for admin
+                        loadUsersData();
+                    } else {
+                        alert("Access Denied: You do not have admin privileges.");
+                        window.location.href = "index.html"; // Redirect to login or another page
+                    }
+                });
+            } else {
+                // Redirect to login page if unauthenticated
+                window.location.href = "index.html";
+            }
+        });
+
+        // Log Out Functionality
+        document.getElementById("logoutButton").addEventListener("click", () => {
+            firebase.auth().signOut().then(() => {
+                window.location.href = "index.html"; // Redirect to login after logout
+            }).catch((error) => {
+                alert("Error logging out: " + error.message);
+            });
+        });
+
+        // Function to format dates
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        // Function to Load All Users' Data for Admin
+        function loadUsersData() {
+            const userListDiv = document.getElementById("userList");
+            const loadingSpinner = document.getElementById("loadingSpinner");
+            const userCountHeader = document.getElementById("userCountHeader");
+
+            document.getElementById("loadingSpinner").style.display = "flex";
+            userListDiv.style.display = "none";
+
+            firebase.database().ref("users").once("value", (snapshot) => {
+                const users = snapshot.val();
+                if (users) {
+                    let userCount = Object.keys(users).length; // Count the number of users
+                    userCountHeader.innerHTML = `All Users (${userCount})`; // Update header with user count
+
+                    let htmlContent = `
+                        <table class="table text-light">
+                            <thead>
+                                <tr>
+                                    <th><input type="text" class="filter-input" id="filterName" placeholder="By Name"></th>
+                                    <th><input type="text" class="filter-input" id="filterEmail" placeholder="By Email"></th>
+                                    <th><input type="text" class="filter-input" id="filterMobile" placeholder="By Mobile"></th>
+                                    <th><input type="text" class="filter-input" id="filterRole" placeholder="By Role"></th>
+                                    <th><input type="text" class="filter-input" id="filterSignup" placeholder="By-SignUp-Date"></th>
+                                    <th><input type="text" class="filter-input" id="filterLogin" placeholder="By-Last-Login"></th>
+                                    <th><input type="text" class="filter-input" id="filterFeedback" placeholder="By Feedback"></th>
+                                </tr>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Mobile</th>
+                                    <th>Role</th>
+                                    <th>Sign Up</th>
+                                    <th>Last Login</th>
+                                    <th>Feedback</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                    `;
+
+                    
+
+                    // Populate user data into the table
+                    Object.keys(users).forEach(uid => {
+                        const user = users[uid];
+                        let feedback = 'No feedback yet';
+
+                        // Check if user has feedback data
+                        if (user.feedback) {
+                            feedback = Object.keys(user.feedback).map(feedbackId => {
+                                const fb = user.feedback[feedbackId];
+                                return `<div><strong>Rating:</strong> ${fb.rating}, <strong>Message:</strong> ${fb.message}</div>`;
+                            }).join('');
+                        }
+
+                        htmlContent += `
+                            <tr>
+                                <td>${user.firstName} ${user.lastName}</td>
+                                <td>${user.email}</td>
+                                <td>${user.mobile || "N/A"}</td>
+                                <td>${user.role || "user"}</td>
+                                <td>${user.signupDate ? formatDate(user.signupDate) : "N/A"}</td>
+                                <td>${user.lastLoginDate ? formatDate(user.lastLoginDate) : "N/A"}</td>
+                                <td>${feedback}</td>
+                            </tr>
+                        `;
+                    });
+
+                    htmlContent += `
+                            </tbody>
+                        </table>
+                    `;
+                    userListDiv.innerHTML = htmlContent;
+
+                    
+
+                    // Hide loading spinner and display the table
+                    loadingSpinner.style.display = "none";
+                    userListDiv.style.display = "block";
+
+
+                    // Add event listeners for filter inputs
+                    addFilterListeners();
+                } else {
+                    userListDiv.innerHTML = "<p>No users found in the database.</p>";
+
+                    // Hide loading spinner
+                    loadingSpinner.style.display = "none";
+                    userListDiv.style.display = "block";
+                }
+            }).catch((error) => {
+                alert("Error loading user data: " + error.message);
+
+                // Hide loading spinner after data is loaded
+                document.getElementById("loadingSpinner").style.display = "none";
+            });
+        }
+
+        // Function to filter the table rows based on input
+        function addFilterListeners() {
+            const filters = {
+                name: document.getElementById("filterName"),
+                email: document.getElementById("filterEmail"),
+                mobile: document.getElementById("filterMobile"),
+                role: document.getElementById("filterRole"),
+                signup: document.getElementById("filterSignup"),
+                login: document.getElementById("filterLogin"),
+                feedback: document.getElementById("filterFeedback")
+            };
+
+            Object.keys(filters).forEach((key) => {
+                filters[key].addEventListener("input", function() {
+                    filterTable();
+                });
+            });
+        }
+
+        // Function to filter table rows based on input
+        function filterTable() {
+            const filterName = document.getElementById("filterName").value.toLowerCase();
+            const filterEmail = document.getElementById("filterEmail").value.toLowerCase();
+            const filterMobile = document.getElementById("filterMobile").value.toLowerCase();
+            const filterRole = document.getElementById("filterRole").value.toLowerCase();
+            const filterSignup = document.getElementById("filterSignup").value.toLowerCase();
+            const filterLogin = document.getElementById("filterLogin").value.toLowerCase();
+            const filterFeedback = document.getElementById("filterFeedback").value.toLowerCase();
+
+            const rows = document.querySelectorAll("#userTableBody tr");
+
+            rows.forEach((row) => {
+                const name = row.cells[0].textContent.toLowerCase();
+                const email = row.cells[1].textContent.toLowerCase();
+                const mobile = row.cells[2].textContent.toLowerCase();
+                const role = row.cells[3].textContent.toLowerCase();
+                const signup = row.cells[4].textContent.toLowerCase();
+                const login = row.cells[5].textContent.toLowerCase();
+                const feedback = row.cells[6].textContent.toLowerCase();
+
+                const matchesFilter =
+                    (name.includes(filterName) &&
+                    email.includes(filterEmail) &&
+                    mobile.includes(filterMobile) &&
+                    role.includes(filterRole) &&
+                    signup.includes(filterSignup) &&
+                    login.includes(filterLogin) &&
+                    feedback.includes(filterFeedback));
+
+                row.style.display = matchesFilter ? "" : "none";
+
+                
+            });
+        }
+
+        // back Button
+function goBack() {
+    if (window.history.length > 1) {
+        window.history.back();
+    } else {
+        window.location.href = "defaultPage.html"; // Redirect to a default page
+    }
+}
+
+
+    </script>
+</body>
+</html>

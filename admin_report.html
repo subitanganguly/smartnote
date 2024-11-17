@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Report</title>
+    <link rel="icon" type="image/png" href="img/logo.png">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="style/backStar.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="style/firebase-init.js"></script>
+    <style>
+        body {
+            background: radial-gradient(ellipse at bottom, #0d1d31 0%, #0d1d31);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-1 text-light">
+        <div class="card text-bg-primary mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <a href="#" class="btn btn-lg btn-outline-light me-2" style="border-radius: 50px;" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div class="d-flex justify-content-between align-items-center">
+                    <p id="greetingMessage" class="mb-0">Welcome, Admin!</p>
+                </div>
+                <button id="logoutButton" class="btn btn-light" style="border-radius: 70px; font-size: small;">Log Out</button>
+            </div>
+        </div>
+
+        <!-- Search Filter Section -->
+        <div class="mb-3">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search users by name or email..." onkeyup="filterUsers()">
+        </div>
+        
+        <!-- User Report Section -->
+        <div class="text-light">
+            <div class="mb-3">
+                <h5 id="userCountHeader">Total Users</h5>
+            </div>
+            <center>
+            <div id="loadingSpinner" class="spinner-border text-light spinner-container" style="display: none;" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            </center>
+            <div id="userList" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Authentication State Check
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                const Name = user.displayName ? user.displayName.split(' ')[0] : 'Admin';
+                document.getElementById("greetingMessage").innerHTML = `Hello, <b>${Name}</b>!`;
+
+                firebase.database().ref(`users/${user.uid}/role`).once('value').then((snapshot) => {
+                    if (snapshot.val() === 'admin') {
+                        loadUsersData();
+                    } else {
+                        alert("Access Denied: You do not have admin privileges.");
+                        window.location.href = "index.html";
+                    }
+                });
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        // Log Out Functionality
+        document.getElementById("logoutButton").addEventListener("click", () => {
+            firebase.auth().signOut().then(() => {
+                window.location.href = "index.html";
+            }).catch((error) => {
+                alert("Error logging out: " + error.message);
+            });
+        });
+
+        // Function to format dates
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        // Global users data variable for filtering
+        let usersData = [];
+
+        // Function to Load All Users' Data for Admin
+        function loadUsersData() {
+            const userListDiv = document.getElementById("userList");
+            const loadingSpinner = document.getElementById("loadingSpinner");
+            const userCountHeader = document.getElementById("userCountHeader");
+
+            loadingSpinner.style.display = "flex";
+            userListDiv.style.display = "none";
+
+            firebase.database().ref("users").once("value", (snapshot) => {
+                const users = snapshot.val();
+                if (users) {
+                    usersData = users; // Store users data for filtering
+                    let userCount = Object.keys(users).length;
+                    userCountHeader.innerHTML = `All Users (${userCount})`;
+
+                    let htmlContent = '';
+
+                    Object.keys(users).forEach(uid => {
+                        const user = users[uid];
+                        let feedback = 'No feedback yet';
+                        if (user.feedback) {
+                            feedback = Object.keys(user.feedback).map(feedbackId => {
+                                const fb = user.feedback[feedbackId];
+                                return `<div><strong>Rating:</strong> ${fb.rating}, <strong>Message:</strong> ${fb.message}</div>`;
+                            }).join('');
+                        }
+
+                        htmlContent += `
+                            <div class="user-card glass mb-2" style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px; color: white;">
+                                <div class="user-info" style="font-size: 14px;">
+                                    <span class="user-name" style="font-size: 16px; color: #FF7F50;"><i class="fas fa-user"></i><b> ${user.Name} [${user.role || "user"}]</b></span><br>
+                                    <span class="user-mobile" style="color: #32CD32;"><i class="fas fa-mobile-alt"></i> ${user.mobile || "N/A"}</span><br>
+                                    <span class="user-email" style="color: #1E90FF;"><i class="fas fa-envelope"></i> ${user.email}</span><br>
+                                    <span class="user-signup" style="color: #FFD700;font-size: 10px;">Sign-up: ${user.signupDate ? formatDate(user.signupDate) : "N/A"}</span><br>
+                                    <span class="user-last-login" style="color: #FFD700;font-size: 10px;">Last Login: ${user.lastLoginDate ? formatDate(user.lastLoginDate) : "N/A"}</span><br>
+                                </div>
+                                <div class="feedback" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
+                                    ${feedback}
+                                </div>
+                                <div class="role-action mt-2">
+                                    <button class="btn btn-warning btn-sm" onclick="updateUserRole('${uid}', '${user.role}')">Change Role</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    userListDiv.innerHTML = htmlContent;
+
+                    loadingSpinner.style.display = "none";
+                    userListDiv.style.display = "block";
+                } else {
+                    userListDiv.innerHTML = "<p>No users found in the database.";
+                    loadingSpinner.style.display = "none";
+                    userListDiv.style.display = "block";
+                }
+            }).catch((error) => {
+                alert("Error loading user data: " + error.message);
+                document.getElementById("loadingSpinner").style.display = "none";
+            });
+        }
+
+        // Function to filter users by name or email
+        function filterUsers() {
+            const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+            const filteredUsers = Object.keys(usersData).filter(uid => {
+                const user = usersData[uid];
+                return user.Name.toLowerCase().includes(searchTerm) || user.email.toLowerCase().includes(searchTerm) ||
+                user.mobile.toLowerCase().includes(searchTerm);
+            });
+
+            // Display filtered users
+            const userListDiv = document.getElementById("userList");
+            let htmlContent = '';
+
+            filteredUsers.forEach(uid => {
+                const user = usersData[uid];
+                let feedback = 'No feedback yet';
+                if (user.feedback) {
+                    feedback = Object.keys(user.feedback).map(feedbackId => {
+                        const fb = user.feedback[feedbackId];
+                        return `<div><strong>Rating:</strong> ${fb.rating}, <strong>Message:</strong> ${fb.message}</div>`;
+                    }).join('');
+                }
+
+                htmlContent += `
+                    <div class="user-card glass mb-2" style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px; color: white;">
+                        <div class="user-info" style="font-size: 14px;">
+                            <span class="user-name" style="font-size: 16px; color: #FF7F50;"><i class="fas fa-user"></i><b> ${user.Name} [${user.role || "user"}]</b></span><br>
+                            <span class="user-mobile" style="color: #32CD32;"><i class="fas fa-mobile-alt"></i> ${user.mobile || "N/A"}</span><br>
+                            <span class="user-email" style="color: #1E90FF;"><i class="fas fa-envelope"></i> ${user.email}</span><br>
+                            <span class="user-signup" style="color: #FFD700;">Sign-up: ${user.signupDate ? formatDate(user.signupDate) : "N/A"}</span><br>
+                            <span class="user-last-login" style="color: #FFD700;">Last Login: ${user.lastLoginDate ? formatDate(user.lastLoginDate) : "N/A"}</span><br>
+                        </div>
+                        <div class="feedback" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
+                            ${feedback}
+                        </div>
+                        <div class="role-action mt-2">
+                            <button class="btn btn-warning btn-sm" onclick="updateUserRole('${uid}', '${user.role}')">Change Role</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            userListDiv.innerHTML = htmlContent;
+        }
+
+        // Function to update user role
+        function updateUserRole(uid, currentRole) {
+            const newRole = currentRole === "admin" ? "user" : "admin";
+            if (!confirm(`Are you sure you want to change this user's role to ${newRole}?`)) {
+                return;
+            }
+
+            firebase.database().ref(`users/${uid}`).update({ role: newRole })
+            .then(() => {
+                alert(`User role updated to ${newRole}`);
+                loadUsersData(); 
+            }).catch((error) => {
+                alert("Error updating user role: " + error.message);
+            });
+        }
+
+        // Back Button Functionality
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>
