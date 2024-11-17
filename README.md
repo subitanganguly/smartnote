@@ -1,0 +1,2 @@
+# smartnote
+Smart Note App
