@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard - To-Do List</title>
-    <link rel="icon" type="image/png" href="img/logo.png">
+    <link rel="icon" type="image/png" href="logo.png">
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="backStar.css" rel="stylesheet">
@@ -83,7 +83,7 @@ input:checked + .slider:before {
 <body>
     
     <div class="container mt-1 text-light">
-        <div class="card text-bg-primary mb-3">
+        <div class="card text-bg-primary mb-2">
             <!-- Button to Open Modal -->     
            <div class="card-header d-flex justify-content-between align-items-center">
              <!-- Back Button with Icon -->
@@ -91,25 +91,34 @@ input:checked + .slider:before {
                 <i class="fas fa-arrow-left"></i>
              </a>
                 <!-- Notes Count Display -->
-               <h5 class="mt-3">Notes</h5>
+               <h5 class="mt-1">Notes</h5>
                <button id="logoutButton" class="btn btn-light" style="border-radius: 70px; font-size: small;">Log Out</button>
            </div>
         </div>
         
          <!-- Add Note Button with Icon -->
-         <button id="openModalBtn" class="btn btn-outline-light mt-1">
+         <button id="openModalBtn" class="btn btn-outline-light" style="border-radius: 20px;">
          <i class="fas fa-plus"></i> Add Note
          </button>
 
         <!-- Important Filter Button with Icon -->
-        <button id="importantFilterBtn" class="btn btn-outline-warning mt-1">
+        <button id="importantFilterBtn" class="btn btn-outline-warning" style="border-radius: 20px;">
         <i class="fas fa-star"></i> Important
         </button>
-        <h5 class="mt-3">Your Notes [<span class="text-light" id="noteCount">0</span>]</h5>
+        <P class="mt-1">Your Notes [<span class="text-light" id="noteCount">0</span>]</P>
 
         
         <!-- Search Input for Notes -->
-        <input id="searchInput" class="form-control mt-3" type="text" placeholder="Search notes...">
+           <!-- Search Filter Section -->
+        <div class="mb-2">
+            <div class="input-group mb-2">
+                <span class="input-group-text" id="searchIcon">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input id="searchInput" class="form-control" type="text" placeholder="Search notes...">
+            </div>
+            
+        </div>
         
        
         <ul id="notesList" class="list-group mt-3"></ul>
@@ -246,38 +255,47 @@ input:checked + .slider:before {
 
                 listItem.innerHTML = `
                     <div class="glass mb-2">
-                        <div class="text-right mb-1" style="margin-right: 20px;">
-                            <span>Important</span>
-                            <label class="switch">
-                        <input type="checkbox" class="important-checkbox" ${noteData.important ? "checked" : ""}>
-                        <span class="slider round"></span>
-                        </label>
-                            <button class="btn btn-secondary btn-sm mr-2 copy-btn">
-                                <i class="fas fa-copy"></i>
+            <div class="text-right mb-1" style="margin-right: 20px;">
+                <span>Important</span>
+                <label class="switch">
+                    <input type="checkbox" class="important-checkbox" ${noteData.important ? "checked" : ""}>
+                    <span class="slider round"></span>
+                </label>
+                <button class="btn btn-secondary btn-sm mr-2 copy-btn">
+                    <i class="fas fa-copy"></i>
+                </button>
+                <button class="btn btn-success btn-sm share-btn hide">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+                <!-- Dropdown Menu Section -->
+                <span class="dropleft mb-2">
+                    <a type="button" class="btn btn-sm btn-danger" data-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end text-center" aria-labelledby="dropdownMenuLink">
+                        <li>
+                            <button class="btn btn-sm btn-light edit-btn d-block w-100 mb-1">
+                                <i class="fas fa-edit"></i> Edit
                             </button>
-                            <button class="btn btn-success btn-sm share-btn hide">
-                                <i class="fas fa-share-alt"></i>
+                        </li>
+                        <li>
+                            <button class="btn btn-sm btn-info preview-btn d-block w-100 mb-1 text-light">
+                                <i class="fas fa-eye"></i> Preview
                             </button>
-                        </div>
-                        <textarea class="form-control mb-2" rows="4" readonly style="max-height: 7.5em; overflow-y: auto;">${noteData.text}</textarea>
-                        <div class="text-center">
-                            <button class="btn btn-warning btn-sm mr-2 edit-btn">
-                             <i class="fas fa-edit"></i> Edit
+                        </li>
+                        <li>
+                            <button class="btn btn-sm btn-danger delete-btn d-block w-100 text-light">
+                                <i class="fas fa-trash-alt"></i> Delete
                             </button>
-                            <button class="btn btn-info btn-sm mr-2 preview-btn">
-                            <i class="fas fa-eye"></i> Preview
-                            </button>
-                             <button class="btn btn-danger btn-sm mr-2 delete-btn">
-                           <i class="fas fa-trash-alt"></i> Delete
-                          </button>
-
-                            <!-- Switch-style Important Button -->
-                        
-
-                            <br>
-                            <span style="font-size: x-small;">${noteDate}</span>
-                        </div>
-                    </div>
+                        </li>
+                    </ul>
+                </span>
+                <div class="mt-1">
+                    <textarea class="form-control" rows="3" readonly style="max-height: 7.5em; overflow-y: auto;">${noteData.text}</textarea>
+                    <span style="font-size: x-small;">${noteDate}</span>
+                </div>               
+            </div>                       
+        </div>
                 `;
                 // Copy Note Text
                 listItem.querySelector(".copy-btn").addEventListener("click", () => {
