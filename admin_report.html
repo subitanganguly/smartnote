@@ -117,82 +117,97 @@
         // Global users data variable for filtering
         let usersData = [];
 
-        // Function to Load All Users' Data for Admin
-        function loadUsersData() {
-            const userListDiv = document.getElementById("userList");
-            const loadingSpinner = document.getElementById("loadingSpinner");
-            const userCountHeader = document.getElementById("userCountHeader");
+// Function to Load All Users' Data for Admin
+function loadUsersData() {
+    const userListDiv = document.getElementById("userList");
+    const loadingSpinner = document.getElementById("loadingSpinner");
+    const userCountHeader = document.getElementById("userCountHeader");
 
-            loadingSpinner.style.display = "flex";
-            userListDiv.style.display = "none";
+    loadingSpinner.style.display = "flex";
+    userListDiv.style.display = "none";
 
-            firebase.database().ref("users").once("value", (snapshot) => {
-                const users = snapshot.val();
-                if (users) {
-                    usersData = users; // Store users data for filtering
-                    let userCount = Object.keys(users).length;
-                    userCountHeader.innerHTML = `All Users (${userCount})`;
+    firebase.database().ref("users").once("value", (snapshot) => {
+        const users = snapshot.val();
+        if (users) {
+            usersData = users; // Store users data for filtering
+            let userCount = Object.keys(users).length;
+            userCountHeader.innerHTML = `All Users (${userCount})`;
 
-                    let htmlContent = '';
+            const userPromises = Object.keys(users).map(async (uid) => {
+                const user = users[uid];
 
-                    Object.keys(users).forEach(uid => {
-                        const user = users[uid];
-                        let feedback = 'No feedback yet';
-                        if (user.feedback) {
-                            feedback = Object.keys(user.feedback).map(feedbackId => {
-                                const fb = user.feedback[feedbackId];
-                                return `<div><strong>Rating:</strong> ${fb.rating}, <strong>Message:</strong> ${fb.message}</div>`;
-                            }).join('');
-                        }
+                // Fetch notes count for this user
+                const notesSnapshot = await firebase.database().ref(`notes/${uid}`).once("value");
+                const notes = notesSnapshot.val();
+                const noteCount = notes ? Object.keys(notes).length : 0; // Count notes if any, otherwise 0
 
-                        htmlContent += `
-                <div class="d-flex justify-content-between align-items-start glass mb-2 zoom">
-                <!-- User Info Section -->
-                <div class="user-info" style="font-size: 12px; width: 90%;">
-                    <span class="user-name" style="font-size: 12px; color: #fb0071;">
-                        <i class="fas fa-user"></i><b class="text-uppercase"> ${user.Name} </b>
-                        <span class="text-uppercase" style="color: #d3d3d3;"> [${user.role || "user"}]</span>   
-                    </span>
-                    <span class="user-mobile" style="color: #32CD32;"><i class="fas fa-mobile-alt"></i> ${user.mobile || "N/A"}</span><br>
-                    <span class="user-email" style="color: #1E90FF;"><i class="fas fa-envelope"></i> ${user.email}</span><br>
-                    <span class="user-signup" style="color: #FFD700; font-size: 10px;">Sign-up: ${user.signupDate ? formatDate(user.signupDate) : "N/A"}</span><br>
-                    <span class="user-last-login" style="color: #ff8000; font-size: 10px;">Last Login: ${user.lastLoginDate ? formatDate(user.lastLoginDate) : "N/A"}</span><br>
-                    <div class="feedback text-uppercase" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
-                        ${feedback}
-                    </div>
-                </div>
-        
-                <!-- Dropdown Menu Section -->
-                <div class="dropstart">
-                    <a class="btn btn-sm text-light" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-ellipsis-v"></i>  
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <li>
-                            <a style="padding-right: 60px;" class="btn  btn-sm" onclick="updateUserRole('${uid}', '${user.role}')">Change Role</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-                        `;
-                    });
+                // Fetch expenses count for this user
+                const expensesSnapshot = await firebase.database().ref(`expenses/${uid}`).once("value");
+                const expenses = expensesSnapshot.val();
+                const expensesCount = expenses ? Object.keys(expenses).length : 0; // Corrected: Count expenses if any, otherwise 0
+                
+                 // Fetch archive_expenses count for this user
+                 const archive_expensesSnapshot = await firebase.database().ref(`archive_expenses/${uid}`).once("value");
+                const archive_expenses = archive_expensesSnapshot.val();
+                const archive_expensesCount = archive_expenses ? Object.keys(archive_expenses).length : 0; // Corrected: Count expenses if any, otherwise 0
 
-                    userListDiv.innerHTML = htmlContent;
-
-                    loadingSpinner.style.display = "none";
-                    userListDiv.style.display = "block";
-                } else {
-                    userListDiv.innerHTML = "<p>No users found in the database.";
-                    loadingSpinner.style.display = "none";
-                    userListDiv.style.display = "block";
+                let feedback = 'No feedback yet';
+                if (user.feedback) {
+                    feedback = Object.keys(user.feedback).map(feedbackId => {
+                        const fb = user.feedback[feedbackId];
+                        return `<div><strong>Rating:</strong> ${fb.rating}, <strong>Message:</strong> ${fb.message}</div>`;
+                    }).join('');
                 }
-            }).catch((error) => {
-                alert("Error loading user data: " + error.message);
-                document.getElementById("loadingSpinner").style.display = "none";
-            });
-        }
 
-        function filterUsers() {
+                return `
+                    <div class="d-flex justify-content-between align-items-start glass mb-2 zoom">
+                        <div class="user-info" style="font-size: 12px; width: 90%;">
+                            <span class="user-name" style="font-size: 12px; color: #fb0071;">
+                                <i class="fas fa-user"></i><b class="text-uppercase"> ${user.Name} </b>
+                                <span class="text-uppercase" style="color: #d3d3d3;"> [${user.role || "user"}]</span>   
+                            </span>
+                            <span class="user-mobile" style="color: #32CD32;"><i class="fas fa-mobile-alt"></i> ${user.mobile || "N/A"}</span><br>
+                            <span class="user-email" style="color: #1E90FF;"><i class="fas fa-envelope"></i> ${user.email}</span><br>
+                            <span class="user-signup" style="color: #FFD700; font-size: 10px;">Sign-up: ${user.signupDate ? formatDate(user.signupDate) : "N/A"}</span><br>
+                            <span class="user-last-login" style="color: #ff8000; font-size: 10px;">Last Login: ${user.lastLoginDate ? formatDate(user.lastLoginDate) : "N/A"}</span><br>
+                            <div class="feedback text-uppercase" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
+                                ${feedback}
+                            </div>
+                            <div class="note-count" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
+                                Notes:📝${noteCount} | Expenses:💵${expensesCount} | Archive:🗑${archive_expensesCount}
+                            </div>
+                        </div>
+                        <div class="dropstart">
+                            <a class="btn btn-sm text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v"></i>  
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="btn  btn-sm" onclick="updateUserRole('${uid}', '${user.role}')">Change Role</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Use Promise.all to wait for all user promises to resolve
+            Promise.all(userPromises).then(userHtmlArray => {
+                userListDiv.innerHTML = userHtmlArray.join('');
+                loadingSpinner.style.display = "none";
+                userListDiv.style.display = "block";
+            });
+        } else {
+            userListDiv.innerHTML = "<p>No users found in the database.</p>";
+            loadingSpinner.style.display = "none";
+            userListDiv.style.display = "block";
+        }
+    }).catch((error) => {
+        alert("Error loading user data: " + error.message);
+        loadingSpinner.style.display = "none";
+    });
+}
+
+
+function filterUsers() {
     const searchTerm = document.getElementById("searchInput").value.toLowerCase();
     const filteredUsers = Object.keys(usersData).filter(uid => {
         const user = usersData[uid];
@@ -215,8 +230,26 @@
     const userListDiv = document.getElementById("userList");
     let htmlContent = '';
 
-    filteredUsers.forEach(uid => {
+    const userPromises = filteredUsers.map(async (uid) => {
         const user = usersData[uid];
+        
+        // Fetch the notes count for each user
+        const notesSnapshot = await firebase.database().ref(`notes/${uid}`).once("value");
+        const notes = notesSnapshot.val();
+        const noteCount = notes ? Object.keys(notes).length : 0; // Count notes if any, otherwise 0
+
+        // Fetch expenses count for this user
+        const expensesSnapshot = await firebase.database().ref(`expenses/${uid}`).once("value");
+        const expenses = expensesSnapshot.val();
+        const expensesCount = expenses ? Object.keys(expenses).length : 0; // Count notes if any, otherwise 0
+
+        // Fetch archive_expenses count for this user
+        const archive_expensesSnapshot = await firebase.database().ref(`archive_expenses/${uid}`).once("value");
+        const archive_expenses = archive_expensesSnapshot.val();
+        const archive_expensesCount = archive_expenses ? Object.keys(archive_expenses).length : 0; // Corrected: Count expenses if any, otherwise 0
+
+
+
         let feedback = 'No feedback yet';
         if (user.feedback) {
             feedback = Object.keys(user.feedback).map(feedbackId => {
@@ -225,44 +258,46 @@
             }).join('');
         }
 
-        htmlContent += `
+        return `
             <div class="d-flex justify-content-between align-items-start glass mb-2 zoom">
-                <!-- User Info Section -->
-                <div class="user-info" style="font-size: 12px; width: 90%;">
-                    <span class="user-name" style="font-size: 12px; color: #fb0071;">
-                        <i class="fas fa-user"></i><b class="text-uppercase"> ${user.Name} </b>
-                        <span class="text-uppercase" style="color: #d3d3d3;"> [${user.role || "user"}]</span>   
-                    </span>
-                    <span class="user-mobile" style="color: #32CD32;"><i class="fas fa-mobile-alt"></i> ${user.mobile || "N/A"}</span><br>
-                    <span class="user-email" style="color: #1E90FF;"><i class="fas fa-envelope"></i> ${user.email}</span><br>
-                    <span class="user-signup" style="color: #FFD700; font-size: 10px;">Sign-up: ${user.signupDate ? formatDate(user.signupDate) : "N/A"}</span><br>
-                    <span class="user-last-login" style="color: #ff8000; font-size: 10px;">Last Login: ${user.lastLoginDate ? formatDate(user.lastLoginDate) : "N/A"}</span><br>
-                    <div class="feedback text-uppercase" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
-                        ${feedback}
+                        <div class="user-info" style="font-size: 12px; width: 90%;">
+                            <span class="user-name" style="font-size: 12px; color: #fb0071;">
+                                <i class="fas fa-user"></i><b class="text-uppercase"> ${user.Name} </b>
+                                <span class="text-uppercase" style="color: #d3d3d3;"> [${user.role || "user"}]</span>   
+                            </span>
+                            <span class="user-mobile" style="color: #32CD32;"><i class="fas fa-mobile-alt"></i> ${user.mobile || "N/A"}</span><br>
+                            <span class="user-email" style="color: #1E90FF;"><i class="fas fa-envelope"></i> ${user.email}</span><br>
+                            <span class="user-signup" style="color: #FFD700; font-size: 10px;">Sign-up: ${user.signupDate ? formatDate(user.signupDate) : "N/A"}</span><br>
+                            <span class="user-last-login" style="color: #ff8000; font-size: 10px;">Last Login: ${user.lastLoginDate ? formatDate(user.lastLoginDate) : "N/A"}</span><br>
+                            <div class="feedback text-uppercase" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
+                                ${feedback}
+                            </div>
+                            <div class="note-count" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
+                                Notes:📝${noteCount} | Expenses:💵${expensesCount} | Archive:🗑${archive_expensesCount}
+                            </div>
+                        </div>
+                        <div class="dropstart">
+                            <a class="btn btn-sm text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v"></i>  
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="btn  btn-sm" onclick="updateUserRole('${uid}', '${user.role}')">Change Role</a></li>
+                            </ul>
+                        </div>
                     </div>
-                </div>
-        
-                <!-- Dropdown Menu Section -->
-                <div class="dropstart">
-                    <a class="btn btn-sm text-light" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-ellipsis-v"></i>  
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <li>
-                            <a style="padding-right: 60px;" class="btn  btn-sm" onclick="updateUserRole('${uid}', '${user.role}')">Change Role</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
         `;
     });
 
-    userListDiv.innerHTML = htmlContent;
-
-    // Show "No results found" if the filter matches no users
-    if (filteredUsers.length === 0) {
-        userListDiv.innerHTML = "<p>No users match your search criteria.</p>";
-    }
+    // Use Promise.all to wait for all user promises to resolve
+    Promise.all(userPromises).then(userHtmlArray => {
+        userListDiv.innerHTML = userHtmlArray.join('');
+        // Show "No results found" if the filter matches no users
+        if (filteredUsers.length === 0) {
+            userListDiv.innerHTML = "<p>No users match your search criteria.</p>";
+        }
+    }).catch((error) => {
+        alert("Error loading user data: " + error.message);
+    });
 }
 
 
