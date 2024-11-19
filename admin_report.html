@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Report</title>
-    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="icon" type="image/png" href="img/logo.png">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="backStar.css" rel="stylesheet">
+    <link href="style/backStar.css" rel="stylesheet">
         <!-- Bootstrap 5 JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Font Awesome for icons -->
@@ -16,17 +16,30 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="firebase-init.js"></script>
+    <script src="style/firebase-init.js"></script>
     <style>
-        body {
-            background: radial-gradient(ellipse at bottom, #0d1d31 0%, #0d1d31);
-        }
+       
 
 
 
     </style>
 </head>
 <body>
+
+     <div class="area" >
+        <ul class="circles">
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+        </ul>
+      
     <div class="container mt-1 text-light">
         <div class="card text-bg-primary mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -46,7 +59,7 @@
                 <span class="input-group-text" id="searchIcon">
                     <i class="fas fa-search"></i>
                 </span>
-                <input type="text" id="searchInput" class="form-control searchInput" placeholder="Search......." onkeyup="filterUsers()">
+                <input type="text" id="searchInput" class="form-control searchInput" autocomplete="off" placeholder="Search......." onkeyup="filterUsers()">
             </div>
             
         </div>
@@ -133,7 +146,7 @@
                         }
 
                         htmlContent += `
-                <div class="d-flex justify-content-between align-items-start glass zoom mb-2">
+                <div class="d-flex justify-content-between align-items-start glass mb-2 zoom">
                 <!-- User Info Section -->
                 <div class="user-info" style="font-size: 12px; width: 90%;">
                     <span class="user-name" style="font-size: 12px; color: #fb0071;">
@@ -213,7 +226,7 @@
         }
 
         htmlContent += `
-            <div class="d-flex justify-content-between align-items-start glass zoom mb-2">
+            <div class="d-flex justify-content-between align-items-start glass mb-2 zoom">
                 <!-- User Info Section -->
                 <div class="user-info" style="font-size: 12px; width: 90%;">
                     <span class="user-name" style="font-size: 12px; color: #fb0071;">
