@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard</title>
-    <link rel="icon" type="image/png" href="img/logo.png">
+    <link rel="icon" type="image/png" href="logo.png">
+     <!-- Font Awesome for icons -->
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="backStar.css" rel="stylesheet">
@@ -18,14 +20,6 @@
     <script src="sb.js"></script>
 </head>
 <style>
-    body {
-    align-items: center;
-    min-height: 100vh; /* Full viewport height */
-    margin: 0;
-    background: radial-gradient(ellipse at bottom, #0d1d31 0%, #0c0d13 100%);
-    overflow: hidden;
-}
-
 /* Remove underline from links */
 .card-link {
     text-decoration: none;
@@ -66,62 +60,23 @@
 
 </style>
 <body>
-    <div class="stars">
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-      </div>
+    <div class="area" >
+        <ul class="circles">
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+        </ul>
    
     <div class="container mt-1">
-        <div class="card text-bg-primary mb-2">
-            <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="glass2 text-light mb-3">
+            <div class="d-flex justify-content-between align-items-center">
                 <p id="greetingMessage" class="mb-0">Welcome!</p>
                 <button id="logoutButton" class="btn btn-light" style="border-radius: 50px;">Log Out</button>
             </div>
@@ -130,23 +85,23 @@
         
         
         <!-- Link to Your Notes Page -->
-        <a href="#" id="noteButton" class="card-link">
+        <a href="#" id="noteButton" class="card-link caveat">
             <div class="card-body glass zoom text-light mb-2">
-                <img src="yourNote.webp" alt="Notes Image" class="card-image" style="background-color: rgb(8, 236, 96);">
+                <i class="fas fa-book icons"></i> <!-- Font Awesome icon for a note -->
                 <h5 class="card-title text-center mt-3">Your Notes</h5>
             </div>
         </a>
         <!-- Link to Your expenditure Page -->
-        <a href="#" id="expenditureButton" class="card-link">
+        <a href="#" id="expenditureButton" class="card-link caveat">
             <div class="card-body glass zoom text-light mb-2">
-                <img src="Expenditure.webp" alt="Notes Image" class="card-image" style="background-color: rgb(8, 236, 96);">
+                <i class="fas fa-wallet icons"></i>                
                 <h5 class="card-title text-center mt-3">Expenditure</h5>
             </div>
         </a>
         <!-- Link to Your expenditure Page -->
-        <a href="#" id="feedback" class="card-link">
-            <div class="card-body glass zoom text-light mb-2">
-                <img src="feedback.webp" alt="Notes Image" class="card-image" style="background-color: rgb(8, 236, 96);">
+        <a href="#" id="feedback" class="card-link caveat">
+            <div class="card-body glass zoom text-light mb-2 ">
+                <i class="fas fa-thumbs-up icons"></i>                
                 <h5 class="card-title text-center mt-3">Feedback</h5>
             </div>
         </a>
