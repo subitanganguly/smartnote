@@ -36,7 +36,9 @@
     position: relative;
     display: inline-block;
     width: 34px;
-    height: 20px;
+    height: 16px;
+
+    
 }
 
 .switch input {
@@ -60,7 +62,7 @@
 .slider:before {
     position: absolute;
     content: "";
-    height: 14px;
+    height: 10px;
     width: 14px;
     left: 3px;
     bottom: 3px;
@@ -81,11 +83,24 @@ input:checked + .slider:before {
 }
 </style>
 <body>
-    
-    <div class="container mt-1 text-light">
-        <div class="card text-bg-primary mb-2">
+    <div class="area" >
+        <ul class="circles">
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+        </ul>
+    <div class="container mt-1 text-light " >
+        
+        <div class="glass2 text-light mb-2">
             <!-- Button to Open Modal -->     
-           <div class="card-header d-flex justify-content-between align-items-center">
+           <div class="d-flex justify-content-between align-items-center">
              <!-- Back Button with Icon -->
              <a href="#" class="btn btn-lg btn-outline-light me-2 scroll" style="border-radius: 50px;" onclick="goBack()">
                 <i class="fas fa-arrow-left"></i>
@@ -111,7 +126,7 @@ input:checked + .slider:before {
         <!-- Search Input for Notes -->
            <!-- Search Filter Section -->
         <div class="mb-2">
-            <div class="input-group zoom mb-2">
+            <div class="input-group zoom mb-2" >
                 <span class="input-group-text" id="searchIcon">
                     <i class="fas fa-search"></i>
                 </span>
@@ -132,7 +147,7 @@ input:checked + .slider:before {
                 
                     </div>
                     <div class="modal-body">
-                        <textarea id="modalNoteInput" class="form-control" rows="10" placeholder="Write your note..."></textarea>
+                        <textarea id="modalNoteInput" class="form-control" rows="17" placeholder="Write your note..."></textarea>
                     </div>
                     <div class="modal-footer" style="justify-content: center;">
                         <a type="button" class="btn zoom" data-dismiss="modal" style="background-color: #ffc107;"><b>Close</b></a>
@@ -254,48 +269,46 @@ input:checked + .slider:before {
                 if (noteData.important) listItem.classList.add("important-note");
 
                 listItem.innerHTML = `
-                    <div class="glass zoom mb-2">
-            <div class="text-right mb-1" style="margin-right: 20px;">
-                <span>Important</span>
-                <label class="switch">
-                    <input type="checkbox" class="important-checkbox" ${noteData.important ? "checked" : ""}>
-                    <span class="slider round"></span>
-                </label>
-                <button class="btn btn-secondary btn-sm mr-2 copy-btn">
-                    <i class="fas fa-copy"></i>
-                </button>
-                <button class="btn btn-success btn-sm share-btn hide">
-                    <i class="fas fa-share-alt"></i>
-                </button>
-                <!-- Dropdown Menu Section -->
-                <span class="dropleft mb-2">
-                    <a type="button" class="btn btn-sm btn-danger" data-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end text-center" aria-labelledby="dropdownMenuLink">
-                        <li>
-                            <button class="btn btn-sm btn-light edit-btn d-block w-100 mb-1">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                        </li>
-                        <li>
-                            <button class="btn btn-sm btn-info preview-btn d-block w-100 mb-1 text-light">
-                                <i class="fas fa-eye"></i> Preview
-                            </button>
-                        </li>
-                        <li>
-                            <button class="btn btn-sm btn-danger delete-btn d-block w-100 text-light">
-                                <i class="fas fa-trash-alt"></i> Delete
-                            </button>
-                        </li>
-                    </ul>
-                </span>
-                <div class="mt-1">
-                    <textarea class="form-control" rows="3" readonly style="max-height: 7.5em; overflow-y: auto;">${noteData.text}</textarea>
-                    <span style="font-size: x-small;">${noteDate}</span>
-                </div>               
-            </div>                       
-        </div>
+                    <div class="glass-note zoom mb-2">
+             <div class="text-right"> 
+                <span>Important</span>          
+            <label class="switch">
+                <input type="checkbox" class="important-checkbox" ${noteData.important ? "checked" : ""}>
+                <span class="slider round"></span>
+            </label>
+           
+            <button class="btn btn-success btn-sm share-btn hide">
+                <i class="fas fa-share-alt"></i>
+            </button>
+            
+            <span class="dropleft mb-2">
+                <a type="button" class="btn btn-sm text-light" data-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-ellipsis-v"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end text-center" aria-labelledby="dropdownMenuLink">
+                    <li>                    
+                    <button class="btn btn-sm btn-info copy-btn d-block w-100 mb-1 text-light">
+                    <i class="fas fa-copy text-light"></i> Copy
+                    </button>
+                    </li>
+                    <li>
+                        <button class="btn btn-sm btn-info preview-btn d-block w-100 mb-1 text-light">
+                            <i class="fas fa-eye"></i> Preview
+                        </button>
+                    </li>
+                    <li>
+                        <button class="btn btn-sm btn-danger delete-btn d-block w-100 text-light">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </button>
+                    </li>
+                </ul>
+            </span>
+            </div> 
+             <a class="btn btn-sm btn-light edit-btn d-block w-100 mb-1">
+            <textarea class="form-control" rows="4" readonly style="max-height: 7.5em; overflow-y: auto;">${noteData.text}</textarea>
+            </a>
+            <span style="font-size: x-small;">${noteDate}</span>
+        </div>    
                 `;
                 // Copy Note Text
                 listItem.querySelector(".copy-btn").addEventListener("click", () => {
@@ -433,9 +446,10 @@ function goBack() {
     if (window.history.length > 1) {
         window.history.back();
     } else {
-        window.location.href = "defaultPage.html"; // Redirect to a default page
+        window.location.href = "index.html"; // Redirect to a default page
     }
 }
+
 
 
     </script>
