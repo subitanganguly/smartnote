@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Archived Expenditures</title>
-    <link rel="icon" type="image/png" href="img/logo.png">
+    <link rel="icon" type="image/png" href="logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="backStar.css" rel="stylesheet">
     <!-- Font Awesome for icons -->
@@ -20,8 +20,21 @@
    }
 </style>
 <body>
+    <div class="area" >
+        <ul class="circles">
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+        </ul>
     <div class="container mt-1 mb-3">
-        <div class="card text-bg-primary mb-3">
+        <div class="glass2 text-light mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <a href="#" class="btn btn-lg btn-outline-light me-2 scroll" style="border-radius: 50px;" onclick="goBack()">
                     <i class="fas fa-arrow-left"></i>
@@ -40,7 +53,7 @@
         <div id="yearList" class="row mt-3" style="display: none;"></div>
         
         <!-- No record found message -->
-        <div id="noRecordMessage" class="text-center text-light mt-3 glass" style="display: none;">
+        <div id="noRecordMessage" class="text-center text-light mt-3 glass zoom" style="display: none;">
             No record found.
         </div>
     </div>
@@ -104,7 +117,7 @@
 
                 const cardLink = document.createElement("a");
                 cardLink.href = `yearly_expenses.html?year=${year}`;
-                cardLink.classList.add("card", "glass", "shadow-sm", "text-decoration-none", "text-light", "text-center");
+                cardLink.classList.add("card", "glass","zoom", "text-decoration-none", "text-light", "text-center");
 
                 const cardBody = document.createElement("div");
                 cardBody.classList.add("card-body");
