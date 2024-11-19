@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <link rel="icon" type="image/png" href="img/logo.png">
+    <link rel="icon" type="image/png" href="logo.png">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="backStar.css" rel="stylesheet">
@@ -58,70 +60,29 @@
 /* Title styling */
 .card-title {
     font-size: 1.5em;
-    margin-bottom: 27px;
+    margin-bottom: 20px;
     display: flex;
     align-items: center; /* Vertically centers text within its container */
 }
 
-
 </style>
 <body>
-    <div class="stars">
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-        <div class="star"></div>
-      </div>
-   
+    <div class="area" >
+        <ul class="circles">
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+        </ul>
     <div class="container mt-1">
-        <div class="card text-bg-primary mb-2">
-            <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="glass2 mb-2">
+            <div class="card-header d-flex justify-content-between align-items-center text-light">
                 <p id="greetingMessage" class="mb-0">Welcome!</p>
                 <button id="logoutButton" class="btn btn-light" style="border-radius: 50px;">Log Out</button>
             </div>
@@ -130,29 +91,29 @@
         
         
         <!-- Link to Your Notes Page -->
-        <a href="#" id="noteButton" class="card-link">
+        <a href="#" id="noteButton" class="card-link caveat">
             <div class="card-body glass zoom text-light mb-2">
-                <img src="yourNote.webp" alt="Notes Image" class="card-image" style="background-color: rgb(8, 236, 96);">
+                <i class="fas fa-book icons"></i> <!-- Font Awesome icon for a note -->
                 <h5 class="card-title text-center mt-3">Your Notes</h5>
             </div>
         </a>
         <!-- Link to Your expenditure Page -->
-        <a href="#" id="expenditureButton" class="card-link">
+        <a href="#" id="expenditureButton" class="card-link caveat">
             <div class="card-body glass zoom text-light mb-2">
-                <img src="Expenditure.webp" alt="Notes Image" class="card-image" style="background-color: rgb(8, 236, 96);">
+                <i class="fas fa-wallet icons"></i>                
                 <h5 class="card-title text-center mt-3">Expenditure</h5>
             </div>
         </a>
         <!-- Link to Your expenditure Page -->
-        <a href="#" id="feedback" class="card-link">
+        <a href="#" id="feedback" class="card-link caveat">
             <div class="card-body glass zoom text-light mb-2">
-                <img src="feedback.webp" alt="Notes Image" class="card-image" style="background-color: rgb(8, 236, 96);">
+                <i class="fas fa-thumbs-up icons"></i>                
                 <h5 class="card-title text-center mt-3">Feedback</h5>
             </div>
         </a>
-        <a href="#" id="admin_report" class="card-link">
+        <a href="#" id="admin_report" class="card-link caveat">
             <div class="card-body glass zoom text-light mb-2">
-                <img src="report.webp" alt="Notes Image" class="card-image" style="background-color: rgb(8, 236, 96);">
+                <i class="fas fa-database icons"></i>
                 <h5 class="card-title text-center mt-3">App Users</h5>
             </div>
         </a>
@@ -183,7 +144,6 @@ function navigateTo(page) {
 
 document.getElementById("noteButton").addEventListener("click", () => navigateTo("note.html"));
 document.getElementById("expenditureButton").addEventListener("click", () => navigateTo("expenditure.html"));
-document.getElementById("admin_report").addEventListener("click", () => navigateTo("admin_report.html"));
 document.getElementById("feedback").addEventListener("click", () => navigateTo("feedback.html"));
         // Log out function
         document.getElementById("logoutButton").addEventListener("click", () => {
@@ -194,6 +154,21 @@ document.getElementById("feedback").addEventListener("click", () => navigateTo("
             });
         });     
       
+    </script>
+    <script>
+        document.getElementById("admin_report").addEventListener("click", () => {
+            if (window.innerWidth <= 768) {
+                // For small screens (like mobile devices)
+                navigateTo("admin_report.html");
+            } else {
+                // For larger screens (like desktops)
+                navigateTo("admin_reportWeb.html");
+            }
+        });
+    
+        function navigateTo(url) {
+            window.location.href = url;
+        }
     </script>
 </body>
 </html>
