@@ -252,10 +252,10 @@ document.getElementById("saveNoteBtn").addEventListener("click", () => {
 
         // Updated renderNotes function with important notes filtering and search for both title and text
         function renderNotes(filter = "") {
-       notesList.innerHTML = ""; // Clear notes list
+    notesList.innerHTML = ""; // Clear notes list
     const filteredNotes = notesArray.filter(note => {
-        const noteTitle = note.val().title.toLowerCase();  // Get note title in lowercase
-        const noteText = note.val().text.toLowerCase();    // Get note text in lowercase
+        const noteTitle = (note.val().title || "").toLowerCase();  // Safe check for title
+        const noteText = (note.val().text || "").toLowerCase();    // Safe check for text
         const matchesSearch = noteTitle.includes(filter.toLowerCase()) || noteText.includes(filter.toLowerCase()); // Match filter with both title and text
         const isImportant = note.val().important;
         return matchesSearch && (!showOnlyImportant || isImportant);
@@ -271,12 +271,12 @@ document.getElementById("saveNoteBtn").addEventListener("click", () => {
 
         // Format the date to "11 Nov 2024, 3:45 PM"
         const formattedDateTime = noteDate.toLocaleString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true  // Use 12-hour format (AM/PM)
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true  // Use 12-hour format (AM/PM)
         });
 
         const listItem = document.createElement("li");
@@ -393,7 +393,6 @@ document.getElementById("saveNoteBtn").addEventListener("click", () => {
         notesList.appendChild(listItem);
     });
 }
-
 
         // Load notes and display them
         firebase.auth().onAuthStateChanged((user) => {
