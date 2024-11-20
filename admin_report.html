@@ -70,7 +70,7 @@
                 <h5 id="userCountHeader">Total Users</h5>
             </div>
             <center>
-            <div id="loadingSpinner" class="spinner-border text-light spinner-container" style="display: none;" role="status">
+            <div id="loadingSpinner" class="loader mt-3" style="display: none;" role="status">
                 <span class="sr-only">Loading...</span>
             </div>
             </center>
@@ -136,6 +136,9 @@ function loadUsersData() {
             const userPromises = Object.keys(users).map(async (uid) => {
                 const user = users[uid];
 
+                // Format the last use date
+                const lastUseFormatted = user.lastUse ? formatDate(user.lastUse) : "N/A";
+
                 // Fetch notes count for this user
                 const notesSnapshot = await firebase.database().ref(`notes/${uid}`).once("value");
                 const notes = notesSnapshot.val();
@@ -151,6 +154,9 @@ function loadUsersData() {
                 const archive_expenses = archive_expensesSnapshot.val();
                 const archive_expensesCount = archive_expenses ? Object.keys(archive_expenses).length : 0; // Corrected: Count expenses if any, otherwise 0
 
+
+
+
                 let feedback = 'No feedback yet';
                 if (user.feedback) {
                     feedback = Object.keys(user.feedback).map(feedbackId => {
@@ -161,31 +167,42 @@ function loadUsersData() {
 
                 return `
                     <div class="d-flex justify-content-between align-items-start glass mb-2 zoom">
-                        <div class="user-info" style="font-size: 12px; width: 90%;">
-                            <span class="user-name" style="font-size: 12px; color: #fb0071;">
-                                <i class="fas fa-user"></i><b class="text-uppercase"> ${user.Name} </b>
-                                <span class="text-uppercase" style="color: #d3d3d3;"> [${user.role || "user"}]</span>   
-                            </span>
-                            <span class="user-mobile" style="color: #32CD32;"><i class="fas fa-mobile-alt"></i> ${user.mobile || "N/A"}</span><br>
-                            <span class="user-email" style="color: #1E90FF;"><i class="fas fa-envelope"></i> ${user.email}</span><br>
-                            <span class="user-signup" style="color: #FFD700; font-size: 10px;">Sign-up: ${user.signupDate ? formatDate(user.signupDate) : "N/A"}</span><br>
-                            <span class="user-last-login" style="color: #ff8000; font-size: 10px;">Last Login: ${user.lastLoginDate ? formatDate(user.lastLoginDate) : "N/A"}</span><br>
-                            <div class="feedback text-uppercase" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
-                                ${feedback}
-                            </div>
-                            <div class="note-count" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
-                                Notes:📝${noteCount} | Expenses:💵${expensesCount} | Archive:🗑${archive_expensesCount}
-                            </div>
-                        </div>
-                        <div class="dropstart">
-                            <a class="btn btn-sm text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-ellipsis-v"></i>  
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="btn  btn-sm" onclick="updateUserRole('${uid}', '${user.role}')">Change Role</a></li>
-                            </ul>
-                        </div>
-                    </div>
+    <div class="user-info" style="font-size: 12px; width: 90%;">
+        <span class="user-name" style="font-size: 12px; color: #fb0071;">
+            <i class="fas fa-user"></i><b class="text-uppercase"> ${user.Name} </b>
+            <span class="text-uppercase" style="color: #d3d3d3;"> [${user.role || "user"}]</span>
+        </span>
+        <span class="user-mobile" style="color: #32CD32;"><i class="fas fa-mobile-alt"></i> ${user.mobile || "N/A"}</span><br>
+        <span class="user-email" style="color: #1E90FF;"><i class="fas fa-envelope"></i> ${user.email}</span><br>
+        <span class="user-signup" style="color: #FFD700; font-size: 10px;">Sign-up: ${user.signupDate ? formatDate(user.signupDate) : "N/A"}</span><br>
+        <span class="user-last-login" style="color: #ff8000; font-size: 10px;">Last Login: ${user.lastLoginDate ? formatDate(user.lastLoginDate) : "N/A"}</span><br>
+        <span class="user-last-use" style="color: #00CED1; font-size: 10px;">Last Use: ${user.lastUse ? formatDate(user.lastUse) : "N/A"}</span><br>
+        
+        <div class="feedback text-uppercase" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
+            ${feedback}
+        </div>
+        <div class="note-count" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
+            Notes:📝${noteCount} | Expenses:💵${expensesCount} | Archive:🗑${archive_expensesCount}
+        </div>
+        <!-- New User or Active User Label -->
+        <span class="user-status" style="font-size: 10px; color: #32CD32; font-weight: bold;">
+            ${isNewUser(user.signupDate) ? 'New User' : ''} ${isActiveUser(user.lastUse) ? '| Active User' : ''}
+        </span>
+    </div>
+    
+    <div class="dropstart">
+        <a class="btn btn-sm text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-ellipsis-v"></i>  
+        </a>
+        <ul class="dropdown-menu">
+            <li><a class="btn btn-sm" onclick="updateUserRole('${uid}', '${user.role}')">Change Role</a></li>
+            <li><a href="mailto:${user.email}?subject=Thank%20You%20for%20Choosing%20Our%20SmartNote%20App&body=Dear%20${user.Name},%0D%0A%0D%0AThank%20you%20for%20choosing%20SmartNote.%20We%20hope%20you%20enjoy%20using%20our%20app.%20If%20you%20have%20any%20feedback%20or%20questions,%20feel%20free%20to%20reach%20out.%0D%0A%0D%0ABest%20Regards,%0D%0AThe%20SmartNote%20Team" class="btn btn-sm" style="border-radius: 50px;">Send Thank You Email</a> </li>
+        </ul>
+    </div>
+</div>
+
+
+
                 `;
             });
 
@@ -259,32 +276,41 @@ function filterUsers() {
         }
 
         return `
-            <div class="d-flex justify-content-between align-items-start glass mb-2 zoom">
-                        <div class="user-info" style="font-size: 12px; width: 90%;">
-                            <span class="user-name" style="font-size: 12px; color: #fb0071;">
-                                <i class="fas fa-user"></i><b class="text-uppercase"> ${user.Name} </b>
-                                <span class="text-uppercase" style="color: #d3d3d3;"> [${user.role || "user"}]</span>   
-                            </span>
-                            <span class="user-mobile" style="color: #32CD32;"><i class="fas fa-mobile-alt"></i> ${user.mobile || "N/A"}</span><br>
-                            <span class="user-email" style="color: #1E90FF;"><i class="fas fa-envelope"></i> ${user.email}</span><br>
-                            <span class="user-signup" style="color: #FFD700; font-size: 10px;">Sign-up: ${user.signupDate ? formatDate(user.signupDate) : "N/A"}</span><br>
-                            <span class="user-last-login" style="color: #ff8000; font-size: 10px;">Last Login: ${user.lastLoginDate ? formatDate(user.lastLoginDate) : "N/A"}</span><br>
-                            <div class="feedback text-uppercase" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
-                                ${feedback}
-                            </div>
-                            <div class="note-count" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
-                                Notes:📝${noteCount} | Expenses:💵${expensesCount} | Archive:🗑${archive_expensesCount}
-                            </div>
-                        </div>
-                        <div class="dropstart">
-                            <a class="btn btn-sm text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-ellipsis-v"></i>  
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="btn  btn-sm" onclick="updateUserRole('${uid}', '${user.role}')">Change Role</a></li>
-                            </ul>
-                        </div>
-                    </div>
+             <div class="d-flex justify-content-between align-items-start glass mb-2 zoom">
+    <div class="user-info" style="font-size: 12px; width: 90%;">
+        <span class="user-name" style="font-size: 12px; color: #fb0071;">
+            <i class="fas fa-user"></i><b class="text-uppercase"> ${user.Name} </b>
+            <span class="text-uppercase" style="color: #d3d3d3;"> [${user.role || "user"}]</span>
+        </span>
+        <span class="user-mobile" style="color: #32CD32;"><i class="fas fa-mobile-alt"></i> ${user.mobile || "N/A"}</span><br>
+        <span class="user-email" style="color: #1E90FF;"><i class="fas fa-envelope"></i> ${user.email}</span><br>
+        <span class="user-signup" style="color: #FFD700; font-size: 10px;">Sign-up: ${user.signupDate ? formatDate(user.signupDate) : "N/A"}</span><br>
+        <span class="user-last-login" style="color: #ff8000; font-size: 10px;">Last Login: ${user.lastLoginDate ? formatDate(user.lastLoginDate) : "N/A"}</span><br>
+        <span class="user-last-use" style="color: #00CED1; font-size: 10px;">Last Use: ${user.lastUse ? formatDate(user.lastUse) : "N/A"}</span><br>
+        
+        <div class="feedback text-uppercase" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
+            ${feedback}
+        </div>
+        <div class="note-count" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
+            Notes:📝${noteCount} | Expenses:💵${expensesCount} | Archive:🗑${archive_expensesCount}
+        </div>
+        <!-- New User or Active User Label -->
+        <span class="user-status" style="font-size: 10px; color: #32CD32; font-weight: bold;">
+            ${isNewUser(user.signupDate) ? 'New User' : ''} ${isActiveUser(user.lastUse) ? '| Active User' : ''}
+        </span>
+    </div>
+    
+    <div class="dropstart">
+        <a class="btn btn-sm text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-ellipsis-v"></i>  
+        </a>
+        <ul class="dropdown-menu">
+            <li><a class="btn btn-sm" onclick="updateUserRole('${uid}', '${user.role}')">Change Role</a></li>
+            <li><a href="mailto:${user.email}?subject=Thank%20You%20for%20Choosing%20Our%20SmartNote%20App&body=Dear%20${user.Name},%0D%0A%0D%0AThank%20you%20for%20choosing%20SmartNote.%20We%20hope%20you%20enjoy%20using%20our%20app.%20If%20you%20have%20any%20feedback%20or%20questions,%20feel%20free%20to%20reach%20out.%0D%0A%0D%0ABest%20Regards,%0D%0AThe%20SmartNote%20Team" class="btn btn-sm" style="border-radius: 50px;">Send Thank You Email</a> </li>
+        </ul>
+    </div>
+</div>
+
         `;
     });
 
@@ -321,6 +347,26 @@ function filterUsers() {
         function goBack() {
             window.history.back();
         }
+
+
+
+       // Function to check if the user is a new user (signed up in the last 30 days)
+function isNewUser(signupDate) {
+    const now = new Date();
+    const signupDateObj = new Date(signupDate);
+    const diffInDays = (now - signupDateObj) / (1000 * 3600 * 24); // Difference in days
+    return diffInDays <= 5; // Consider the user "new" if signed up within the last 30 days
+}
+
+// Function to check if the user is active based on their last use (used the app within the last 7 days)
+function isActiveUser(lastUse) {
+    if (!lastUse) return false;
+    const now = new Date();
+    const lastUseDateObj = new Date(lastUse);
+    const diffInDays = (now - lastUseDateObj) / (1000 * 3600 * 24); // Difference in days
+    return diffInDays <= 7; // Consider the user "active" if they used the app within the last 7 days
+}
+
     </script>
 </body>
 </html>
