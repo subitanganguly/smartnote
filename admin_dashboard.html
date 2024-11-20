@@ -17,6 +17,8 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <script src="sb.js"></script>
 </head>
 <style>
@@ -123,15 +125,39 @@
     <script>
         let currentUser = null;
 
+
+
+// Firebase Authentication State Listener
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         currentUser = user;
+
+        // Extract user ID
+        const userId = user.uid;
+
+        // Get the current date and time
+        const now = new Date();
+        const formattedDateTime = now.toLocaleString(); // e.g., "11/20/2024, 3:45:20 PM"
+
+        // Update `lastUse` in Firebase Database
+        firebase.database().ref(`users/${userId}`).update({
+            lastUse: now.getTime(), // Unix timestamp
+            lastUseFormatted: formattedDateTime // Human-readable format
+        }).then(() => {
+            console.log("Last use timestamp updated successfully.");
+        }).catch((error) => {
+            console.error("Error updating last use timestamp:", error);
+        });
+
+        // Display greeting
         const firstName = user.displayName ? user.displayName.split(' ')[0] : 'User';
         document.getElementById("greetingMessage").innerHTML = `Hello <span class="text-warning"><b>${firstName}</b>,</span> Welcome`;
     } else {
+        // Redirect to login page if not authenticated
         window.location.href = "index.html";
     }
 });
+
 
 function navigateTo(page) {
     if (currentUser) {
