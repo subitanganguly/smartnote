@@ -18,19 +18,10 @@
     <script src="sb.js"></script>
 </head>
 <style>
-     body {
-   
-    background: radial-gradient(ellipse at bottom, #0d1d31 0%,#0d1d31);
-  
+body {
+   background: radial-gradient(ellipse at bottom, #0d1d31 0%,#0d1d31);  
 }
 
-#loadingSpinner {
-    position: fixed;  /* Fix the spinner to the screen */
-    top: 50%;         /* Center vertically */
-    left: 50%;        /* Center horizontally */
-   
-    z-index: 9999;    /* Ensure it's on top of other content */
-}
 /* Switch styles */
 .switch {
     position: relative;
@@ -138,24 +129,25 @@ input:checked + .slider:before {
        
         <ul id="notesList" class="list-group mt-3"></ul>
         
-        <!-- Modal for Adding/Editing Note -->
-        <div class="modal fade glass" id="addNoteModal" tabindex="-1" aria-labelledby="addNoteModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content text-dark">
-                    <div class="modal-header">
-                        <h5 class="modal-title text-center" id="addNoteModalLabel" style="justify-content: center;">ADD NEW NOTE</h5>
-                
-                    </div>
-                    <div class="modal-body">
-                        <textarea id="modalNoteInput" class="form-control" rows="17" placeholder="Write your note..."></textarea>
-                    </div>
-                    <div class="modal-footer" style="justify-content: center;">
-                        <a type="button" class="btn zoom" data-dismiss="modal" style="background-color: #ffc107;"><b>Close</b></a>
-                        <a id="saveNoteBtn" type="button" class="btn zoom" style="background-color: #03c924;"><b>Save Note</b></a>
-                    </div>
-                </div>
+       <!-- Modal for Adding/Editing Note -->
+<div class="modal fade glass" id="addNoteModal" tabindex="-1" aria-labelledby="addNoteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content text-dark">
+            <div class="modal-header">
+                <h5 class="modal-title text-center" id="addNoteModalLabel" style="justify-content: center;">ADD NEW NOTE</h5>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="modalNoteTitle" class="form-control mb-3" placeholder="Enter note title">
+                <textarea id="modalNoteInput" class="form-control" rows="17" placeholder="Write your note..."></textarea>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <a type="button" class="btn zoom" data-dismiss="modal" style="background-color: #ffc107;"><b>Close</b></a>
+                <a id="saveNoteBtn" type="button" class="btn zoom" style="background-color: #03c924;"><b>Save Note</b></a>
             </div>
         </div>
+    </div>
+</div>
+
 
         <!-- Modal for Previewing Note -->
         <div class="modal fade glass" id="previewNoteModal" tabindex="-1" aria-labelledby="previewNoteModalLabel" aria-hidden="true">
@@ -175,10 +167,11 @@ input:checked + .slider:before {
             </div>
         </div>
 
-       <!-- Loading Spinner -->
-<div id="loadingSpinner" class="spinner-border text-light mt-3" style="display: none;" role="status">
-</div>
-
+        <div class="text-center" style="display: flex; justify-content: center; align-items: center; height: 30vh;">  
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="loader mt-3" style="display: none;" role="status"></div>
+          </div>
+          
 
     </div>
 
@@ -207,29 +200,40 @@ input:checked + .slider:before {
         });
 
         // Save note or update edited note
-        document.getElementById("saveNoteBtn").addEventListener("click", () => {
-            const noteText = document.getElementById("modalNoteInput").value;
-            if (noteText.trim() !== "") {
-                const userId = firebase.auth().currentUser.uid;
-                const notesRef = firebase.database().ref("notes/" + userId);
-                const currentDate = new Date().toISOString();
+document.getElementById("saveNoteBtn").addEventListener("click", () => {
+    const noteTitle = document.getElementById("modalNoteTitle").value;
+    const noteText = document.getElementById("modalNoteInput").value;
+    
+    if (noteTitle.trim() !== "" && noteText.trim() !== "") {
+        const userId = firebase.auth().currentUser.uid;
+        const notesRef = firebase.database().ref("notes/" + userId);
+        const currentDate = new Date().toISOString();
 
-                if (editNoteId) {
-                    // Update existing note
-                    notesRef.child(editNoteId).update({ text: noteText });
-                } else {
-                    // Add new note
-                    notesRef.push().set({
-                        text: noteText,
-                        date: currentDate
-                    });
-                }
+        if (editNoteId) {
+            // Update existing note
+            notesRef.child(editNoteId).update({
+                title: noteTitle,
+                text: noteText
+            });
+        } else {
+            // Add new note
+            notesRef.push().set({
+                title: noteTitle,
+                text: noteText,
+                date: currentDate
+            });
+        }
 
-                $('#addNoteModal').modal('hide');
-            } else {
-                alert("Please enter some text for the note.");
-            }
-        });
+          // Reset form fields after saving or updating
+          document.getElementById("modalNoteTitle").value = "";  // Clear note title
+        document.getElementById("modalNoteInput").value = "";  // Clear note content
+
+        $('#addNoteModal').modal('hide');
+    } else {
+        alert("Please enter both a title and text for the note.");
+    }
+});
+
 
        // Toggle the important filter
           importantFilterBtn.addEventListener("click", () => {
@@ -246,142 +250,168 @@ input:checked + .slider:before {
         });
 
 
-         // Updated renderNotes function with important notes filtering
-         function renderNotes(filter = "") {
-            notesList.innerHTML = ""; // Clear notes list
-            const filteredNotes = notesArray.filter(note => {
-                const noteText = note.val().text.toLowerCase();
-                const matchesSearch = noteText.includes(filter.toLowerCase());
-                const isImportant = note.val().important;
-                return matchesSearch && (!showOnlyImportant || isImportant);
-            });
+        // Updated renderNotes function with important notes filtering and search for both title and text
+        function renderNotes(filter = "") {
+       notesList.innerHTML = ""; // Clear notes list
+    const filteredNotes = notesArray.filter(note => {
+        const noteTitle = note.val().title.toLowerCase();  // Get note title in lowercase
+        const noteText = note.val().text.toLowerCase();    // Get note text in lowercase
+        const matchesSearch = noteTitle.includes(filter.toLowerCase()) || noteText.includes(filter.toLowerCase()); // Match filter with both title and text
+        const isImportant = note.val().important;
+        return matchesSearch && (!showOnlyImportant || isImportant);
+    });
 
-            noteCount.textContent = filteredNotes.length; // Update notes count
+    noteCount.textContent = filteredNotes.length; // Update notes count
 
-            // Render each filtered note
-            filteredNotes.forEach((childSnapshot) => {
-                const noteData = childSnapshot.val();
-                const noteId = childSnapshot.key;
-                const noteDate = new Date(noteData.date).toLocaleString();
+    // Render each filtered note
+    filteredNotes.forEach((childSnapshot) => {
+        const noteData = childSnapshot.val();
+        const noteId = childSnapshot.key;
+        const noteDate = new Date(noteData.date);
 
-                const listItem = document.createElement("li");
-                listItem.classList.add("group-item");
-                if (noteData.important) listItem.classList.add("important-note");
+        // Format the date to "11 Nov 2024, 3:45 PM"
+        const formattedDateTime = noteDate.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true  // Use 12-hour format (AM/PM)
+        });
 
-                listItem.innerHTML = `
-                    <div class="glass-note zoom mb-2">
-             <div class="text-right"> 
-                <span>Important</span>          
-            <label class="switch">
-                <input type="checkbox" class="important-checkbox" ${noteData.important ? "checked" : ""}>
-                <span class="slider round"></span>
-            </label>
-           
-            <button class="btn btn-success btn-sm share-btn hide">
-                <i class="fas fa-share-alt"></i>
-            </button>
-            
-            <span class="dropleft mb-2">
-                <a type="button" class="btn btn-sm text-light" data-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-ellipsis-v"></i>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end text-center" aria-labelledby="dropdownMenuLink">
-                    <li>                    
-                    <button class="btn btn-sm btn-info copy-btn d-block w-100 mb-1 text-light">
-                    <i class="fas fa-copy text-light"></i> Copy
+        const listItem = document.createElement("li");
+        listItem.classList.add("group-item");
+        if (noteData.important) listItem.classList.add("important-note");
+
+        listItem.innerHTML = `
+            <div class="glass-note zoom mb-2">
+                <div class="text-right">
+                    <span>Important</span>
+                    <label class="switch">
+                        <input type="checkbox" class="important-checkbox" ${noteData.important ? "checked" : ""}>
+                        <span class="slider round"></span>
+                    </label>
+                    <button class="btn btn-success btn-sm share-btn hide">
+                        <i class="fas fa-share-alt"></i>
                     </button>
-                    </li>
-                    <li>
-                        <button class="btn btn-sm btn-info preview-btn d-block w-100 mb-1 text-light">
-                            <i class="fas fa-eye"></i> Preview
-                        </button>
-                    </li>
-                    <li>
-                        <button class="btn btn-sm btn-danger delete-btn d-block w-100 text-light">
-                            <i class="fas fa-trash-alt"></i> Delete
-                        </button>
-                    </li>
-                </ul>
-            </span>
-            </div> 
-             <a class="btn btn-sm btn-light edit-btn d-block w-100 mb-1">
-            <textarea class="form-control" rows="4" readonly style="max-height: 7.5em; overflow-y: auto;">${noteData.text}</textarea>
-            </a>
-            <span style="font-size: x-small;">${noteDate}</span>
-        </div>    
-                `;
-                // Copy Note Text
-                listItem.querySelector(".copy-btn").addEventListener("click", () => {
-                    const textToCopy = noteData.text;
-                    navigator.clipboard.writeText(textToCopy).then(() => {
-                        alert("Text copied to clipboard!");
-                    }).catch((err) => {
-                        alert("Failed to copy text: " + err);
-                    });
-                });
+                    <span class="dropleft mb-2">
+                        <a type="button" class="btn btn-sm text-light" data-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end text-center" aria-labelledby="dropdownMenuLink">
+                            <li>
+                                <button class="btn btn-sm btn-info copy-btn d-block w-100 mb-1 text-light">
+                                    <i class="fas fa-copy text-light"></i> Copy
+                                </button>
+                            </li>
+                            <li>
+                                <button class="btn btn-sm btn-info preview-btn d-block w-100 mb-1 text-light">
+                                    <i class="fas fa-eye"></i> Preview
+                                </button>
+                            </li>
+                            <li>
+                                <button class="btn btn-sm btn-danger delete-btn d-block w-100 text-light">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </button>
+                            </li>
+                        </ul>
+                    </span>
+                </div>
+                <a class="btn btn-sm btn-light edit-btn d-block w-100 mb-1">
+                     <h6 style="background-color: rgba(0, 123, 255, 0.2); padding: 5px; border-radius: 5px; display: inline-block; margin-bottom: 5px;">
+            ${noteData.title}
+        </h6> <!-- Display note title with background color and opacity -->
+                    <textarea class="form-control" rows="4" readonly style="max-height: 7.5em; overflow-y: auto;">${noteData.text}</textarea>
+                </a>
+                <span style="font-size: x-small;">${formattedDateTime}</span>
+            </div>
+        `;
 
-                // Share Note Text
-                listItem.querySelector(".share-btn").addEventListener("click", () => {
-                    const textToShare = noteData.text;
-                    if (navigator.share) {
-                        navigator.share({
-                            title: 'Note Share',
-                            text: textToShare,
-                        }).then(() => {
-                            alert("Note shared successfully!"); 
-                        }).catch((err) => {
-                            alert("Failed to share note: " + err);
-                        });
-                    } else {
-                        alert("Sharing is not supported on your device.");
-                    }
-                });
-
-                // Edit Note
-                listItem.querySelector(".edit-btn").addEventListener("click", () => {
-                    editNoteId = noteId;  // Store note ID for editing
-                    document.getElementById("modalNoteInput").value = noteData.text;  // Pre-fill modal with note text
-                    $('#addNoteModal').modal('show');
-                });
-
-                // Preview Note
-                listItem.querySelector(".preview-btn").addEventListener("click", () => {
-                // Replace newlines with <br> to display text line by line
-                const formattedText = noteData.text.replace(/\n/g, '<br>');
-                document.getElementById("previewNoteContent").innerHTML = `<p>${formattedText}</p>`;
-                   $('#previewNoteModal').modal('show');
-                });
-
-
-                // Delete Note
-                listItem.querySelector(".delete-btn").addEventListener("click", () => {
-                    if (confirm("Are you sure you want to delete this note?")) {
-                        firebase.database().ref("notes/" + firebase.auth().currentUser.uid + "/" + noteId).remove()
-                            .then(() => {
-                                alert("Note deleted successfully.");
-                            })
-                            .catch((error) => {
-                                alert("Error deleting note: " + error.message);
-                            });
-                    }
-                });
-
-                // Mark/Unmark Note as Important with switch-style checkbox
-listItem.querySelector(".important-checkbox").addEventListener("change", (e) => {
-    const isImportant = e.target.checked; // Get the new 'important' state
-    const notesRef = firebase.database().ref("notes/" + firebase.auth().currentUser.uid);
-    notesRef.child(noteId).update({ important: isImportant });
-});
-
-
-                notesList.appendChild(listItem);
+        // Copy Note Text
+        listItem.querySelector(".copy-btn").addEventListener("click", () => {
+            const textToCopy = noteData.text;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert("Text copied to clipboard!");
+            }).catch((err) => {
+                alert("Failed to copy text: " + err);
             });
-        }
+        });
+
+        // Share Note Text
+        listItem.querySelector(".share-btn").addEventListener("click", () => {
+            const textToShare = noteData.text;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Note Share',
+                    text: textToShare,
+                }).then(() => {
+                    alert("Note shared successfully!"); 
+                }).catch((err) => {
+                    alert("Failed to share note: " + err);
+                });
+            } else {
+                alert("Sharing is not supported on your device.");
+            }
+        });
+
+        // Edit Note
+        listItem.querySelector(".edit-btn").addEventListener("click", () => {
+            editNoteId = noteId;  // Store note ID for editing
+            document.getElementById("modalNoteTitle").value = noteData.title;  // Pre-fill modal with note title
+            document.getElementById("modalNoteInput").value = noteData.text;  // Pre-fill modal with note text
+            $('#addNoteModal').modal('show');
+        });
+
+        // Preview Note
+        listItem.querySelector(".preview-btn").addEventListener("click", () => {
+            // Replace newlines with <br> to display text line by line
+            const formattedText = noteData.text.replace(/\n/g, '<br>');
+            document.getElementById("previewNoteContent").innerHTML = `<p>${formattedText}</p>`;
+            $('#previewNoteModal').modal('show');
+        });
+
+        // Delete Note
+        listItem.querySelector(".delete-btn").addEventListener("click", () => {
+            if (confirm("Are you sure you want to delete this note?")) {
+                firebase.database().ref("notes/" + firebase.auth().currentUser.uid + "/" + noteId).remove()
+                    .then(() => {
+                        alert("Note deleted successfully.");
+                    })
+                    .catch((error) => {
+                        alert("Error deleting note: " + error.message);
+                    });
+            }
+        });
+
+        // Mark/Unmark Note as Important with switch-style checkbox
+        listItem.querySelector(".important-checkbox").addEventListener("change", (e) => {
+            const isImportant = e.target.checked; // Get the new 'important' state
+            const notesRef = firebase.database().ref("notes/" + firebase.auth().currentUser.uid);
+            notesRef.child(noteId).update({ important: isImportant });
+        });
+
+        notesList.appendChild(listItem);
+    });
+}
+
 
         // Load notes and display them
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 const userId = user.uid;
+                  // Get the current date and time
+        const now = new Date();
+        const formattedDateTime = now.toLocaleString(); // e.g., "11/20/2024, 3:45:20 PM"
+
+        // Update `lastUse` in Firebase Database
+        firebase.database().ref(`users/${userId}`).update({
+            lastUse: now.getTime(), // Unix timestamp
+            lastUseFormatted: formattedDateTime // Human-readable format
+        }).then(() => {
+            console.log("Last use timestamp updated successfully.");
+        }).catch((error) => {
+            console.error("Error updating last use timestamp:", error);
+        });
                 const notesRef = firebase.database().ref("notes/" + userId);
 
                 loadingSpinner.style.display = "block";
@@ -402,29 +432,7 @@ listItem.querySelector(".important-checkbox").addEventListener("change", (e) => 
             });
         
 
-        
-
-        // Load notes and display them
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                const userId = user.uid;
-                const notesRef = firebase.database().ref("notes/" + userId);
-
-                loadingSpinner.style.display = "block";
-                notesRef.orderByChild("date").on("value", (snapshot) => {
-                    loadingSpinner.style.display = "none";
-
-                    notesArray = [];
-                    snapshot.forEach((childSnapshot) => {
-                        notesArray.unshift(childSnapshot);
-                    });
-
-                    renderNotes(); // Render the notes with the current filter
-                });
-            } else {
-                window.location.href = "index.html";
-            }
-        });
+    
 
         // Search filter event listener
         searchInput.addEventListener("input", (e) => {
