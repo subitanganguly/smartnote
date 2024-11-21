@@ -19,9 +19,36 @@
     <script src="firebase-init.js"></script>
     <style>
        
+       @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        30% {
+            transform: translateY(-3px);
+        }
+    }
 
+    .bouncy {
+        display: inline-block;
+        animation: bounce 1s infinite;
+        color: #ff33dd;
+        box-shadow: 4px papayawhip;
+    }
 
+    @keyframes pulsate {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+    }
 
+    .pulsate {
+        display: inline-block;
+        animation: pulsate 1.5s infinite;
+        color: #33ddff;
+    }
     </style>
 </head>
 <body>
@@ -185,9 +212,15 @@ function loadUsersData() {
             Notes:📝${noteCount} | Expenses:💵${expensesCount} | Archive:🗑${archive_expensesCount}
         </div>
         <!-- New User or Active User Label -->
-        <span class="user-status" style="font-size: 10px; color: #32CD32; font-weight: bold;">
-            ${isNewUser(user.signupDate) ? 'New User' : ''} ${isActiveUser(user.lastUse) ? '| Active User' : ''}
-        </span>
+       <span class="user-status" style="font-size: 10px; font-weight: bold;">
+    ${isNewUser(user.signupDate) ? '<span class="bouncy">New User</span> | ' : ''} 
+    ${isActiveUser(user.lastUse) ? '<span class="pulsate">Active User</span>' : ''}
+    <spin id="emailStatus-${uid}" style="display: none; font-size: 12px;">
+    Email sent successfully!
+   </span>
+
+</span>
+
     </div>
     
     <div class="dropstart">
@@ -196,7 +229,12 @@ function loadUsersData() {
         </a>
         <ul class="dropdown-menu">
             <li><a class="btn btn-sm" onclick="updateUserRole('${uid}', '${user.role}')">Change Role</a></li>
-            <li><a href="mailto:${user.email}?subject=Thank%20You%20for%20Choosing%20Our%20SmartNote%20App&body=Dear%20${user.Name},%0D%0A%0D%0AThank%20you%20for%20choosing%20SmartNote.%20We%20hope%20you%20enjoy%20using%20our%20app.%20If%20you%20have%20any%20feedback%20or%20questions,%20feel%20free%20to%20reach%20out.%0D%0A%0D%0ABest%20Regards,%0D%0AThe%20SmartNote%20Team" class="btn btn-sm" style="border-radius: 50px;">Send Thank You Email</a> </li>
+            <li>
+            <a href="mailto:${user.email}?subject=Thank%20You%20for%20Choosing%20Our%20SmartNote%20App&body=Dear%20${user.Name},%0D%0A%0D%0AThank%20you%20for%20choosing%20SmartNote.%20We%20hope%20you%20enjoy%20using%20our%20app.%20If%20you%20have%20any%20feedback%20or%20questions,%20feel%20free%20to%20reach%20out.%0D%0A%0D%0ABest%20Regards,%0D%0AThe%20SmartNote%20Team"
+             class="btn btn-sm" 
+             style="border-radius: 50px;" 
+             onclick="showEmailConfirmation('${uid}')">Send Thank You Email</a>
+           </li>
         </ul>
     </div>
 </div>
@@ -294,10 +332,16 @@ function filterUsers() {
         <div class="note-count" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
             Notes:📝${noteCount} | Expenses:💵${expensesCount} | Archive:🗑${archive_expensesCount}
         </div>
-        <!-- New User or Active User Label -->
-        <span class="user-status" style="font-size: 10px; color: #32CD32; font-weight: bold;">
-            ${isNewUser(user.signupDate) ? 'New User' : ''} ${isActiveUser(user.lastUse) ? '| Active User' : ''}
-        </span>
+          <!-- New User or Active User Label -->
+       <span class="user-status" style="font-size: 10px; font-weight: bold;">
+    ${isNewUser(user.signupDate) ? '<span class="bouncy">New User</span> | ' : ''} 
+    ${isActiveUser(user.lastUse) ? '<span class="pulsate">Active User</span>' : ''}
+    <spin id="emailStatus-${uid}" style="display: none; font-size: 12px;">
+    Email sent successfully!
+   </span>
+
+</span>
+
     </div>
     
     <div class="dropstart">
@@ -306,10 +350,16 @@ function filterUsers() {
         </a>
         <ul class="dropdown-menu">
             <li><a class="btn btn-sm" onclick="updateUserRole('${uid}', '${user.role}')">Change Role</a></li>
-            <li><a href="mailto:${user.email}?subject=Thank%20You%20for%20Choosing%20Our%20SmartNote%20App&body=Dear%20${user.Name},%0D%0A%0D%0AThank%20you%20for%20choosing%20SmartNote.%20We%20hope%20you%20enjoy%20using%20our%20app.%20If%20you%20have%20any%20feedback%20or%20questions,%20feel%20free%20to%20reach%20out.%0D%0A%0D%0ABest%20Regards,%0D%0AThe%20SmartNote%20Team" class="btn btn-sm" style="border-radius: 50px;">Send Thank You Email</a> </li>
+            <li>
+            <a href="mailto:${user.email}?subject=Thank%20You%20for%20Choosing%20Our%20SmartNote%20App&body=Dear%20${user.Name},%0D%0A%0D%0AThank%20you%20for%20choosing%20SmartNote.%20We%20hope%20you%20enjoy%20using%20our%20app.%20If%20you%20have%20any%20feedback%20or%20questions,%20feel%20free%20to%20reach%20out.%0D%0A%0D%0ABest%20Regards,%0D%0AThe%20SmartNote%20Team"
+             class="btn btn-sm" 
+             style="border-radius: 50px;" 
+             onclick="showEmailConfirmation('${uid}')">Send Thank You Email</a>
+           </li>
         </ul>
     </div>
 </div>
+
 
         `;
     });
@@ -365,6 +415,16 @@ function isActiveUser(lastUse) {
     const lastUseDateObj = new Date(lastUse);
     const diffInDays = (now - lastUseDateObj) / (1000 * 3600 * 24); // Difference in days
     return diffInDays <= 7; // Consider the user "active" if they used the app within the last 7 days
+}
+
+
+function showEmailConfirmation(uid) {
+    // Locate the confirmation message container by its ID
+    const emailStatusDiv = document.getElementById(`emailStatus-${uid}`);
+    
+    // Show the confirmation message
+    emailStatusDiv.style.display = "block";
+    
 }
 
     </script>
