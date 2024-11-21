@@ -123,10 +123,18 @@
       
     </div>
     <script>
-        let currentUser = null;
+ // Check user role on page load
+    document.addEventListener("DOMContentLoaded", () => {
+        const userRole = localStorage.getItem("userRole");
 
-
-
+        // Redirect if the user is not an admin
+        if (userRole !== "admin") {
+            alert("Access Denied: You are not authorized to access this page.");
+            window.location.href = "index.html"; // Redirect to login or another page
+        }
+    });   
+        
+let currentUser = null;
 // Firebase Authentication State Listener
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
