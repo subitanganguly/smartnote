@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Note - Note</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="style/backStar.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+
+
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="style/sb.js"></script>
+</head>
+<style>
+body {
+   background: radial-gradient(ellipse at bottom, #0d1d31 0%,#0d1d31);  
+   font-family: Protest;
+}
+
+/* Switch styles */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 34px;
+    height: 16px;
+
+    
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 15px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 10px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #ff6c0a; /* Set color for the 'Important' state */
+}
+
+input:checked + .slider:before {
+    transform: translateX(14px);
+}
+.hide{
+    display:none;
+}
+
+
+ /* Default List View */
+ .list-view .group-item {
+        width: 100%;
+    }
+
+    /* Grid View */
+    .grid-view {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        font-size: 5px;
+    }
+    .grid-view .group-item {
+        flex: 0 0 48%; /* Two columns per row */
+    }
+
+
+
+
+
+
+
+</style>
+<body>
+    <div class="area" >
+        <ul class="circles">
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+        </ul>
+    <div class="container mt-1 text-light " >
+        
+        <div class="glass2 text-light mb-2">
+            <!-- Button to Open Modal -->     
+           <div class="d-flex justify-content-between align-items-center">
+             <!-- Back Button with Icon -->
+             <a href="#" class="btn btn-lg btn-outline-light me-2 scroll" style="border-radius: 50px;" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+             </a>
+                <!-- Notes Count Display -->
+               <h5 class="mt-1">Notes</h5>
+               <button id="logoutButton" class="btn btn-light" style="border-radius: 70px; font-size: small;">Log Out</button>
+           </div>
+        </div>
+        
+         <!-- Add Note Button with Icon -->
+         <button id="openModalBtn" class="btn btn-outline-light" style="border-radius: 20px; font-size: small;">
+         <i class="fas fa-plus"></i> Add Note
+         </button>
+
+        <!-- Important Filter Button with Icon -->
+        <button id="importantFilterBtn" class="btn btn-outline-warning" style="border-radius: 20px; font-size: small">
+        <i class="fas fa-star"></i> Important
+        </button>
+        <button id="toggleViewBtn" class="btn btn-outline-info hide" style="border-radius: 20px; font-size: small">
+            <i class="fas fa-th-large"></i> Grid View
+        </button>
+        
+        <P class="mt-1">Your Notes [<span class="text-light" id="noteCount">0</span>]</P>
+
+        
+        <!-- Search Input for Notes -->
+           <!-- Search Filter Section -->
+        <div class="mb-2">
+            <div class="input-group zoom mb-2" >
+                <span class="input-group-text" id="searchIcon">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input id="searchInput" class="form-control" type="text" placeholder="Search notes...">
+            </div>
+            
+        </div>
+        
+        <ul id="notesList" class="list-view"></ul>
+        <ul id="notesList" class="list-group"></ul>
+        
+       <!-- Modal for Adding/Editing Note -->
+<div class="modal fade glass" id="addNoteModal" tabindex="-1" aria-labelledby="addNoteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content text-dark">
+            <div class="modal-header">
+                <h5 class="modal-title text-center" id="addNoteModalLabel" style="justify-content: center;">ADD NEW NOTE</h5>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="modalNoteTitle" class="form-control mb-3" placeholder="Enter note title">
+                <textarea id="modalNoteInput" class="form-control" rows="17" placeholder="Write your note..."></textarea>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <a type="button" class="btn zoom" data-dismiss="modal" style="background-color: #ffc107;"><b>Close</b></a>
+                <a id="saveNoteBtn" type="button" class="btn zoom" style="background-color: #03c924;"><b>Save Note</b></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <!-- Modal for Previewing Note -->
+        <div class="modal fade glass" id="previewNoteModal" tabindex="-1" aria-labelledby="previewNoteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content text-dark">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="previewNoteModalLabel">Note Preview</h5>
+                        
+                    </div>
+                    <div class="modal-body">
+                        <div id="previewNoteContent"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center" style="display: flex; justify-content: center; align-items: center; height: 30vh;">  
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="loader mt-3" style="display: none;" role="status"></div>
+          </div>
+          
+
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        const notesList = document.getElementById("notesList");
+        const loadingSpinner = document.getElementById("loadingSpinner");
+        const noteCount = document.getElementById("noteCount");
+        const searchInput = document.getElementById("searchInput");
+        const importantFilterBtn = document.getElementById("importantFilterBtn");
+
+
+        let editNoteId = null; // Track note being edited
+        let notesArray = [];   // Store all notes for filtering
+        let showOnlyImportant = false; // Track if important filter is active
+
+        // Show modal for adding a new note
+        document.getElementById("openModalBtn").addEventListener("click", () => {
+            editNoteId = null;  // Reset editNoteId for new note
+            document.getElementById("modalNoteInput").value = "";  // Clear modal input
+            $('#addNoteModal').modal('show');
+        });
+
+        // Save note or update edited note
+document.getElementById("saveNoteBtn").addEventListener("click", () => {
+    const noteTitle = document.getElementById("modalNoteTitle").value;
+    const noteText = document.getElementById("modalNoteInput").value;
+    
+    if (noteTitle.trim() !== "" && noteText.trim() !== "") {
+        const userId = firebase.auth().currentUser.uid;
+        const notesRef = firebase.database().ref("notes/" + userId);
+        const currentDate = new Date().toISOString();
+
+        if (editNoteId) {
+            // Update existing note
+            notesRef.child(editNoteId).update({
+                title: noteTitle,
+                text: noteText
+            });
+        } else {
+            // Add new note
+            notesRef.push().set({
+                title: noteTitle,
+                text: noteText,
+                date: currentDate
+            });
+        }
+
+          // Reset form fields after saving or updating
+          document.getElementById("modalNoteTitle").value = "";  // Clear note title
+        document.getElementById("modalNoteInput").value = "";  // Clear note content
+
+        $('#addNoteModal').modal('hide');
+    } else {
+        alert("Please enter both a title and text for the note.");
+    }
+});
+
+
+       // Toggle the important filter
+          importantFilterBtn.addEventListener("click", () => {
+          showOnlyImportant = !showOnlyImportant;
+
+       // Update button text and icon based on the filter state
+        importantFilterBtn.innerHTML = showOnlyImportant 
+        ? '<i class="fas fa-list"></i> All Notes' 
+        : '<i class="fas fa-star"></i> Important';
+        //? '<i class="fas fa-list"></i>' 
+        //: '<i class="fas fa-star"></i>';
+
+         renderNotes(); // Re-render notes based on the current filter
+        });
+
+
+        // Updated renderNotes function with important notes filtering and search for both title and text
+        function renderNotes(filter = "") {
+    notesList.innerHTML = ""; // Clear notes list
+    const filteredNotes = notesArray.filter(note => {
+        const noteTitle = (note.val().title || "").toLowerCase();  // Safe check for title
+        const noteText = (note.val().text || "").toLowerCase();    // Safe check for text
+        const matchesSearch = noteTitle.includes(filter.toLowerCase()) || noteText.includes(filter.toLowerCase()); // Match filter with both title and text
+        const isImportant = note.val().important;
+        return matchesSearch && (!showOnlyImportant || isImportant);
+    });
+
+    noteCount.textContent = filteredNotes.length; // Update notes count
+
+    // Render each filtered note
+    filteredNotes.forEach((childSnapshot) => {
+        const noteData = childSnapshot.val();
+        const noteId = childSnapshot.key;
+        const noteDate = new Date(noteData.date);
+
+        // Format the date to "11 Nov 2024, 3:45 PM"
+        const formattedDateTime = noteDate.toLocaleString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true  // Use 12-hour format (AM/PM)
+        });
+
+        const listItem = document.createElement("li");
+        listItem.classList.add("group-item");
+        if (noteData.important) listItem.classList.add("important-note");
+
+        listItem.innerHTML = `
+            <div class="zoom mb-2 "> 
+           <a class="btn btn-sm btn-light d-block w-100 " style="position: relative; background-color: rgba(240, 250, 94, 0.507);">           
+            <p class="text-left" style="margin-bottom: 1px; font-family: Protest;">
+            <b>${noteData.title}</b>
+           </p>
+            <label class="switch" style="position: absolute; top: 50%; transform: translateY(-50%); right: 10px;">
+            <input type="checkbox" class="important-checkbox" ${noteData.important ? "checked" : ""}>
+            <span class="slider round"></span>
+           </label> 
+            <button class="btn btn-sm delete-btn" style="position: absolute; top: 0%; transform: translateY(-5%); right: 65px;">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+        <button class="btn btn-sm copy-btn" style="position: absolute; top: 0%; transform: translateY(-5%); right: 42px;">
+            <i class="fas fa-copy"></i>
+        </button>
+        <button class="btn btn-sm btn-info preview-btn hide">
+            <i class="fas fa-eye"></i> Preview
+        </button>
+          <button class="btn btn-success btn-sm share-btn hide">
+                    <i class="fas fa-share-alt"></i>
+         </button>
+           </a>
+            <a class="btn btn-sm btn-light edit-btn d-block w-100 mb-1" style="position: relative;">
+           <div style="position: relative;">
+            <textarea class="form-control" rows="5" readonly style="max-height: 7.5em; overflow-y: auto; margin-bottom: 1px; font-size: x-small; font-family: Protest;"">${noteData.text}</textarea>
+            <span style="font-size: 9px;position: absolute; top: 90%; transform: translateY(-50%); right: 20px;">${formattedDateTime}</span>          
+          </div> 
+          </a>      
+            
+        </div>
+        `;
+
+        // Copy Note Text
+        listItem.querySelector(".copy-btn").addEventListener("click", () => {
+            const textToCopy = noteData.text;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert("Text copied to clipboard!");
+            }).catch((err) => {
+                alert("Failed to copy text: " + err);
+            });
+        });
+
+        // Share Note Text
+        listItem.querySelector(".share-btn").addEventListener("click", () => {
+            const textToShare = noteData.text;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Note Share',
+                    text: textToShare,
+                }).then(() => {
+                    alert("Note shared successfully!"); 
+                }).catch((err) => {
+                    alert("Failed to share note: " + err);
+                });
+            } else {
+                alert("Sharing is not supported on your device.");
+            }
+        });
+
+        // Edit Note
+        listItem.querySelector(".edit-btn").addEventListener("click", () => {
+            editNoteId = noteId;  // Store note ID for editing
+            document.getElementById("modalNoteTitle").value = noteData.title;  // Pre-fill modal with note title
+            document.getElementById("modalNoteInput").value = noteData.text;  // Pre-fill modal with note text
+            $('#addNoteModal').modal('show');
+        });
+
+        // Preview Note
+        listItem.querySelector(".preview-btn").addEventListener("click", () => {
+            // Replace newlines with <br> to display text line by line
+            const formattedText = noteData.text.replace(/\n/g, '<br>');
+            document.getElementById("previewNoteContent").innerHTML = `<p>${formattedText}</p>`;
+            $('#previewNoteModal').modal('show');
+        });
+
+        // Delete Note
+        listItem.querySelector(".delete-btn").addEventListener("click", () => {
+            if (confirm("Are you sure you want to delete this note?")) {
+                firebase.database().ref("notes/" + firebase.auth().currentUser.uid + "/" + noteId).remove()
+                    .then(() => {
+                        alert("Note deleted successfully.");
+                    })
+                    .catch((error) => {
+                        alert("Error deleting note: " + error.message);
+                    });
+            }
+        });
+
+        // Mark/Unmark Note as Important with switch-style checkbox
+        listItem.querySelector(".important-checkbox").addEventListener("change", (e) => {
+            const isImportant = e.target.checked; // Get the new 'important' state
+            const notesRef = firebase.database().ref("notes/" + firebase.auth().currentUser.uid);
+            notesRef.child(noteId).update({ important: isImportant });
+        });
+
+        notesList.appendChild(listItem);
+    });
+}
+
+        // Load notes and display them
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                const userId = user.uid;
+                  // Get the current date and time
+        const now = new Date();
+        const formattedDateTime = now.toLocaleString(); // e.g., "11/20/2024, 3:45:20 PM"
+
+        // Update `lastUse` in Firebase Database
+        firebase.database().ref(`users/${userId}`).update({
+            lastUse: now.getTime(), // Unix timestamp
+            lastUseFormatted: formattedDateTime // Human-readable format
+        }).then(() => {
+            console.log("Last use timestamp updated successfully.");
+        }).catch((error) => {
+            console.error("Error updating last use timestamp:", error);
+        });
+                const notesRef = firebase.database().ref("notes/" + userId);
+
+                loadingSpinner.style.display = "block";
+                notesRef.orderByChild("date").on("value", (snapshot) => {
+                    loadingSpinner.style.display = "none";
+                    notesArray = [];
+                    snapshot.forEach((childSnapshot) => {
+                        notesArray.unshift(childSnapshot);
+                    });
+                    renderNotes(); // Render the notes with the current filter
+                });
+            } else {
+                window.location.href = "login.html";
+            }
+       
+
+                notesList.appendChild(listItem);
+            });
+        
+
+    
+
+        // Search filter event listener
+        searchInput.addEventListener("input", (e) => {
+            const filter = e.target.value;
+            renderNotes(filter); // Re-render notes with search filter
+        });
+
+         // Log out function
+         document.getElementById("logoutButton").addEventListener("click", () => {
+            firebase.auth().signOut().then(() => {
+                window.location.href = "login.html";
+            }).catch((error) => {
+                alert("Error logging out: " + error.message);
+            });
+        });
+
+        // back Button
+function goBack() {
+    if (window.history.length > 1) {
+        window.history.back();
+    } else {
+        window.location.href = "login.html"; // Redirect to a default page
+    }
+}
+
+const toggleViewBtn = document.getElementById("toggleViewBtn");
+
+// Toggle between list and grid views
+toggleViewBtn.addEventListener("click", () => {
+    if (notesList.classList.contains("list-view")) {
+        // Switch to Grid View
+        notesList.classList.remove("list-view");
+        notesList.classList.add("grid-view");
+        toggleViewBtn.innerHTML = '<i class="fas fa-list"></i> List View'; // Update button text/icon
+    } else {
+        // Switch to List View
+        notesList.classList.remove("grid-view");
+        notesList.classList.add("list-view");
+        toggleViewBtn.innerHTML = '<i class="fas fa-th-large"></i> Grid View'; // Update button text/icon
+    }
+});
+
+
+    </script>
+  
+</body>
+</html>

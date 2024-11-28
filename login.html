@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Note</title>
+    <!-- Bootstrap CSS -->
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.4.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link href="style/backStar.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <!-- Firebase Database SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="style/sb.js"></script>
+
+
+    <style>
+/* General styling for the text */
+.logo-text {
+    display: inline-block;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 2.5rem; /* Adjust size as needed */
+}
+
+/* Styling for each letter */
+.letter {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 1s forwards, bounce 1s ease-in-out infinite;
+}
+
+/* Initial animation for fade-in and upward movement */
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Bouncy animation for continuous effect */
+@keyframes bounce {
+    0% {
+        transform: translateY(0);
+    }
+    25% {
+        transform: translateY(-10px);
+    }
+    50% {
+        transform: translateY(0);
+    }
+    75% {
+        transform: translateY(-5px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+/* Delay each letter's initial animation (fadeInUp) */
+.letter:nth-child(1) {
+    animation-delay: 0s, 0s; /* No delay for bounce */
+}
+.letter:nth-child(2) {
+    animation-delay: 0.1s, 0.1s;
+}
+.letter:nth-child(3) {
+    animation-delay: 0.2s, 0.2s;
+}
+.letter:nth-child(4) {
+    animation-delay: 0.3s, 0.3s;
+}
+.letter:nth-child(5) {
+    animation-delay: 0.4s, 0.4s;
+}
+.letter:nth-child(6) {
+    animation-delay: 0.5s, 0.5s;
+}
+.letter:nth-child(7) {
+    animation-delay: 0.6s, 0.6s;
+}
+.letter:nth-child(8) {
+    animation-delay: 0.7s, 0.7s;
+}
+.letter:nth-child(9) {
+    animation-delay: 0.8s, 0.8s;
+}
+
+        .centered-form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .card {
+            width: 100%;
+            max-width: 380px;
+            padding: 20px;
+        }
+
+        /* Style for the loading spinner */
+        .spinner-border {
+            display: none; /* Hidden initially */
+        }
+         /* Style for spinner within button */
+         .spinner-border.spinner-border-sm {
+            display: none;
+        }
+        .loading .spinner-border {
+            display: inline-block;
+        }
+        .loading .button-text {
+            display: none;
+        }
+    .glass {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+  body {
+	 display: flex;
+	 justify-content: center;
+	 align-items: center;
+	 min-height: 100vh;
+	 background: radial-gradient(ellipse at bottom, #0d1d31 0%, #0c0d13 100%);
+	 overflow: hidden;
+  }
+  
+    </style>
+</head>
+<body>
+    <div class="area" >
+        <ul class="circles">
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+        </ul>
+    <div class="container centered-form">
+
+         <!-- Modal For App Update -->
+  <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="updateModalLabel">Update Required</h5>
+        </div>
+        <div class="modal-body">
+          A new version of the app is available. Please update to continue.
+          <br>
+          <!-- Anchor tag -->
+          <a id="appUpdateLink" href="" class="btn btn-primary mt-3" target="_blank">Update App</a>
+        </div>
+      </div>
+    </div>
+  </div>
+       <!-- Log In Form -->
+    <div id="loginCard" class="card  shadow p-3 glass">
+    <div class="card-body">
+        <!-- Logo Image -->
+        <div class="text-center mb-1">
+            <p class="logo-text" style="font-family: Creepster ;">
+                <b>
+                    <span class="letter" style="color: rgb(206, 0, 189);">S</span>
+                    <span class="letter" style="color: rgba(6, 160, 160, 0.616);">m</span>
+                    <span class="letter" style="color: rgb(184, 224, 6);">a</span>
+                    <span class="letter" style="color: #FF6347;">r</span> <!-- Tomato Red -->
+                    <span class="letter" style="color: #FFD700;">t</span> <!-- Gold -->
+                    <span class="letter" style="color: #8A2BE2;">N</span> <!-- BlueViolet -->
+                    <span class="letter" style="color: #FF4500;">o</span> <!-- OrangeRed -->
+                    <span class="letter" style="color: #32CD32;">t</span> <!-- LimeGreen -->
+                    <span class="letter" style="color: #1E90FF;">e</span> <!-- DodgerBlue -->
+                </b>
+            </p>
+            
+            <!-- Logo Image <img src="img/logo.png" alt="Logo" class="img-fluid" style="max-width: 100px;"> -->
+
+        </div>
+        
+        <!--<h5 class="card-title text-center text-light">Log In</h5> -->
+        <form id="loginForm">
+            <div class="form-group text-light">
+                <label for="loginEmail">Email address<span class="text-danger">*</span></label>
+                <input type="email" class="form-control" id="loginEmail" placeholder="Email address" required>
+            </div>
+            <div class="form-group text-light">
+                <label for="loginPassword">Password<span class="text-danger">*</span></label>
+                <input type="password" class="form-control" id="loginPassword" placeholder="Your Password" required>
+            </div>
+            <div class="form-group form-check text-light">
+                <input type="checkbox" class="form-check-input" id="rememberMe">
+                <label class="form-check-label" for="rememberMe">Remember Me</label>
+            </div>
+            <div class="text-center d-grid">
+                <!-- Login Button with Spinner -->
+                <button type="submit" id="loginButton" class="btn btn-primary shadow tertiary">
+                    <span class="button-text">Log In</span>
+                    <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+                </button>
+                <p class="mt-3 text-light">Don't have an account? <a href="#" id="showSignup" class="text-info"><b>Register</b></a>
+                <br>    
+                <span class="mt-1"><a href="#" id="showForgotPassword" class="text-warning"><b>Forgot Password?</b></a></span>
+                </p>
+                <p class="text-center text-light" style="font-family: Caveat ;"> Developed by <strong>Subitan Ganguly</strong></p>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+        <!-- Sign Up Form (hidden initially) -->
+        <div id="signupCard" class="card d-none text-light glass">
+            <div class="card-body">
+                <h5 class="card-title text-center">Register</h5>
+                <form id="signupForm">
+                    <div class="form-group">
+                        <label for="SignupName">Name<span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="SignupName" placeholder="First Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupEmail">Email address<span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="signupEmail" placeholder="Email address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupMobile">Mobile Number<span class="text-danger">*</span></label>
+                        <input type="tel" class="form-control" id="signupMobile" placeholder="Mobile Number" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signupPassword">Password<span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="signupPassword" placeholder="Your Password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password<span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm your Password" required>
+                     </div>
+                     
+                    <div class="text-center d-grid">
+                        <!-- Sign Up Button with Spinner -->
+                        <button type="submit" id="signupButton" class="btn btn-primary shadow tertiary mt-3">
+                            <span class="button-text">Sign Up</span>
+                            <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+                        </button>
+                        <p class="mt-3">Already have an account? <a href="#" id="showLogin" class="text-success"><b>Log In</b></a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Forgot Password Form (hidden initially) -->
+        <div id="forgotPasswordCard" class="card d-none shadow p-3 text-light glass">
+            <div class="card-body">
+                <h5 class="card-title text-center">Forgot Password</h5>
+                <form id="forgotPasswordForm">
+                    <div class="form-group">
+                        <label for="resetEmail">Email address<span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="resetEmail" placeholder="Email address" required>
+                    </div>
+                    <div class="text-center d-grid">
+                        <button type="submit" class="btn btn-primary shadow tertiary mt-3">Send Reset Link</button>
+                        <p class="mt-3"><a href="#" id="backToLogin" class="text-success"><b>Back to Login</b></a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        // Auto-fill email and password fields if saved in localStorage
+        const rememberedUser = JSON.parse(localStorage.getItem("rememberedUser"));
+        if (rememberedUser) {
+            document.getElementById("loginEmail").value = rememberedUser.email;
+            document.getElementById("loginPassword").value = rememberedUser.password;
+            document.getElementById("rememberMe").checked = true;
+        }
+
+        // Toggle between login, signup, and forgot password forms
+        document.getElementById("showSignup").addEventListener("click", function(event) {
+            event.preventDefault();
+            document.getElementById("loginCard").classList.add("d-none");
+            document.getElementById("signupCard").classList.remove("d-none");
+        });
+
+        document.getElementById("showLogin").addEventListener("click", function(event) {
+            event.preventDefault();
+            document.getElementById("signupCard").classList.add("d-none");
+            document.getElementById("loginCard").classList.remove("d-none");
+        });
+
+        document.getElementById("showForgotPassword").addEventListener("click", function(event) {
+            event.preventDefault();
+            document.getElementById("loginCard").classList.add("d-none");
+            document.getElementById("forgotPasswordCard").classList.remove("d-none");
+        });
+
+        document.getElementById("backToLogin").addEventListener("click", function(event) {
+            event.preventDefault();
+            document.getElementById("forgotPasswordCard").classList.add("d-none");
+            document.getElementById("loginCard").classList.remove("d-none");
+        });
+
+        document.getElementById("loginForm").addEventListener("submit", function (event) {
+    event.preventDefault();
+    
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+    const rememberMe = document.getElementById("rememberMe").checked;
+    const loginButton = document.getElementById("loginButton");
+
+    // Show loading spinner and disable button
+    loginButton.classList.add("loading");
+    loginButton.disabled = true;
+
+    const persistence = rememberMe 
+        ? firebase.auth.Auth.Persistence.LOCAL 
+        : firebase.auth.Auth.Persistence.SESSION;
+
+    firebase.auth()
+        .setPersistence(persistence)
+        .then(() => {
+            // Attempt login with email and password
+            return firebase.auth().signInWithEmailAndPassword(email, password);
+        })
+        .then((userCredential) => {
+            const user = userCredential.user;
+            const lastLoginDate = new Date().toISOString();
+
+            // Fetch user data from the database
+            return firebase.database().ref("users/" + user.uid).once("value")
+                .then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        throw new Error("User data not found in the database.");
+                    }
+
+                    const userData = snapshot.val();
+
+                    // Update the lastLoginDate in the database
+                    return firebase.database().ref("users/" + user.uid).update({
+                        lastLoginDate: lastLoginDate
+                    }).then(() => userData); // Pass userData for further handling
+                });
+        })
+        .then((userData) => {
+    // Save user role and other details in localStorage
+    localStorage.setItem("userRole", userData.role); // Save role in localStorage
+    localStorage.setItem("userLoggedIn", "true"); // Flag to indicate user is logged in
+
+    // Save user credentials if 'remember me' is checked
+    if (rememberMe) {
+        localStorage.setItem("rememberedUser", JSON.stringify({ email, password }));
+    } else {
+        localStorage.removeItem("rememberedUser");
+    }
+
+    // Role-based redirection
+    if (userData.role === "admin") {
+        //alert("Welcome Admin!");
+        window.location.href = "admin_dashboard.html"; // Redirect to admin dashboard
+    } else {
+        //alert("Login successful!");
+        window.location.href = "index.html"; // Redirect to user dashboard
+    }
+})
+
+        .catch((error) => {
+            // Detailed error messages based on error codes
+            let errorMessage;
+            switch (error.code) {
+                case "auth/user-not-found":
+                    errorMessage = "No user found with this email.";
+                    break;
+                case "auth/wrong-password":
+                    errorMessage = "Incorrect password.";
+                    break;
+                case "auth/invalid-email":
+                    errorMessage = "Invalid email address.";
+                    break;
+                case "auth/network-request-failed":
+                    errorMessage = "Network error. Please try again.";
+                    break;
+                default:
+                    errorMessage = error.message || "An unknown error occurred.";
+            }
+            alert(errorMessage);
+            console.error("Login Error:", error);
+        })
+        .finally(() => {
+            // Re-enable button and hide loading spinner
+            loginButton.classList.remove("loading");
+            loginButton.disabled = false;
+        });
+});
+
+
+    // Sign up function with Confirm Password check and loading spinner in button
+    document.getElementById("signupForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const Name = document.getElementById("SignupName").value;
+        const email = document.getElementById("signupEmail").value;
+        const mobile = document.getElementById("signupMobile").value;
+        const password = document.getElementById("signupPassword").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+        const signupButton = document.getElementById("signupButton");
+
+        // Check if passwords match
+        if (password !== confirmPassword) {
+            alert("Passwords do not match. Please try again.");
+            return;
+        }
+
+        // Show loading spinner and disable button
+        signupButton.classList.add("loading");
+        signupButton.disabled = true;
+
+        try {
+            const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+            const user = userCredential.user;
+
+            const signUpDate = new Date().toISOString(); // ISO format for date-time
+
+            await firebase.database().ref("users/" + user.uid).set({
+            Name: Name,
+            email: email,
+            mobile: mobile,
+            signupDate: signUpDate,
+            lastLoginDate: signUpDate,  // Initialize with sign-up date
+            role: "user"
+         });
+
+
+            // Set user display name
+            await user.updateProfile({
+                displayName: `${Name} `
+            });
+
+            alert("Sign up successful! You can now log in.");
+
+            // Hide signup card and show login card
+            document.getElementById("signupCard").classList.add("d-none");
+            document.getElementById("loginCard").classList.remove("d-none");
+        } catch (error) {
+            console.error("Error during sign up:", error); // Log the error for debugging
+            alert("Error: " + error.message);
+        } finally {
+            // Hide loading spinner and re-enable button
+            signupButton.classList.remove("loading");
+            signupButton.disabled = false;
+        }
+    });
+
+
+        // Forgot password function
+        document.getElementById("forgotPasswordForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const email = document.getElementById("resetEmail").value;
+            firebase.auth().sendPasswordResetEmail(email)
+                .then(() => alert("Password reset link sent!"))
+                .catch(() => alert("Error sending password reset link."));
+        });
+
+        
+
+
+// Reference to the appUpdate node in the database For App Update
+    const dbRef = firebase.database().ref("appUpdate");
+
+// Fetch appUpdate data
+dbRef.on("value", (snapshot) => {
+  const appUpdate = snapshot.val();
+  const linkElement = document.getElementById("appUpdateLink");
+
+  if (appUpdate && appUpdate.status === true) {
+    // Set the href attribute of the link
+    linkElement.href = appUpdate.link;
+
+    // Show the modal
+    $('#updateModal').modal('show');
+  } else {
+    // Hide the modal if it’s shown (to prevent it from displaying)
+    $('#updateModal').modal('hide');
+  }
+});
+    </script>
+    
+</body>
+</html>
