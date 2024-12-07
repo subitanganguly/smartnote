@@ -17,7 +17,7 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <h5 class="text-center headt">QR Generator</h5>
-                <form id="upiForm" class="glass mt-3">
+                <form id="upiForm" class="glass mt-3 mb-5">
                     <div class="form-group">
                         <label for="upiId">UPI ID<span class="text-danger"> *</span></label>
                         <input type="text" class="input btn-block" id="upiId" placeholder="Enter UPI ID" required style="font-family: 'Gill Sans';">
@@ -36,6 +36,7 @@
                     </div>
                     <div class="form-group">
                         <button type="submit" class="glow-on-hover btn-3 btn-block">Generate QR Code</button>
+                        <button id="reloadButton" class="glow-on-hover btn-3 btn-block">Generate New QR</button>
                     </div>
                 </form>
                 <div id="qrCodeContainer" class="mt-4 text-center">
@@ -107,6 +108,11 @@
                     window.location.href = `qr.html?qrCode=${encodeURIComponent(url)}`;
                 }
             });
+        });
+    </script>
+     <script>
+        document.getElementById("reloadButton").addEventListener("click", function () {
+            location.reload(); // Reloads the current page
         });
     </script>
 </body>
