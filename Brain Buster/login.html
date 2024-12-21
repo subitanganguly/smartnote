@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brain Buster Login</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+  <script src="js/all.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    /* Custom styling for form boxes */
+    .form-card {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .glass {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+  border-radius: 25px;
+  border: 3px solid rgb(255, 0, 115);
+  box-shadow: 0 2px 10px 0 rgb(255, 0, 170);
+  padding: 0rem; 
+  }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="text-center">Brain Buster</h1>
+
+    <!-- Login Form -->
+    <div id="login-form" class="card glass p-4 form-card text-light">
+      <h3 class="text-center">Login</h3>
+      <div class="mb-3">
+        <label for="login-email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="login-email" placeholder="Enter your email" required>
+      </div>
+      <div class="mb-3 position-relative">
+        <label for="login-password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="login-password" placeholder="Enter your password" required>
+        <span class="position-absolute top-50 end-0 translate-middle-y text-dark me-2" style="cursor: pointer; padding-top: 30px;" onclick="togglePassword('login-password', this)">
+          <i class="bi bi-eye-slash" id="login-password-icon"></i>
+        </span>
+      </div>
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="rememberMe">
+        <label class="form-check-label" for="rememberMe">Remember Me</label>
+      </div>
+      <button id="loginBtn" class="btn btn-primary w-100">
+        <span class="spinner-border spinner-border-sm me-2 d-none" id="loginSpinner"></span>
+        Login
+      </button>
+      <p class="text-center mt-3">
+        <a href="#" id="goToSignup">Sign Up</a> | 
+        <a href="#" id="goToForgotPassword">Forgot Password?</a>
+      </p>
+    </div>
+
+    <!-- Signup Form -->
+    <div id="signup-form" class="card p-4 form-card glass d-none text-light">
+      <h3 class="text-center">Sign Up</h3>
+      <div class="mb-3">
+        <label for="signup-name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="signup-name" placeholder="Enter your name" required>
+      </div>      
+      <div class="mb-3">
+        <label for="signup-email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="signup-email" placeholder="Enter your email" required>
+      </div>
+      <div class="mb-3 position-relative">
+        <label for="signup-password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="signup-password" placeholder="Enter your password" required>
+        <span class="position-absolute top-50 end-0 translate-middle-y me-2 text-dark" style="cursor: pointer; padding-top: 30px;" onclick="togglePassword('signup-password', this)">
+          <i class="bi bi-eye-slash" id="signup-password-icon"></i>
+        </span>
+      </div>
+      <button id="signupBtn" class="btn btn-success w-100">
+        <span class="spinner-border spinner-border-sm me-2 d-none" id="signupSpinner"></span>
+        Sign Up
+      </button>
+      <p class="text-center mt-3">
+        <a href="#" id="goToLoginFromSignup">Back to Login</a>
+      </p>
+    </div>
+
+    <!-- Forgot Password Form -->
+    <div id="forgot-password-form" class="card p-4 form-card glass d-none text-light">
+      <h3 class="text-center">Forgot Password</h3>
+      <div class="mb-3">
+        <label for="forgot-email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="forgot-email" placeholder="Enter your email" required>
+      </div>
+      <button id="forgotPasswordBtn" class="btn btn-warning w-100">Send Reset Email</button>
+      <p class="text-center mt-3">
+        <a href="#" id="goToLoginFromForgot">Back to Login</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+   // Toggle Password Visibility
+   function togglePassword(inputId, iconElement) {
+      const input = document.getElementById(inputId);
+      const icon = iconElement.querySelector("i");
+
+      if (input.type === "password") {
+        input.type = "text";
+        icon.classList.replace("bi-eye-slash", "bi-eye");
+      } else {
+        input.type = "password";
+        icon.classList.replace("bi-eye", "bi-eye-slash");
+      }
+    }
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    // Load remembered credentials on page load
+    window.addEventListener("load", () => {
+      const savedEmail = localStorage.getItem("savedEmail");
+      const savedPassword = localStorage.getItem("savedPassword");
+
+      if (savedEmail && savedPassword) {
+        document.getElementById("login-email").value = savedEmail;
+        document.getElementById("login-password").value = savedPassword;
+        document.getElementById("rememberMe").checked = true;
+      }
+    });
+
+    // Login functionality
+document.getElementById("loginBtn").addEventListener("click", () => {
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
+  const rememberMe = document.getElementById("rememberMe").checked;
+
+  const loginBtn = document.getElementById("loginBtn");
+  const loginSpinner = document.getElementById("loginSpinner");
+
+  loginBtn.disabled = true;
+  loginSpinner.classList.remove("d-none");
+
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(() => {
+      if (rememberMe) {
+        localStorage.setItem("savedEmail", email);
+        localStorage.setItem("savedPassword", password);
+      } else {
+        localStorage.removeItem("savedEmail");
+        localStorage.removeItem("savedPassword");
+      }
+      window.location.href = "index.html";
+    })
+    .catch((error) => {
+      alert("Error: " + error.message);
+    })
+    .finally(() => {
+      loginBtn.disabled = false;
+      loginSpinner.classList.add("d-none");
+    });
+});
+   // Signup functionality
+document.getElementById("signupBtn").addEventListener("click", () => {
+  const name = document.getElementById("signup-name").value;
+  const email = document.getElementById("signup-email").value;
+  const password = document.getElementById("signup-password").value;
+
+  const signupBtn = document.getElementById("signupBtn");
+  const signupSpinner = document.getElementById("signupSpinner");
+
+  if (!name) {
+    alert("Please enter your name.");
+    return;
+  }
+
+  signupBtn.disabled = true;
+  signupSpinner.classList.remove("d-none");
+
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      firebase.database().ref('users/' + user.uid).set({
+        name: name,
+        email: user.email,
+        role: "user"
+      });
+      alert("Signup successful. Please log in.");
+      toggleForm("login-form");
+    })
+    .catch((error) => {
+      alert("Error: " + error.message);
+    })
+    .finally(() => {
+      signupBtn.disabled = false;
+      signupSpinner.classList.add("d-none");
+    });
+});
+
+    // Forgot Password functionality
+    document.getElementById("forgotPasswordBtn").addEventListener("click", () => {
+      const email = document.getElementById("forgot-email").value;
+
+      if (!email) {
+        alert("Please enter your email for password reset.");
+        return;
+      }
+
+      firebase.auth().sendPasswordResetEmail(email)
+        .then(() => {
+          alert("Password reset email sent. Please check your inbox.");
+          toggleForm("login-form");
+        })
+        .catch((error) => {
+          alert("Error: " + error.message);
+        });
+    });
+
+    // Navigation between forms
+    function toggleForm(showFormId) {
+      document.getElementById("login-form").classList.add("d-none");
+      document.getElementById("signup-form").classList.add("d-none");
+      document.getElementById("forgot-password-form").classList.add("d-none");
+      document.getElementById(showFormId).classList.remove("d-none");
+    }
+
+    document.getElementById("goToSignup").addEventListener("click", () => toggleForm("signup-form"));
+    document.getElementById("goToForgotPassword").addEventListener("click", () => toggleForm("forgot-password-form"));
+    document.getElementById("goToLoginFromSignup").addEventListener("click", () => toggleForm("login-form"));
+    document.getElementById("goToLoginFromForgot").addEventListener("click", () => toggleForm("login-form"));
+
+    // Listen for offline event
+window.addEventListener("offline", function() {
+  // User has gone offline, redirect to offline page
+  window.location.href = "offline.html";
+});
+
+// Listen for online event (optional, if you want to detect when the user comes back online)
+window.addEventListener("online", function() {
+  // console.log("User is back online.");
+});
+  </script>
+</body>
+</html>

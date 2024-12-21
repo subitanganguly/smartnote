@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bulk Upload questions</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <script src="js/all.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script>
+ 
+    firebase.initializeApp(firebaseConfig);
+
+    // Variable to hold parsed questions from the uploaded file
+    let uploadedquestions = [];
+
+    // Handle Excel file upload
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        uploadedquestions = XLSX.utils.sheet_to_json(sheet); // Store parsed data
+        alert(`${uploadedquestions.length} questions loaded from the file. Click "Upload" to save them.`);
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    // Function to bulk upload data to Firebase with duplicate checking
+    function bulkUploadToFirebase() {
+      if (uploadedquestions.length === 0) {
+        alert("No questions to upload. Please select a file first.");
+        return;
+      }
+
+      const dbRef = firebase.database().ref('quiz_data');
+
+      // Fetch all existing questions to compare
+      dbRef.once('value')
+        .then(snapshot => {
+          const existingquestions = [];
+          snapshot.forEach(childSnapshot => {
+            const data = childSnapshot.val();
+            existingquestions.push(data.question.toLowerCase().trim());
+          });
+
+          const promises = [];
+          const newquestions = uploadedquestions.filter(question => {
+            // Check if the question is already in the database
+            const isDuplicate = existingquestions.includes(question.question.toLowerCase().trim());
+            if (isDuplicate) {
+              console.warn(`Duplicate question skipped: "${question.question}"`);
+            }
+            return !isDuplicate; // Only include non-duplicate questions
+          });
+
+          newquestions.forEach(question => {
+            // Prepare data to upload
+            const quizData = {
+              question: question.question,
+              options: {
+                option1: question.option1,
+                option2: question.option2,
+                option3: question.option3,
+                option4: question.option4,
+              },
+              genre: question.genre,
+              difficulty: question.difficulty,
+              answer: question.answer
+            };
+
+            // Add each new question as a new entry in Firebase
+            const newQuizRef = dbRef.push();
+            promises.push(newQuizRef.set(quizData));
+          });
+
+          if (newquestions.length === 0) {
+            alert("All uploaded questions were duplicates. No new questions were added.");
+            return;
+          }
+
+          // Notify the user once all new questions are uploaded
+          Promise.all(promises)
+            .then(() => {
+              alert(`${newquestions.length} new questions have been uploaded successfully!`);
+              uploadedquestions = []; // Clear the temporary data
+            })
+            .catch(error => {
+              console.error("Error uploading questions: ", error);
+              alert("Error uploading some questions. Check console for details.");
+            });
+        })
+        .catch(error => {
+          console.error("Error checking existing questions: ", error);
+          alert("Error checking existing questions. Please try again.");
+        });
+    }
+
+    // Function to generate and download an Excel template
+    function downloadTemplate() {
+      const data = [
+        { question: "What is 2+2?", option1: "3", option2: "4", option3: "5", option4: "6", genre: "mathematics", difficulty: "easy", answer: "option2" },
+        { question: "Capital of the US?", option1: "LA", option2: "NY", option3: "DC", option4: "SF", genre: "geography", difficulty: "medium", answer: "option3" }
+      ];
+
+      const worksheet = XLSX.utils.json_to_sheet(data, { header: ["question", "option1", "option2", "option3", "option4", "genre", "difficulty", "answer"] });
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Template");
+      XLSX.writeFile(workbook, "QuizTemplate.xlsx");
+    }
+
+    // Listen for offline event
+window.addEventListener("offline", function() {
+  // User has gone offline, redirect to offline page
+  window.location.href = "offline.html";
+});
+
+// Listen for online event (optional, if you want to detect when the user comes back online)
+window.addEventListener("online", function() {
+  // console.log("User is back online.");
+});
+  </script>
+  <style>
+    .glass {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+      border-radius: 15px;
+      border: 2px solid rgb(0, 242, 255);
+      box-shadow: 0 2px 10px rgba(0, 255, 221, 0.701);
+    }
+
+    .glass:hover {
+      background: linear-gradient(135deg, rgba(9, 247, 255, 0.178), rgba(255, 255, 255, 0));
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <div class="card p-4 glass text-light" style="max-width: 600px; margin: 0 auto;">
+      <h2 class="text-center">Bulk Upload questions</h2>
+      <p class="text-center">Upload an Excel file to add multiple questions at once.</p>
+
+      <!-- File Upload Input -->
+      <input type="file" class="form-control mb-3" id="fileUpload" accept=".xlsx, .xls" onchange="handleFileUpload(event)">
+
+      <!-- Upload Button -->
+      <button class="btn btn-outline-info w-100 mb-3" onclick="bulkUploadToFirebase()">Upload questions</button>
+
+      <!-- Download Template Button -->
+      <button class="btn btn-outline-info w-100 mb-3" onclick="downloadTemplate()">Download Excel Template</button>
+
+      <div class="text-center">
+        <a href="upload.html" class="btn btn-outline-info">Back</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

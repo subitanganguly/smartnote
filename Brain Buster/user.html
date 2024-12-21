@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brain Buster Users</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="js/all.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <script>
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    // Check if the user is an admin when the page loads
+    window.onload = function () {
+      firebase.auth().onAuthStateChanged(function (user) {
+        if (user) {
+          checkAdminAccess(user);
+        } else {
+          // Redirect to login if no user is logged in
+          window.location.href = "login.html";
+        }
+      });
+    };
+
+    // Function to verify admin access
+    function checkAdminAccess(user) {
+      const userRef = firebase.database().ref('users/' + user.uid);
+      userRef.once('value')
+        .then(snapshot => {
+          const userData = snapshot.val();
+          if (userData?.role === 'admin') {
+            // User is an admin, load user details
+            loadUserDetails();
+          } else {
+            alert("Access denied. Admins only.");
+            window.location.href = "index.html"; // Redirect non-admins
+          }
+        })
+        .catch(error => {
+          console.error("Error checking user role:", error);
+          alert("Error verifying admin access.");
+          window.location.href = "index.html"; // Redirect in case of error
+        });
+    }
+
+    // Function to load user details
+    function loadUserDetails() {
+  const userRef = firebase.database().ref('users');
+  const searchInput = document.getElementById("searchInput").value.toLowerCase(); // Get the search input
+  const lastUsedFilter = document.getElementById("lastUsedFilter").value; // Get the selected last used filter
+  const userCountDiv = document.getElementById("userCount"); // Get the user count div
+  const userDetailsDiv = document.getElementById("userDetails");
+
+  userDetailsDiv.innerHTML = ''; // Clear previous data
+  let filteredUserCount = 0; // Initialize the count of filtered users
+
+  userRef.once('value')
+    .then(snapshot => {
+      const users = snapshot.val();
+      
+      if (users) {
+        Object.keys(users).forEach(uid => {
+          const user = users[uid];
+
+          // Make sure user.name and user.email are strings before calling .toLowerCase()
+          const userName = (user.name || "").toLowerCase();
+          const userEmail = (user.email || "").toLowerCase();
+          
+          // Filter based on the search input (name or email)
+          if (
+            userName.includes(searchInput) ||
+            userEmail.includes(searchInput)
+          ) {
+
+            // Check the "Last Used" filter
+            let includeUser = true;
+
+            if (user.last_used) {
+              const lastUsedDate = new Date(user.last_used);
+              const now = new Date();
+
+              // Check if the user matches the "Last Used" filter
+              switch (lastUsedFilter) {
+                case "today":
+                  // Filter for users who were active today
+                  includeUser = isToday(lastUsedDate, now);
+                  break;
+                case "week":
+                  // Filter for users who were active this week
+                  includeUser = isThisWeek(lastUsedDate, now);
+                  break;
+                case "month":
+                  // Filter for users who were active this month
+                  includeUser = isThisMonth(lastUsedDate, now);
+                  break;
+                case "year":
+                  // Filter for users who were active this year
+                  includeUser = isThisYear(lastUsedDate, now);
+                  break;
+                default:
+                  includeUser = true;
+              }
+            }
+
+            if (includeUser) {
+              filteredUserCount++; // Increment the count of filtered users
+
+              const userCard = document.createElement("div");
+              userCard.className = "card mb-3 glass p-3 text-light";
+
+              // Format the last_used date and time
+              let formattedLastUsed = "N/A";
+              if (user.last_used) {
+                const lastUsedDate = new Date(user.last_used);
+                const dateOptions = { day: '2-digit', month: 'short', year: 'numeric' }; // e.g., "11 Nov 2024"
+                const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }; // e.g., "09:58:40 AM"
+
+                const formattedDate = lastUsedDate.toLocaleDateString('en-US', dateOptions);
+                const formattedTime = lastUsedDate.toLocaleTimeString('en-US', timeOptions);
+                formattedLastUsed = `${formattedDate}, ${formattedTime}`; // Combine date and time
+              }
+
+              const totalAnswers = (user.correct_answers_count || 0) + (user.wrong_answers_count || 0);
+
+              userCard.innerHTML = ` 
+  <p class="card-title">
+    <i class="bi bi-person-circle text-info"></i> 
+    <span class="text-info">${user.name || "N/A"}<span class="text-warning"> [${user.role || "N/A"}]</span></span><br>
+    <span class="fw-bold text-success"> <i class="bi bi-envelope"></i> </span> <span class="text-success" style="font-size: 14px;">${user.email || "N/A"}</span><br>
+    <span class="fw-bold text-secondary">Correct:</span> <span class="text-success">${user.correct_answers_count || 0}</span>
+    <span class="fw-bold text-secondary">Wrong:</span> <span class="text-danger">${user.wrong_answers_count || 0}</span>
+    <span class="fw-bold text-secondary">Total:</span> <span class="text-info">${totalAnswers}</span><br>
+    <span class="fw-bold text-secondary">Last Active:</span> 
+    <span class="text-warning" style="font-size: 10px;">${formattedLastUsed}</span><br>
+    
+    <button class="btn btn-warning btn-sm mt-2" onclick="changeUserRole('${uid}')">Change Role</button> <!-- Add Button -->
+  </p>
+`;
+
+              userDetailsDiv.appendChild(userCard);
+            }
+          }
+        });
+
+        // Update the user count display
+        userCountDiv.innerHTML = `${filteredUserCount}`;
+      } else {
+        userDetailsDiv.innerHTML = '<p class="text-light">No users found.</p>';
+      }
+    })
+    .catch(error => {
+      console.error("Error loading user details:", error);
+      const userDetailsDiv = document.getElementById("userDetails");
+      userDetailsDiv.innerHTML = '<p class="text-danger">Error loading user details.</p>';
+    });
+}
+
+// Helper functions for date comparison
+
+function isToday(lastUsedDate, now) {
+  return lastUsedDate.toDateString() === now.toDateString();
+}
+
+function isThisWeek(lastUsedDate, now) {
+  const startOfWeek = now.getDate() - now.getDay();
+  const endOfWeek = startOfWeek + 6;
+  const weekStartDate = new Date(now.setDate(startOfWeek));
+  const weekEndDate = new Date(now.setDate(endOfWeek));
+
+  return lastUsedDate >= weekStartDate && lastUsedDate <= weekEndDate;
+}
+
+function isThisMonth(lastUsedDate, now) {
+  return lastUsedDate.getMonth() === now.getMonth() && lastUsedDate.getFullYear() === now.getFullYear();
+}
+
+function isThisYear(lastUsedDate, now) {
+  return lastUsedDate.getFullYear() === now.getFullYear();
+}
+
+function changeUserRole(uid) {
+  const newRole = prompt("Enter new role (admin/user):").toLowerCase();
+  if (newRole === "admin" || newRole === "user") {
+    const userRef = firebase.database().ref('users/' + uid);
+    userRef.update({
+      role: newRole
+    })
+    .then(() => {
+      alert("User role updated successfully.");
+      loadUserDetails(); // Refresh the user details
+    })
+    .catch(error => {
+      console.error("Error updating user role:", error);
+      alert("Error updating role.");
+    });
+  } else {
+    alert("Invalid role. Please enter 'admin' or 'user'.");
+  }
+}
+
+// Listen for offline event
+window.addEventListener("offline", function() {
+  // User has gone offline, redirect to offline page
+  window.location.href = "offline.html";
+});
+
+// Listen for online event (optional, if you want to detect when the user comes back online)
+window.addEventListener("online", function() {
+  // console.log("User is back online.");
+});
+  </script>
+
+  <style>
+    .glass {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+      border-radius: 15px;
+      border: 2px solid rgb(0, 242, 255);
+      box-shadow: 0 2px 10px rgba(0, 255, 221, 0.701);
+    }
+
+    .glass:hover {
+      background: linear-gradient(135deg, rgba(9, 247, 255, 0.178), rgba(255, 255, 255, 0));
+    }
+
+   
+  
+  </style>
+</head>
+
+<body>
+  <!-- Floating Back Button -->
+  <button class="back-button" onclick="window.history.back();">
+    <i class="bi bi-arrow-left"></i>
+  </button>
+
+  <div class="container mt-3">
+    <h1 class="text-center mb-3">Brain Buster</h1>
+
+    <!-- Last Used Filter -->
+
+
+    <!-- Search Bar -->
+    <div class="container mb-1 d-flex align-items-center">
+      <div class="position-relative flex-grow-1">
+        <input type="text" id="searchInput" class="form-control rounded-pill ps-5" placeholder="Search....." onkeyup="loadUserDetails()" autocomplete="off">
+        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ps-4 text-muted"></i> <!-- Search Icon -->
+      </div>
+      <span id="userCount" class="text-light ms-1 px-3 py-2 rounded-pill bg-info fw-bold">0</span>
+    </div>
+    <div class="container mb-2">
+      <select id="lastUsedFilter" class="form-select rounded-pill" onchange="loadUserDetails()">
+        <option value="" disabled selected>Last Used</option>
+        <option value="today">Today</option>
+        <option value="week">This Week</option>
+        <option value="month">This Month</option>
+        <option value="year">This Year</option>
+      </select>
+    </div>
+    <center>
+    <div id="userDetails" class="container">
+      <div class="loader mt-5">
+        <span class="loader-text">loadingUsers</span>
+        <span class="load "></span>
+      </div>
+    </div>
+  </center>
+  </div>
+</body>
+
+</html>
