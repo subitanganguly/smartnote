@@ -61,6 +61,17 @@ body{
 }
 #searchInput::placeholder {
     color: #d3d3d3; /* Placeholder text color */
+    
+}
+
+#labelFilter {
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+#labelFilter option {
+    background-color: #d1e7dd; /* Change the background color of the options */
+    color: #000; /* Text color */
 }
 
 .style-box:hover {
