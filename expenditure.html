@@ -139,9 +139,9 @@
                 <li></li>
                 <li></li>
         </ul>
-    <div class="container mt-1 text-light">
+    <div class="container mt-1 text-light ">
         <nav>
-    <div class="glass2 text-light mb-3">
+    <nav class="glass2 text-light mb-3">
         <!-- Button to Open Modal -->     
        <div class="d-flex justify-content-between align-items-center">
          <!-- Back Button with Icon -->
@@ -152,11 +152,11 @@
            <h5 class="mt-3">Expenditure</h5>
            <button id="logoutButton" class="btn btn-light" style="border-radius: 70px; font-size: small;">Log Out</button>
        </div>
-    </div>
+    </nav>
 
     <!-- Filters -->
     <div class="mb-1">
-        <div class="input-group zoom mb-3">
+        <div class="input-group zoom mb-1">
             <span class="input-group-text" id="searchIcon">
                 <i class="fas fa-search"></i>
             </span>
@@ -167,7 +167,9 @@
             <input type="date" id="endDate" class="form-control mb-2 ms-2" placeholder="End Date" style="display: none;">
         </div>
     </div>
-
+    <select id="labelFilter" class="form-select mb-1 zoom">
+        <option value="">All Labels</option>
+      </select>
     <!-- Month Filter (Horizontal Scrollable) -->
     <div id="monthFilter" class="d-flex overflow-auto mb-2">
         <button class="btn btn-outline-warning me-2" data-month="0">Janu</button>
@@ -183,6 +185,8 @@
         <button class="btn btn-outline-warning me-2" data-month="10">Nov</button>
         <button class="btn btn-outline-warning me-2" data-month="11">Dec</button>
     </div>
+    
+      
 
     <!-- Action Buttons -->
     <div id="buttonScroll" class="d-flex overflow-auto mb-1">
@@ -206,32 +210,40 @@
 
 
         <!-- Modal -->
-        <div class="modal fade glass" id="expenseModal" tabindex="-1" aria-labelledby="expenseModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content text-dark">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="expenseModalLabel">Add Expense</h5>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <input type="text" id="expenseDescription" class="form-control mb-2" placeholder="Expense description" list="descriptionSuggestions" autocomplete="off">
-                            <datalist class="text-lowercase" id="descriptionSuggestions" style="background-color: #c3def8; border: 1px solid #c0c2c3; padding: 5px; max-height: 150px; overflow-y: auto; font-size: 14px;"></datalist>
-
-                            <input type="number" id="expenseAmount" class="form-control mb-2" placeholder="Amount" min="0">
-                            <div class="form-floating">
-                                <input type="date" id="expenseDate" class="form-control mb-2">
-                                <label for="expenseDate">Date</label>
-                              </div>
-                              
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" id="addExpenseBtn" class="btn btn-primary">Add Expense</button>
+        <!-- Modal -->
+<div class="modal fade glass" id="expenseModal" tabindex="-1" aria-labelledby="expenseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content text-dark">
+            <div class="modal-header">
+                <h5 class="modal-title" id="expenseModalLabel">Add Expense</h5>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <!-- Expense Description -->
+                    <input type="text" id="expenseDescription" class="form-control mb-2" placeholder="Expense description" list="descriptionSuggestions" autocomplete="off">
+                    <datalist class="text-lowercase" id="descriptionSuggestions" style="background-color: #c3def8; border: 1px solid #c0c2c3; padding: 5px; max-height: 150px; overflow-y: auto; font-size: 14px;"></datalist>
+                    
+                    <!-- Label Input -->
+                    <input type="text" id="expenseLabel" list="labelSuggestions" class="form-control mb-2" placeholder="Label (e.g., Food, Travel)" autocomplete="off">
+                    <datalist id="labelSuggestions" style="background-color: #c3def8; border: 1px solid #c0c2c3; padding: 5px; max-height: 150px; overflow-y: auto; font-size: 14px;"></datalist>         
+                    <!-- Expense Amount -->
+                    <input type="number" id="expenseAmount" class="form-control mb-2" placeholder="Amount" min="0">
+                    
+                    <!-- Expense Date -->
+                    <div class="form-floating">
+                        <input type="date" id="expenseDate" class="form-control mb-2">
+                        <label for="expenseDate">Date</label>
                     </div>
                 </div>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" id="addExpenseBtn" class="btn btn-primary">Add Expense</button>
+            </div>
         </div>
+    </div>
+</div>
+
 
         <!-- Total Amount -->
         <h5 class="mt-3">Total Spent: ₹<span id="totalAmount">0.00</span></h5>
@@ -300,6 +312,7 @@ function resetForm() {
     expenseDescription.value = "";
     expenseAmount.value = "";
     expenseDate.value = "";
+    expenseLabel.value = "";
 }
 
         // UI Elements
@@ -310,6 +323,7 @@ function resetForm() {
         const addExpenseBtn = document.getElementById("addExpenseBtn");
         const expensesList = document.getElementById("expensesList");
         const totalAmount = document.getElementById("totalAmount");
+        const expenseLabel = document.getElementById("expenseLabel");
 
         let userId;
 
@@ -321,6 +335,8 @@ function resetForm() {
                 
                 loadUserExpenses();  // Load the expenses
                 loadDescriptionSuggestions(); // Load description suggestions
+                loadLabelSuggestions();
+                loadLabels();
             } else {
                 console.log("User not authenticated. Redirecting to login...");
                 window.location.href = "login.html";
@@ -328,6 +344,35 @@ function resetForm() {
         });
     
         let selectedMonth = null; // Track the selected month
+
+        function loadLabels() {
+    const labelFilter = document.getElementById("labelFilter");
+    const expensesRef = firebase.database().ref(`expenses/${userId}`);
+
+    // Fetch all expenses to extract unique labels
+    expensesRef.once("value", (snapshot) => {
+        const labels = new Set(); // Use a Set to ensure uniqueness
+        snapshot.forEach((childSnapshot) => {
+            const expense = childSnapshot.val();
+            if (expense.label) {
+                labels.add(expense.label); // Add the label if it exists
+            }
+        });
+
+        // Clear and repopulate the dropdown
+        labelFilter.innerHTML = '<option value="">All Labels</option>'; // Default option
+        labels.forEach((label) => {
+            const option = document.createElement("option");
+            option.value = label;
+            option.textContent = label;
+            labelFilter.appendChild(option);
+        });
+    });
+}
+
+document.getElementById("labelFilter").addEventListener("change", function() {
+    loadUserExpenses();
+});
 
 // Function to load user-specific expenses with filters
 function loadUserExpenses() {
@@ -338,6 +383,7 @@ function loadUserExpenses() {
     const searchText = document.getElementById("searchInput").value.toLowerCase();
     const startDate = document.getElementById("startDate").value;
     const endDate = document.getElementById("endDate").value;
+    const selectedLabel = document.getElementById("labelFilter").value;
 
     expensesRef.once("value", (snapshot) => {
         expensesList.innerHTML = "";
@@ -350,18 +396,21 @@ function loadUserExpenses() {
             const expenseYearMonthDay = expenseDate.toISOString().split("T")[0];
             const expenseMonth = expenseDate.getMonth();
 
-            // Apply filters: description, date range, and selected month
+            // Apply filters: description, date range, month, and label
             const matchesDescription = searchText ? expense.description.toLowerCase().includes(searchText) : true;
             const matchesStartDate = startDate ? expenseYearMonthDay >= startDate : true;
             const matchesEndDate = endDate ? expenseYearMonthDay <= endDate : true;
             const matchesMonth = selectedMonth !== null ? expenseMonth === selectedMonth : true;
+            const matchesLabel = selectedLabel ? expense.label === selectedLabel : true; // Match label if selected
 
-            if (matchesDescription && matchesStartDate && matchesEndDate && matchesMonth) {
+            // Include expense only if it matches all active filters
+            if (matchesDescription && matchesStartDate && matchesEndDate && matchesMonth && matchesLabel) {
                 expensesArray.push({
                     id: childSnapshot.key,
                     date: expense.date,
                     description: expense.description,
                     amount: expense.amount,
+                    label: expense.label || "No Label" // Use default value if label is missing
                 });
             }
         });
@@ -374,7 +423,7 @@ function loadUserExpenses() {
             expensesArray.forEach((expense) => {
                 const expenseDateFormatted = new Date(expense.date).toLocaleDateString("en-GB", {
                     day: "numeric",
-                    month: "short",  // Change from "long" to "short"
+                    month: "short",
                     year: "numeric"
                 });
                 const listItem = document.createElement("li");
@@ -382,27 +431,28 @@ function loadUserExpenses() {
 
                 listItem.innerHTML = `
                     <div class="glass mb-2 text-light text-uppercase zoom">
-                   <div class="d-flex justify-content-between align-items-center" style="margin-left: 20px;">
-                   <span style="font-size: 12px; color: #ffc107;"><b><i class="fas fa-wallet"></i> ${expense.description}</b><span class="text-light"> ₹${expense.amount.toFixed(2)}<br>
-                    <span style="font-size: 12px; color: #32CD32;">${expenseDateFormatted}</span>
-                    </span></span> 
-                  <span>
-                  <div class="dropstart" style="margin-right: 20px;">
-                  <a class="btn btn-sm text-light" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fas fa-ellipsis-v"></i>  
-                  </a>
-                  <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                    <li><a class="btn btn-sm edit-btn" data-id="${expense.id}">Edit</a></li>
-                    <li><a class="btn btn-sm delete-btn" data-id="${expense.id}">Delete</a></li>
-                </ul>
-               </div>
-               </span>
-              </div>
-              
-              </div>
-
-
+                        <div class="d-flex justify-content-between align-items-center" style="margin-left: 20px;">
+                            <span style="font-size: 12px; color: #ffc107;">
+                                <b><i class="fas fa-wallet"></i> ${expense.description}</b>
+                                <span class="text-light"> ₹${expense.amount.toFixed(2)}<br>
+                                <span style="font-size: 12px; color: #32CD32;">${expenseDateFormatted} ${expense.label}</span>
+                                </span>
+                            </span> 
+                            <span>
+                                <div class="dropstart" style="margin-right: 20px;">
+                                    <a class="btn btn-sm text-light" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>  
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                        <li><a class="btn btn-sm edit-btn" data-id="${expense.id}">Edit</a></li>
+                                        <li><a class="btn btn-sm delete-btn" data-id="${expense.id}">Delete</a></li>
+                                    </ul>
+                                </div>
+                            </span>
+                        </div>
+                    </div>
                 `;
+
                 // Add edit functionality
                 listItem.querySelector(".edit-btn").addEventListener("click", (e) => {
                     const expenseId = e.target.getAttribute("data-id");
@@ -416,6 +466,7 @@ function loadUserExpenses() {
                             .then(() => {
                                 alert("Expense deleted successfully.");
                                 loadUserExpenses(); // Reload the list after deletion
+                                loadLabels();
                             })
                             .catch((error) => {
                                 console.error("Error deleting expense:", error);
@@ -442,6 +493,8 @@ function loadUserExpenses() {
 }
 
 
+
+
 // Open the modal with pre-filled data for editing
 function openEditModal(expenseId) {
             const expensesRef = firebase.database().ref(`expenses/${userId}`).child(expenseId);
@@ -450,6 +503,7 @@ function openEditModal(expenseId) {
             expensesRef.once("value", (snapshot) => {
                 const expense = snapshot.val();
                 expenseDescription.value = expense.description;
+                expenseLabel.value = expense.label;
                 expenseAmount.value = expense.amount;
                 expenseDate.value = expense.date;
 
@@ -463,83 +517,62 @@ function openEditModal(expenseId) {
         }
 
         // Function to save the edited expense or add a new one
-        addExpenseBtn.addEventListener("click", () => {
-            const description = expenseDescription.value.trim();
-            const amount = parseFloat(expenseAmount.value);
-            const date = expenseDate.value;
 
-            if (description && !isNaN(amount) && date && userId) {
-                // Disable the button to prevent multiple submissions
-                addExpenseBtn.disabled = true;
 
-                if (window.currentExpenseId) {
-                    // Update the existing expense in Firebase (Edit mode)
-                    const expensesRef = firebase.database().ref(`expenses/${userId}`).child(window.currentExpenseId);
-                    expensesRef.update({
-                        description: description,
-                        amount: amount,
-                        date: date
-                    }).then(() => {
-                        // Re-enable the button after updating the expense
-                        addExpenseBtn.disabled = false;
+addExpenseBtn.addEventListener("click", () => {
+    const description = expenseDescription.value.trim();
+    const label = expenseLabel.value.trim(); // Get label value
+    const amount = parseFloat(expenseAmount.value);
+    const date = expenseDate.value;
 
-                        // Clear input fields
-                        expenseDescription.value = "";
-                        expenseAmount.value = "";
-                        expenseDate.value = "";
+    if (description && label && !isNaN(amount) && date && userId) {
+        // Disable the button to prevent multiple submissions
+        addExpenseBtn.disabled = true;
 
-                        // Close modal after updating
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('expenseModal'));
-                        modal.hide();
-
-                        // Clear the stored expenseId
-                        window.currentExpenseId = null;
-                        
-                        // Reload the expenses list
-                        archiveExpenses();
-                        loadUserExpenses();
-                        resetForm();
-                    }).catch((error) => {
-                        console.error("Error updating expense:", error);
-                        addExpenseBtn.disabled = false;
-                    });
-                } else {
-                    // Add a new expense to Firebase (Add mode)
-                    const expensesRef = firebase.database().ref(`expenses/${userId}`).push();
-                    expensesRef.set({
-                        description: description,
-                        amount: amount,
-                        date: date
-                    }).then(() => {
-                        // Re-enable the button after adding the expense
-                        addExpenseBtn.disabled = false;
-
-                        // Clear input fields
-                        expenseDescription.value = "";
-                        expenseAmount.value = "";
-                        expenseDate.value = "";
-
-                        // Close modal after adding
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('expenseModal'));
-                        modal.hide();
-
-                       
-                        // Reload the expenses list
-                        archiveExpenses();
-                        loadUserExpenses();
-                        resetForm();
-                        loadDescriptionSuggestions(); // Reload suggestions after adding a new expense
-                    }).catch((error) => {
-                        console.error("Error adding expense:", error);
-                        addExpenseBtn.disabled = false;
-                    });
-                }
-            } else {
-                alert("Please enter all expense details.");
-            }
-
-          
-        });
+        if (window.currentExpenseId) {
+            // Update the existing expense in Firebase (Edit mode)
+            const expensesRef = firebase.database().ref(`expenses/${userId}`).child(window.currentExpenseId);
+            expensesRef.update({
+                description: description,
+                label: label, // Include label in the update
+                amount: amount,
+                date: date
+            }).then(() => {
+                addExpenseBtn.disabled = false;
+                resetForm();
+                const modal = bootstrap.Modal.getInstance(document.getElementById('expenseModal'));
+                modal.hide();
+                window.currentExpenseId = null;
+                loadUserExpenses();
+                loadLabels();
+            }).catch((error) => {
+                console.error("Error updating expense:", error);
+                addExpenseBtn.disabled = false;
+            });
+        } else {
+            // Add a new expense to Firebase (Add mode)
+            const expensesRef = firebase.database().ref(`expenses/${userId}`).push();
+            expensesRef.set({
+                description: description,
+                label: label, // Include label in the new entry
+                amount: amount,
+                date: date
+            }).then(() => {
+                addExpenseBtn.disabled = false;
+                resetForm();
+                const modal = bootstrap.Modal.getInstance(document.getElementById('expenseModal'));
+                modal.hide();
+                loadUserExpenses();
+                loadLabels();
+            }).catch((error) => {
+                console.error("Error adding expense:", error);
+                addExpenseBtn.disabled = false;
+            });
+        }
+    } else {
+        alert("Please enter all expense details.");
+    }
+});
 
         // Mouse wheel scroll for horizontal scrolling
        const monthFilter = document.getElementById("monthFilter");
@@ -590,6 +623,9 @@ document.getElementById("resetFiltersBtn").addEventListener("click", () => {
     document.getElementById("endDate").value = "";
     selectedMonth = null;
 
+    // Reset label filter
+    document.getElementById("labelFilter").value = ""; // Reset label filter to "All Labels"
+
     // Reset month button styling
     document.querySelectorAll("#monthFilter button").forEach((button) => {
         button.classList.remove("btn-dark");
@@ -598,6 +634,7 @@ document.getElementById("resetFiltersBtn").addEventListener("click", () => {
 
     loadUserExpenses(); // Reload expenses without filters
 });
+
 
 
 // Event listener for the filter fields
@@ -628,7 +665,7 @@ document.getElementById("endDate").addEventListener("input", loadUserExpenses);
                 });
             }
         });
-        console.log("Previous year records have been archived.");
+       // console.log("Previous year records have been archived.");
         loadUserExpenses(); // Reload to reflect any changes
     });
 }
@@ -671,6 +708,34 @@ function loadDescriptionSuggestions() {
         });
     });
 }
+
+// Function to load unique expense labels for suggestions
+function loadLabelSuggestions() {
+    const expensesRef = firebase.database().ref(`expenses/${userId}`);
+    const labelSuggestions = document.getElementById("labelSuggestions");
+
+    expensesRef.once("value", (snapshot) => {
+        const labels = new Set(); // Use a Set to avoid duplicates
+
+        snapshot.forEach((childSnapshot) => {
+            const expense = childSnapshot.val();
+            if (expense.label) {
+                labels.add(expense.label); // Store unique labels
+            }
+        });
+
+        // Clear previous suggestions
+        labelSuggestions.innerHTML = "";
+
+        // Add new suggestions to the datalist
+        labels.forEach((label) => {
+            const option = document.createElement("option");
+            option.value = label;
+            labelSuggestions.appendChild(option);
+        });
+    });
+}
+
 
 
     </script>
