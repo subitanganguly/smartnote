@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monthly Expenditure Tracker</title>
+    <title>Expense and savings Tracker</title>
+    <link rel="icon" type="image/png" href="logo.png">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="style/backStar.css" rel="stylesheet">
@@ -15,6 +16,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="style/sb.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
 </head>
 <style>
 
@@ -149,7 +151,7 @@
             <i class="fas fa-arrow-left"></i>
          </a>
             <!-- Notes Count Display -->
-           <h5 class="mt-3">Expenditure</h5>
+           <h5 class="mt-3">Expense and Savings</h5>
            <button id="logoutButton" class="btn btn-light" style="border-radius: 70px; font-size: small;">Log Out</button>
        </div>
     </nav>
@@ -167,7 +169,7 @@
             <input type="date" id="endDate" class="form-control mb-2 ms-2" placeholder="End Date" style="display: none;">
         </div>
     </div>
-    <select id="labelFilter" class="form-select mb-1 zoom">
+    <select id="labelFilter" class="form-select mb-1 zoom text-uppercase">
         <option value="">All Labels</option>
       </select>
     <!-- Month Filter (Horizontal Scrollable) -->
@@ -191,7 +193,7 @@
     <!-- Action Buttons -->
     <div id="buttonScroll" class="d-flex overflow-auto mb-1">
         <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal" data-bs-target="#expenseModal">
-            <i class="fas fa-plus"></i> <span class="text">Expense</span>
+            <i class="fas fa-plus"></i> <span class="text">Add</span>
         </button>
 
         <button id="resetFiltersBtn" class="btn btn-outline-light me-2 scroll">
@@ -201,6 +203,9 @@
         <a href="archive_expenditure.html" class="btn btn-outline-light me-2 scroll">
             <i class="fas fa-archive"></i> <span class="text">Archived</span>
         </a>
+        <button id="downloadExcelBtn" class="btn btn-outline-light me-2 scroll">
+            <i class="fas fa-download"></i> <span class="text">Download</span>
+        </button>
         <!-- Button to open the Calculator Modal -->
         <button type="button" class="btn btn-outline-light me-2 scroll" data-bs-toggle="modal" data-bs-target="#calculatorModal">
         <i class="fas fa-calculator"></i> Calculator
@@ -215,16 +220,16 @@
     <div class="modal-dialog">
         <div class="modal-content text-dark">
             <div class="modal-header">
-                <h5 class="modal-title" id="expenseModalLabel">Add Expense</h5>
+                <h5 class="modal-title" id="expenseModalLabel">Add</h5>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
                     <!-- Expense Description -->
-                    <input type="text" id="expenseDescription" class="form-control mb-2" placeholder="Expense description" list="descriptionSuggestions" autocomplete="off">
+                    <input type="text" id="expenseDescription" class="form-control mb-2 text-uppercase" placeholder="Expense description" list="descriptionSuggestions" autocomplete="off">
                     <datalist class="text-lowercase" id="descriptionSuggestions" style="background-color: #c3def8; border: 1px solid #c0c2c3; padding: 5px; max-height: 150px; overflow-y: auto; font-size: 14px;"></datalist>
                     
                     <!-- Label Input -->
-                    <input type="text" id="expenseLabel" list="labelSuggestions" class="form-control mb-2" placeholder="Label (e.g., Food, Travel)" autocomplete="off">
+                    <input type="text" id="expenseLabel" list="labelSuggestions" class="form-control mb-2 text-uppercase" placeholder="Label (e.g., Food, Travel)" autocomplete="off">
                     <datalist id="labelSuggestions" style="background-color: #c3def8; border: 1px solid #c0c2c3; padding: 5px; max-height: 150px; overflow-y: auto; font-size: 14px;"></datalist>         
                     <!-- Expense Amount -->
                     <input type="number" id="expenseAmount" class="form-control mb-2" placeholder="Amount" min="0">
@@ -246,7 +251,7 @@
 
 
         <!-- Total Amount -->
-        <h5 class="mt-3">Total Spent: ₹<span id="totalAmount">0.00</span></h5>
+        <h5 class="mt-3">Total: ₹<span id="totalAmount">0.00</span></h5>
         <!-- Loading Spinner -->
          <center>
         <div id="loadingSpinner" class="loader mt-3" style="display: none;" role="status">
@@ -435,7 +440,7 @@ function loadUserExpenses() {
                             <span style="font-size: 12px; color: #ffc107;">
                                 <b><i class="fas fa-wallet"></i> ${expense.description}</b>
                                 <span class="text-light"> ₹${expense.amount.toFixed(2)}<br>
-                                <span style="font-size: 12px; color: #32CD32;">${expenseDateFormatted} ${expense.label}</span>
+                                <span style="font-size: 12px; color: #32CD32;">${expenseDateFormatted}<span style="display: none;">${expense.label}</span> </span>
                                 </span>
                             </span> 
                             <span>
@@ -467,6 +472,8 @@ function loadUserExpenses() {
                                 alert("Expense deleted successfully.");
                                 loadUserExpenses(); // Reload the list after deletion
                                 loadLabels();
+                                loadDescriptionSuggestions(); // Load description suggestions
+                                loadLabelSuggestions();
                             })
                             .catch((error) => {
                                 console.error("Error deleting expense:", error);
@@ -545,6 +552,8 @@ addExpenseBtn.addEventListener("click", () => {
                 window.currentExpenseId = null;
                 loadUserExpenses();
                 loadLabels();
+                loadDescriptionSuggestions(); // Load description suggestions
+                loadLabelSuggestions();
             }).catch((error) => {
                 console.error("Error updating expense:", error);
                 addExpenseBtn.disabled = false;
@@ -564,6 +573,8 @@ addExpenseBtn.addEventListener("click", () => {
                 modal.hide();
                 loadUserExpenses();
                 loadLabels();
+                loadDescriptionSuggestions(); // Load description suggestions
+                loadLabelSuggestions();
             }).catch((error) => {
                 console.error("Error adding expense:", error);
                 addExpenseBtn.disabled = false;
@@ -736,6 +747,45 @@ function loadLabelSuggestions() {
     });
 }
 
+
+
+// Function to export expenses to Excel
+function downloadExcel() {
+    const expensesRef = firebase.database().ref(`expenses/${userId}`);
+    const expensesArray = [];
+
+    expensesRef.once("value", (snapshot) => {
+        snapshot.forEach((childSnapshot) => {
+            const expense = childSnapshot.val();
+            const expenseDate = new Date(expense.date);
+            const expenseDateFormatted = expenseDate.toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "short",
+                year: "numeric"
+            });
+
+            expensesArray.push({
+                "Title": expense.description,
+                "Amount (₹)": expense.amount.toFixed(2),
+                "Date": expenseDateFormatted,
+                "Label": expense.label || "No Label"
+            });
+        });
+
+        // Create a worksheet from the expenses array
+        const ws = XLSX.utils.json_to_sheet(expensesArray);
+
+        // Create a new workbook and append the worksheet
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Expenses");
+
+        // Trigger the download of the Excel file
+        XLSX.writeFile(wb, "Expenses_List.xlsx");
+    });
+}
+
+// Add event listener to the download button
+document.getElementById("downloadExcelBtn").addEventListener("click", downloadExcel);
 
 
     </script>
