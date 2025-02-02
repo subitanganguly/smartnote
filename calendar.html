@@ -188,6 +188,29 @@
                     </div>
                 </div>
             </div>
+
+          
+<!-- Modal for Event Alert (For Today's Events) -->
+<div class="modal fade" id="eventAlertModal" tabindex="-1" aria-labelledby="eventAlertModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content text-dark glass" style="background-color: #004949;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eventAlertModalLabel">Today's Events</h5>
+            </div>
+            <div class="modal-body" id="alertEventContent">
+                <!-- Dynamic event content will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="markAllAsReadBtn" style="display:none;">Mark All as Read</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
         </div>
     </div>
 
@@ -320,10 +343,86 @@
 
                 // Update the event list
                 updateEventList(events);
+
+                // Check if there's any event for today and show the alert
+                checkTodayEvent(events);
             });
         }
     });
 }
+
+function checkTodayEvent(events) {
+    const today = new Date().toISOString().split('T')[0]; // Get today's date in 'YYYY-MM-DD' format
+    const todayEvents = events.filter(event => event.date === today); // Filter events for today
+
+    if (todayEvents.length > 0) {
+        // Check if any of the events have been marked as read before
+        let newEvents = todayEvents.filter(event => !localStorage.getItem(`eventMarkedAsRead-${event.id}`));
+
+        if (newEvents.length > 0) {
+            let modalContent = ''; // Clear modal content
+
+            // Build modal content for all today's events
+            newEvents.forEach(event => {
+                modalContent += `
+                    <div>
+                        <strong>Title: </strong><span>${event.title}</span><br>
+                        <strong>Description: </strong><span>${event.description}</span><br>
+                        <strong>Date: </strong><span>${event.date}</span><br>
+                        <strong>Time: </strong><span>${event.time}</span><br><br>
+                        <button class="btn btn-primary markAsReadBtn" data-event-id="${event.id}">Mark as Read</button>
+                        <hr>
+                    </div>
+                `;
+            });
+
+            // Inject the content into the modal body
+            document.getElementById('alertEventContent').innerHTML = modalContent;
+
+            // Show the "Mark All as Read" button if there are multiple events
+            if (newEvents.length > 1) {
+                document.getElementById('markAllAsReadBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('markAllAsReadBtn').style.display = 'none';
+            }
+
+            // Show the modal
+            $('#eventAlertModal').modal('show');
+        }
+    }
+}
+
+// "Mark as Read" button functionality (for each event)
+document.addEventListener('click', function (e) {
+    if (e.target && e.target.classList.contains('markAsReadBtn')) {
+        const eventId = e.target.getAttribute('data-event-id');
+        
+        // Mark the event as read in localStorage
+        localStorage.setItem(`eventMarkedAsRead-${eventId}`, 'true');
+
+        // Close the modal
+        $('#eventAlertModal').modal('hide');
+    }
+});
+
+// "Mark All as Read" button functionality
+document.getElementById('markAllAsReadBtn').addEventListener('click', () => {
+    const eventItems = document.querySelectorAll('.markAsReadBtn');
+    
+    eventItems.forEach(button => {
+        const eventId = button.getAttribute('data-event-id');
+        
+        // Mark the event as read in localStorage
+        localStorage.setItem(`eventMarkedAsRead-${eventId}`, 'true');
+    });
+
+    // Close the modal
+    $('#eventAlertModal').modal('hide');
+});
+
+
+
+
 
 function updateEventList(events) {
     const eventListEl = document.getElementById('eventList');
