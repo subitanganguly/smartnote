@@ -27,13 +27,13 @@
     }
 
     .glass2 {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 10px;
-        padding: 10px;
-        margin-bottom: 20px;
-    }
-
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(29, 129, 146, 0.438));
+    border-radius: 8px;
+    border: 3px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    padding: 1rem; /* Optional: Adds padding to space the content from the borders */
+    border-top-right-radius: 40px;
+}
     .fc-toolbar-title {
         color: white;
     }
@@ -72,8 +72,23 @@
     font-weight: bold;
     font-size: 16px; /* Adjust size if needed */
 }
+/* Change the text color of all Sunday dates */
+.fc .fc-daygrid-day.fc-day-sun a {
+    color: red !important;
+    font-weight: bold;
+}
 
-
+/* Change the background color of today's date */
+.fc-day-today {
+    background: rgba(0, 255, 47, 0.3) !important; /* Change to your desired color */
+    border: 2px solid rgb(2, 255, 15) !important; /* Optional: Add a border */
+    border-radius: 5px; /* Optional: Round corners */
+}
+.btn-outline-primary{
+    padding: 5px;
+    font-size: 15px;
+    border-radius: 10px;
+}
 </style>
 <body>
     <div class="area">
@@ -103,12 +118,46 @@
                 </div>
             </div>
 
-            <!-- Calendar Container -->
-            <div id="calendar" class="glass2"></div>
+            <!-- Navigation Buttons (Prev, Next, Today) -->
+    <div class="calendar-controls">
+        
+    </div>
+
+    <!-- Calendar Title -->
+    <div class="glass mb-2">
+        <div class="row align-items-center" style="background-color: #004949; border-radius: 10px; margin-left: 2px; margin-right: 2px;">
+            <!-- Column for Calendar Title -->
+            <div class="col">
+                <h2 id="calendarTitle" ></h2>
+            </div>
+    
+            <!-- Column for Navigation Buttons -->
+            <div class="col text-center">
+                <button class="btn btn-outline-light" id="prevBtn"><</button>
+                <button class="btn btn-outline-light" id="todayBtn">Today</button>
+                <button class="btn btn-outline-light" id="nextBtn">></button>
+            </div>
+        </div>
+         <!-- Calendar Container -->
+         <div id="calendar" class=""></div>
+        <!-- View Buttons (Month, Week, Day) -->
+    <div class="calendar-controls mt-2 text-center">
+        <button class="btn btn-outline-light" onclick="calendar.changeView('dayGridMonth')">Month</button>
+        <button class="btn btn-outline-light" onclick="calendar.changeView('timeGridWeek')">Week</button>
+        <button class="btn btn-outline-light" onclick="calendar.changeView('timeGridDay')">Day</button>
+    </div>
+    </div>
+    
+   
+
+    
+
+
+           
 
             <!-- Event List Container -->
-            <div id="eventListContainer" class="glass2 mt-3 p-3">
-                <h5 class="text-light">Event List</h5>
+            <div id="eventListContainer" class="glass mt-3 p-3">
+                <h5 class="text-light" style="background-color: #004949; padding: 5px; border-radius: 10px;">Event List</h5>
                 <div id="eventLoader" class="text-center">
                     <div class="spinner-border text-light" role="status">
                         <span class="sr-only">Loading...</span>
@@ -119,9 +168,9 @@
 
 
             <!-- Modal for Adding/Editing Events -->
-            <div class="modal fade glass" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+            <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
-                    <div class="modal-content text-dark">
+                    <div class="modal-content text-dark glass" style="background-color: #004949;">
                         <div class="modal-header">
                             <h5 class="modal-title" id="eventModalLabel">Add Event</h5>
                         </div>
@@ -157,44 +206,83 @@
             const calendarEl = document.getElementById('calendar');
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                height: 500, // Adjust height as needed (default is full height)
+                height: 500, // Adjust height as needed
                 headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    left: '',
+                    center: '',
+                    right: ''
                 },
                 events: [], // Events will be loaded from Firebase
+                datesSet: function (info) {
+                    document.getElementById('calendarTitle').innerText = info.view.title;
+                },
                 dateClick: function (info) {
-                    // Open modal to add event on date click
                     currentEventId = null;
                     document.getElementById('eventTitle').value = '';
                     document.getElementById('eventDescription').value = '';
                     document.getElementById('eventDate').value = info.dateStr;
                     document.getElementById('eventTime').value = '12:00';
+                    document.getElementById('deleteEventBtn').style.display = 'none';
                     $('#eventModal').modal('show');
                 },
-                eventClick: function (info) {
-                    currentEventId = info.event.id;
-                    document.getElementById('eventTitle').value = info.event.title;
-                    document.getElementById('eventDescription').value = info.event.extendedProps.description || '';
-                    document.getElementById('eventDate').value = info.event.start.toISOString().split('T')[0];
-                    document.getElementById('eventTime').value = info.event.start.toTimeString().split(' ')[0].substring(0, 5);
-                    
-                    // Show the delete button only for existing events
-                    document.getElementById('deleteEventBtn').style.display = 'inline-block';
-                    
-                    $('#eventModal').modal('show');
+                // eventClick: function (info) {
+                //     currentEventId = info.event.id;
+                //     document.getElementById('eventTitle').value = info.event.title;
+                //     document.getElementById('eventDescription').value = info.event.extendedProps.description || '';
+                //     const eventDate = new Date(info.event.start);
+                //     eventDate.setMinutes(eventDate.getMinutes() - eventDate.getTimezoneOffset()); 
+                //     document.getElementById('eventDate').value = eventDate.toISOString().split('T')[0];
+
+                //     document.getElementById('eventTime').value = info.event.start.toTimeString().split(' ')[0].substring(0, 5);
+
+                //     document.getElementById('deleteEventBtn').style.display = 'inline-block';
+                //     $('#eventModal').modal('show');
+                // }
+                eventClick: function(info) {
+                currentEventId = info.event.id;
+                document.getElementById('eventTitle').value = info.event.title;
+                document.getElementById('eventDescription').value = info.event.extendedProps.description || '';
+
+                // Format the event date
+                const eventDate = new Date(info.event.start);
+                eventDate.setMinutes(eventDate.getMinutes() - eventDate.getTimezoneOffset());
+                document.getElementById('eventDate').value = eventDate.toISOString().split('T')[0];
+
+                // Fix time handling
+                let eventTime = info.event.extendedProps.time || info.event.start.toTimeString().split(' ')[0].substring(0, 5);
+                
+                // If the event data has a time field in Firebase, use that
+                if (info.event.extendedProps.time) {
+                    // Use the time from the Firebase event (assumed format is "HH:mm")
+                    const [hours, minutes] = info.event.extendedProps.time.split(":");
+                    eventTime = `${hours}:${minutes}`;
                 }
 
+                document.getElementById('eventTime').value = eventTime;
+
+                document.getElementById('deleteEventBtn').style.display = 'inline-block';
+                $('#eventModal').modal('show');
+            }
+
             });
+
             calendar.render();
             loadEvents();
+
+            // Navigation buttons event listeners
+            document.getElementById('prevBtn').addEventListener('click', function () {
+                calendar.prev();
+            });
+            document.getElementById('todayBtn').addEventListener('click', function () {
+                calendar.today();
+            });
+            document.getElementById('nextBtn').addEventListener('click', function () {
+                calendar.next();
+            });
         });
 
         // Load events from Firebase
-        function loadEvents() {
-
-
+    function loadEvents() {
     const eventListEl = document.getElementById('eventList');
     const eventLoader = document.getElementById('eventLoader');
 
@@ -391,7 +479,7 @@ function deleteEvent(eventId) {
             if (window.history.length > 1) {
                 window.history.back();
             } else {
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';
             }
         }
     </script>
