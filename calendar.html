@@ -193,14 +193,14 @@
 <!-- Modal for Event Alert (For Today's Events) -->
 <div class="modal fade" id="eventAlertModal" tabindex="-1" aria-labelledby="eventAlertModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content text-dark glass" style="background-color: #004949;">
-            <div class="modal-header">
+        <div class="modal-content text-light glass" style="background-color: #004949;">
+            <div class="modal-header" style="justify-content: center;">
                 <h5 class="modal-title" id="eventAlertModalLabel">Today's Events</h5>
             </div>
             <div class="modal-body" id="alertEventContent">
                 <!-- Dynamic event content will be inserted here -->
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" style="justify-content: center;">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-success" id="markAllAsReadBtn" style="display:none;">Mark All as Read</button>
             </div>
@@ -368,9 +368,9 @@ function checkTodayEvent(events) {
                     <div>
                         <strong>Title: </strong><span>${event.title}</span><br>
                         <strong>Description: </strong><span>${event.description}</span><br>
-                        <strong>Date: </strong><span>${event.date}</span><br>
-                        <strong>Time: </strong><span>${event.time}</span><br><br>
-                        <button class="btn btn-primary markAsReadBtn" data-event-id="${event.id}">Mark as Read</button>
+                        <strong>Date: </strong><span>${event.date}</span>
+                        <strong>Time: </strong><span>${event.time}</span><br>
+                        <button class="btn btn-sm btn-primary markAsReadBtn" data-event-id="${event.id}">Mark as Read</button>
                         <hr>
                     </div>
                 `;
