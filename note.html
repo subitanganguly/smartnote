@@ -140,9 +140,10 @@ input:checked + .slider:before {
         <button id="importantFilterBtn" class="btn btn-outline-warning" style="border-radius: 20px; font-size: small">
         <i class="fas fa-star"></i> Important
         </button>
-        <button id="toggleViewBtn" class="btn btn-outline-info hide" style="border-radius: 20px; font-size: small">
+        <button id="toggleViewBtn" class="btn btn-outline-info d-none d-md-inline-block" style="border-radius: 20px; font-size: small">
             <i class="fas fa-th-large"></i> Grid View
         </button>
+        
         
         <P class="mt-1">Your Notes [<span class="text-light" id="noteCount">0</span>]</P>
 
@@ -156,6 +157,10 @@ input:checked + .slider:before {
                 </span>
                 <input id="searchInput" class="form-control" type="text" placeholder="Search notes...">
             </div>
+            
+            <select id="labelFilter" class="form-control mt-2">
+                <option value="">All Labels</option>
+            </select>
             
         </div>
         
@@ -171,6 +176,8 @@ input:checked + .slider:before {
             </div>
             <div class="modal-body">
                 <input type="text" id="modalNoteTitle" class="form-control mb-3" placeholder="Enter note title">
+                <input type="text" id="modalNoteLabel" class="form-control mb-3" placeholder="Enter note label">
+                <datalist id="labelSuggestions"></datalist>
                 <textarea id="modalNoteInput" class="form-control" rows="17" placeholder="Write your note..."></textarea>
             </div>
             <div class="modal-footer" style="justify-content: center;">
@@ -233,10 +240,11 @@ input:checked + .slider:before {
         });
 
         // Save note or update edited note
-document.getElementById("saveNoteBtn").addEventListener("click", () => {
+        document.getElementById("saveNoteBtn").addEventListener("click", () => {
     const noteTitle = document.getElementById("modalNoteTitle").value;
+    const noteLabel = document.getElementById("modalNoteLabel").value; // Get label input
     const noteText = document.getElementById("modalNoteInput").value;
-    
+
     if (noteTitle.trim() !== "" && noteText.trim() !== "") {
         const userId = firebase.auth().currentUser.uid;
         const notesRef = firebase.database().ref("notes/" + userId);
@@ -246,24 +254,27 @@ document.getElementById("saveNoteBtn").addEventListener("click", () => {
             // Update existing note
             notesRef.child(editNoteId).update({
                 title: noteTitle,
+                label: noteLabel, // Save label
                 text: noteText
             });
         } else {
             // Add new note
             notesRef.push().set({
                 title: noteTitle,
+                label: noteLabel, // Save label
                 text: noteText,
                 date: currentDate
             });
         }
 
-          // Reset form fields after saving or updating
-          document.getElementById("modalNoteTitle").value = "";  // Clear note title
-        document.getElementById("modalNoteInput").value = "";  // Clear note content
+        // Reset form fields after saving
+        document.getElementById("modalNoteTitle").value = "";
+        document.getElementById("modalNoteLabel").value = ""; // Clear label input
+        document.getElementById("modalNoteInput").value = "";
 
         $('#addNoteModal').modal('hide');
     } else {
-        alert("Please enter both a title and text for the note.");
+        alert("Please enter a title, label, and text for the note.");
     }
 });
 
@@ -283,20 +294,47 @@ document.getElementById("saveNoteBtn").addEventListener("click", () => {
         });
 
 
-        // Updated renderNotes function with important notes filtering and search for both title and text
-        function renderNotes(filter = "") {
-    notesList.innerHTML = ""; // Clear notes list
-    const filteredNotes = notesArray.filter(note => {
-        const noteTitle = (note.val().title || "").toLowerCase();  // Safe check for title
-        const noteText = (note.val().text || "").toLowerCase();    // Safe check for text
-        const matchesSearch = noteTitle.includes(filter.toLowerCase()) || noteText.includes(filter.toLowerCase()); // Match filter with both title and text
-        const isImportant = note.val().important;
-        return matchesSearch && (!showOnlyImportant || isImportant);
+        function extractUniqueLabels() {
+    const labels = new Set(); // Use Set to store unique labels
+
+    notesArray.forEach(note => {
+        const label = note.val().label || ""; // Ensure label exists
+        if (label.trim() !== "") {
+            labels.add(label.trim());
+        }
     });
 
-    noteCount.textContent = filteredNotes.length; // Update notes count
+    const labelFilter = document.getElementById("labelFilter");
+    labelFilter.innerHTML = '<option value="">All Labels</option>'; // Reset dropdown
+    labels.forEach(label => {
+        const option = document.createElement("option");
+        option.value = label;
+        option.textContent = label;
+        labelFilter.appendChild(option);
+    });
+}
 
-    // Render each filtered note
+document.getElementById("labelFilter").addEventListener("change", () => {
+    renderNotes(searchInput.value);
+});
+
+        // Updated renderNotes function with important notes filtering and search for both title and text
+        function renderNotes(filter = "") {
+    notesList.innerHTML = ""; 
+    const selectedLabel = document.getElementById("labelFilter").value;
+
+    const filteredNotes = notesArray.filter(note => {
+        const noteTitle = (note.val().title || "").toLowerCase();
+        const noteText = (note.val().text || "").toLowerCase();
+        const noteLabel = (note.val().label || "").trim(); // Ensure label exists
+        const matchesSearch = noteTitle.includes(filter.toLowerCase()) || noteText.includes(filter.toLowerCase());
+        const matchesLabel = selectedLabel === "" || noteLabel === selectedLabel; // Match selected label
+        const isImportant = note.val().important;
+        return matchesSearch && matchesLabel && (!showOnlyImportant || isImportant);
+    });
+
+    noteCount.textContent = filteredNotes.length;
+
     filteredNotes.forEach((childSnapshot) => {
         const noteData = childSnapshot.val();
         const noteId = childSnapshot.key;
@@ -312,7 +350,7 @@ document.getElementById("saveNoteBtn").addEventListener("click", () => {
             hour12: true  // Use 12-hour format (AM/PM)
         });
 
-        const listItem = document.createElement("li");
+        const listItem = document.createElement("div");
         listItem.classList.add("group-item");
         if (noteData.important) listItem.classList.add("important-note");
 
@@ -381,6 +419,7 @@ document.getElementById("saveNoteBtn").addEventListener("click", () => {
             editNoteId = noteId;  // Store note ID for editing
             document.getElementById("modalNoteTitle").value = noteData.title;  // Pre-fill modal with note title
             document.getElementById("modalNoteInput").value = noteData.text;  // Pre-fill modal with note text
+            document.getElementById("modalNoteLabel").value = noteData.label || "";  // Pre-fill modal with note label
             $('#addNoteModal').modal('show');
         });
 
@@ -442,6 +481,7 @@ document.getElementById("saveNoteBtn").addEventListener("click", () => {
                     snapshot.forEach((childSnapshot) => {
                         notesArray.unshift(childSnapshot);
                     });
+                    extractUniqueLabels(); // Populate labels dynamically
                     renderNotes(); // Render the notes with the current filter
                 });
             } else {
@@ -449,7 +489,7 @@ document.getElementById("saveNoteBtn").addEventListener("click", () => {
             }
        
 
-                notesList.appendChild(listItem);
+               // notesList.appendChild(listItem);
             });
         
 
@@ -498,6 +538,16 @@ toggleViewBtn.addEventListener("click", () => {
 
 
     </script>
-  
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Reset form fields when the modal is closed
+        $('#addNoteModal').on('hidden.bs.modal', function () {
+            document.getElementById("modalNoteTitle").value = "";
+            document.getElementById("modalNoteLabel").value = "";
+            document.getElementById("modalNoteInput").value = "";
+        });
+    });
+</script>
+
 </body>
 </html>
