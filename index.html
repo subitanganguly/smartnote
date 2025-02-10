@@ -11,10 +11,7 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="style/backStar.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
-    <!-- Firebase SDK -->
+   
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -91,31 +88,49 @@ body{
         
         
         <!-- Link to Your Notes Page -->
-        <a href="#" id="noteButton" class="card-link caveat">
+        <a href="note.html"  class="card-link caveat">
             <div class="card-body glass zoom text-light mb-2">
                 <i class="fas fa-book icons" style="color: aqua;"></i> <!-- Font Awesome icon for a note -->
                 <h5 class="card-title text-center mt-3" style="color: rgb(109, 214, 214);">Your Notes</h5>
             </div>
         </a>
         <!-- Link to Your expenditure Page -->
-        <a href="#" id="expenditureButton" class="card-link caveat">
+        <a href="expenditure.html"  class="card-link caveat">
             <div class="card-body glass zoom text-light mb-2">
                 <i class="fas fa-wallet icons" style="color: aquamarine;"></i>                
                 <h5 class="card-title text-center mt-3" style="color: rgb(139, 219, 192);">Expenditure</h5>
             </div>
         </a>
-         <!-- Link to Your PDF Page -->
-         <a href="#" id="pdfButton" class="card-link caveat">
+        <a href="calendar.html"  class="card-link caveat">
             <div class="card-body glass zoom text-light mb-2">
+                <i class="fas fa-calendar-alt icons" style="color: rgb(218, 30, 221);"></i>               
+                <h5 class="card-title text-center mt-3" style="color:rgba(252, 6, 240, 0.874);">Calendar</h5>
+            </div>
+        </a>
+         <!-- Link to Your PDF Page -->
+         <a href="pdf.html" class="card-link caveat d-none d-lg-inline-block w-100">
+            <div class="card-body glass zoom text-light mb-2 ">
                 <i class="fas fa-file-pdf icons" style="color: rgb(74, 221, 30);"></i>                
                 <h5 class="card-title text-center mt-3" style="color:rgba(50, 219, 28, 0.532);">Convert to PDF</h5>
             </div>
         </a>
+        <a href="QR/index.html" class="card-link caveat d-none d-lg-inline-block w-100">
+            <div class="card-body glass zoom text-light mb-2 ">
+                <i class="fas fa-indian-rupee-sign icons" style="color: rgb(212, 221, 30);"></i>               
+                <h5 class="card-title text-center mt-3" style="color:rgba(219, 171, 28, 0.532);">UPI ID to Qr</h5>
+            </div>
+        </a>
         <!-- Link to Your expenditure Page -->
-        <a href="#" id="feedback" class="card-link caveat">
+        <a href="feedback.html" class="card-link caveat">
             <div class="card-body glass zoom text-light mb-2 ">
                 <i class="fas fa-thumbs-up icons" style="color: rgb(188, 219, 76);"></i>                
                 <h5 class="card-title text-center mt-3" style="color: rgb(220, 240, 151);">Feedback</h5>
+            </div>
+        </a>
+        <a href="admin_report.html" class="card-link caveat d-none" id="adminLink">
+            <div class="card-body glass zoom text-light mb-2">
+                <i class="fas fa-database icons" style="color: deeppink;"></i>
+                <h5 class="card-title text-center mt-3" style="color: rgb(230, 88, 163);">App Users</h5>
             </div>
         </a>
       
@@ -145,42 +160,44 @@ body{
   
     // Firebase Authentication State Listener
     firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-            currentUser = user;
+    if (user) {
+        currentUser = user;
 
-            // Check user role from localStorage
-            const userRole = localStorage.getItem("userRole");
-            if (userRole === "admin") {
-                // Redirect admins to the admin dashboard
-                window.location.href = "admin_dashboard.html";
-                return;
-            }
-
-            // Extract user ID
-            const userId = user.uid;
-
-            // Get the current date and time
-            const now = new Date();
-            const formattedDateTime = now.toLocaleString(); // e.g., "11/20/2024, 3:45:20 PM"
-
-            // Update `lastUse` in Firebase Database
-            firebase.database().ref(`users/${userId}`).update({
-                lastUse: now.getTime(), // Unix timestamp
-                lastUseFormatted: formattedDateTime // Human-readable format
-            }).then(() => {
-                console.log("Last use timestamp updated successfully.");
-            }).catch((error) => {
-                console.error("Error updating last use timestamp:", error);
-            });
-
-            // Display greeting
-            const firstName = user.displayName ? user.displayName.split(' ')[0] : 'User';
-            document.getElementById("greetingMessage").innerHTML = `Hello <span class="" style="color: cyan;"><b>${firstName}</b>,</span> Welcome`;
-        } else {
-            // Redirect to login page if not authenticated
-            window.location.href = "login.html";
+        // Check user role from localStorage
+        const userRole = localStorage.getItem("userRole");
+        if (userRole === "admin") {
+            document.getElementById("adminLink").classList.remove("d-none");
         }
-    });
+
+        // Extract user ID
+        const userId = user.uid;
+
+        // Get the first name, fallback to 'User' if displayName is null
+        const firstName = user.displayName ? user.displayName.split(' ')[0] : 'User';
+
+        // Ensure greetingMessage element exists before updating it
+        const greetingElement = document.getElementById("greetingMessage");
+        if (greetingElement) {
+            greetingElement.innerHTML = `Hello <span class="" style="color: cyan;"><b>${firstName}</b>,</span> Welcome`;
+        } else {
+            console.error("Element with ID 'greetingMessage' not found.");
+        }
+
+        // Update `lastUse` in Firebase Database
+        firebase.database().ref(`users/${userId}`).update({
+            lastUse: Date.now(),
+            lastUseFormatted: new Date().toLocaleString()
+        }).then(() => {
+            console.log("Last use timestamp updated successfully.");
+        }).catch((error) => {
+            console.error("Error updating last use timestamp:", error);
+        });
+
+    } else {
+        window.location.href = "login.html"; // Redirect to login if not authenticated
+    }
+});
+
 
     // Log out function
     document.getElementById("logoutButton").addEventListener("click", () => {
@@ -190,72 +207,6 @@ body{
             alert("Error logging out: " + error.message);
         });
     });
-
-    // Check if user is logged in before navigating to other pages
-    document.getElementById("noteButton").addEventListener("click", () => {
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                window.location.href = "note.html";
-            } else {
-                alert("Please log in to access the To-Do List.");
-                window.location.href = "login.html";
-            }
-        });
-    });
-
-    document.getElementById("feedback").addEventListener("click", () => {
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                window.location.href = "feedback.html";
-            } else {
-                alert("Please log in to access the feedback page.");
-                window.location.href = "login.html";
-            }
-        });
-    });
-
-    document.getElementById("expenditureButton").addEventListener("click", () => {
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                window.location.href = "expenditure.html";
-            } else {
-                alert("Please log in to access the expenditure notes.");
-                window.location.href = "login.html";
-            }
-        });
-    });
-
-    document.getElementById("pdfButton").addEventListener("click", () => {
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                window.location.href = "pdf.html";
-            } else {
-                alert("Please log in to access the PDF notes.");
-                window.location.href = "login.html";
-            }
-        });
-    });
-
-// Reference to the Firebase database
-const dbRef = firebase.database().ref('appUpdate');
-
-// Fetch appUpdate data in real-time
-dbRef.on("value", (snapshot) => {
-    const appUpdate = snapshot.val();
-    const linkElement = document.getElementById("appUpdateLink");
-
-    // Check if appUpdate exists and handle `status` as boolean or string
-    if (appUpdate && (appUpdate.status === true || appUpdate.status === "true")) {
-        // Set the href attribute of the link
-        linkElement.href = appUpdate.link;
-
-        // Show the modal
-        $('#updateModal').modal('show'); // Using jQuery to show modal
-    } else {
-        // Hide the modal if it's shown
-        $('#updateModal').modal('hide');
-    }
-});
 
 
 
