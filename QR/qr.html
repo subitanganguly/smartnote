@@ -55,7 +55,7 @@
             </button>
 
             <!-- WhatsApp Share Button -->
-            <a id="whatsappButton" href="#" target="_blank" class="btn btn-success">
+            <a id="whatsappButton" href="#" target="_blank" class="btn btn-success d-none d-lg-inline-block">
                 <i class="fab fa-whatsapp"></i> 
             </a>
 
@@ -150,19 +150,34 @@ whatsappButton.onclick = function() {
 
 
 
-                // Set up the copy QR functionality
-                const copyButton = document.getElementById('copyButton');
-                copyButton.style.display = 'inline-block'; // Make the copy button visible
-                copyButton.onclick = function() {
-                    navigator.clipboard.writeText(qrCodeUrl).then(function() {
-                        alert("QR Code URL copied to clipboard!");
-                    }).catch(function(error) {
-                        console.error("Failed to copy QR code URL", error);
-                    });
-                };
-            } else {
-                alert("No QR code found!");
+             // Set up the copy QR functionality
+const copyButton = document.getElementById('copyButton');
+copyButton.style.display = 'inline-block'; // Make the copy button visible
+
+copyButton.onclick = function() {
+    const img = document.querySelector("#qrCodeContainer img"); // Get the QR code image
+
+    if (!img) {
+        alert("No QR Code image found!");
+        return;
+    }
+
+    fetch(img.src)
+        .then(response => response.blob()) // Convert image to a Blob
+        .then(blob => {
+            const item = new ClipboardItem({ [blob.type]: blob });
+            navigator.clipboard.write([item]).then(() => {
+                alert("QR Code image copied to clipboard!");
+            }).catch(error => {
+                console.error("Failed to copy QR code image", error);
+            });
+        })
+        .catch(error => {
+            console.error("Error fetching QR code image", error);
+        });
+};
             }
+
         });
     </script>
 </body>
