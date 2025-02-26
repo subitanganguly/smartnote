@@ -7,6 +7,9 @@
     <link rel="icon" type="image/png" href="info.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
 </head>
 <style>
   /* Floating Button Styling */
@@ -17,53 +20,219 @@
             display: none; /* Initially hidden */
             z-index: 1000;
             border-radius: 50px;
-            padding: 10px;
+           
         }
 
 
     body {
-    background: linear-gradient(to right, #c9f3f89d, #ffe8e8); /* Light blue to white */
+    background: linear-gradient(to right, #88f3ff9d, #ffb5ea); /* Light blue to white */
     min-height: 100vh; /* Ensures full height */
+    font-family: "Josefin Sans", serif;
+    font-optical-sizing: auto;
+    overflow: auto;
+    background: linear-gradient(315deg, rgba(101, 0, 94, 0.368) 3%, rgba(60, 133, 206, 0.434) 38%, rgba(48, 238, 225, 0.39) 68%, rgba(255, 25, 25, 0.336) 98%);
+    animation: gradient 15s ease infinite;
+    background-size: 400% 400%;
+    background-attachment: fixed;
+  
+    }
+
+    @keyframes gradient {
+    0% {
+        background-position: 0% 0%;
+    }
+    50% {
+        background-position: 100% 100%;
+    }
+    100% {
+        background-position: 0% 0%;
+    }
 }
 
-tr:nth-child(even) {
-  background-color: #00c00023;
+.wave {
+    background: rgb(255 255 255 / 25%);
+    border-radius: 1000% 1000% 0 0;
+    position: fixed;
+    width: 200%;
+    height: 12em;
+    animation: wave 10s -3s linear infinite;
+    transform: translate3d(0, 0, 0);
+    opacity: 0.8;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
 }
 
-table {
-  border-collapse: collapse;
-  width: 100%;
+.wave:nth-of-type(2) {
+    bottom: -1.25em;
+    animation: wave 18s linear reverse infinite;
+    opacity: 0.8;
 }
 
-th, td {
-  text-align: left;
-  padding: 8px;
-  border: 1px solid #008b74;
+.wave:nth-of-type(3) {
+    bottom: -2.5em;
+    animation: wave 20s -1s reverse infinite;
+    opacity: 0.9;
 }
 
-/* Center align text in the first column */
-th:first-child, td:first-child {
-  text-align: center;
+@keyframes wave {
+    2% {
+        transform: translateX(1);
+    }
+
+    25% {
+        transform: translateX(-25%);
+    }
+
+    50% {
+        transform: translateX(-50%);
+    }
+
+    75% {
+        transform: translateX(-25%);
+    }
+
+    100% {
+        transform: translateX(1);
+    }
 }
 
-/* Apply styles for mobile view */
-@media (max-width: 768px) {
-  th, td {
-    font-size: 12px;
-  }
+    tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.2); /* Semi-transparent white */
+    backdrop-filter: blur(10px); /* Blur effect */
+    -webkit-backdrop-filter: blur(10px); /* Safari support */
+    box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.1),inset 1px 1px 10px 5px rgba(99, 2, 255, 0.36) ; /* Soft shadow */
+    border-radius: 5px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth effect */
+    }
+
+    tr:nth-child(odd):nth-child(n+2) {
+    background: rgba(255, 255, 255, 0.2); /* Semi-transparent white */
+    backdrop-filter: blur(10px); /* Blur effect */
+    -webkit-backdrop-filter: blur(10px); /* Safari support */
+    box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.1),inset 1px 1px 10px 5px rgba(2, 124, 255, 0.36) ; /* Soft shadow */
+    border-radius: 5px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth effect */
+    }
+
+    .cstr {
+    background: rgba(255, 255, 255, 0.2); /* Semi-transparent white */
+    backdrop-filter: blur(10px); /* Blur effect */
+    -webkit-backdrop-filter: blur(10px); /* Safari support */
+    box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.1),inset 1px 1px 10px 5px rgba(2, 124, 255, 0.36) ; /* Soft shadow */
+    border-radius: 5px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth effect */
+    }
+
+        /* Hover effect */
+    tr:nth-child(even):hover,
+    tr:nth-child(odd):nth-child(n+2):hover,.cstr:hover {
+        transform: scale(1.01); /* Zoom in */
+        box-shadow: inset 1px 1px 15px 7px rgba(2, 27, 255, 0.53); /* Stronger shadow */
+        color: #f70088;
+    }
+
+
+    table {
+    width: 100%;
+    border-collapse: separate; /* Required for border-spacing to work */
+    border-spacing: 0 5px; /* Adds 10px vertical space between rows */
+    }
+
+    th, td {
+    text-align: left;
+    padding: 4px;
+    }
+
+    /* Center align text in the first column */
+    th:first-child, td:first-child {
+    text-align: center;
+    }
+
+    /* Apply styles for mobile view */
+    @media (max-width: 768px) {
+    th, td {
+        font-size: 12px;
+        padding: 4px;
+    }
+    .btn-warning{
+        font-size: 10px;
+    }
+    .btn-primary{
+        font-size: 10px;
+    }
+    }
+    #searchInput {
+    width: 100%;
+    padding: 7px;
+    font-size: 16px;
+    border: 2px solid #ddd;
+    border-radius: 15px;
+    transition: all 0.3s ease-in-out;
+    outline: none;
 }
+
+#searchInput:hover {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+}
+
+#searchInput:focus {
+    border-color: #1d0056;
+    box-shadow: 0 0 12px rgba(0, 86, 179, 0.4), inset 1px 1px 15px 7px rgba(2, 27, 255, 0.777);;
+}
+
+.fade-in-logo {
+    opacity: 0; /* Start invisible */
+    animation: fadeIn 1.5s ease-in-out forwards; /* Apply animation */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px); /* Slight upward motion */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-bt {
+    opacity: 0; /* Start invisible */
+    animation: fadeIn 1.5s ease-in-out forwards; /* Apply animation */
+    animation-delay: 1s; /* Delay the animation by 1.5 seconds */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px); /* Slight upward motion */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
 </style>
 <body>
+    <div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+     </div>
      <!-- 🔐 Password Modal -->
      <div class="modal fade" id="passwordModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content" style="background: linear-gradient(to right, #008b74, #2b9900);">
                 <div class="modal-header">
-                    <h5 class="modal-title">Enter Password</h5>
+                    <h5 class="modal-title text-light">Enter Password</h5>
                 </div>
                 <div class="modal-body">
                     <input type="password" id="passwordInput" class="form-control shadow-sm" placeholder="Enter Password">
-                    <div class="text-danger mt-2 d-none" id="errorText">Incorrect Password! Try again.</div>
+                    <div class="text-danger mt-2 d-none bg-light rounded px-3" id="errorText">Incorrect Password! Try again.</div>
                 </div>
                 <div class="modal-footer d-flex justify-content-center">
                     <button type="button" class="btn btn-primary shadow w-100" id="submitPassword">Submit</button>
@@ -73,23 +242,30 @@ th:first-child, td:first-child {
     </div>
 
     <div class="content d-none"> 
-    <nav class="navbar shadow fixed-top" style="background: linear-gradient(to right, #008b74, #2b9900); border-bottom: 3px solid rgb(0, 74, 80); border-top: 3px solid rgb(0, 74, 80);">
-        <div class="container">
-            <div class="d-flex align-items-center gap-2 w-100" style="padding-top: 5px;">
-                <div class="flex-grow-1">
-                    <label for="searchInput" class="form-label fw-bold mb-1">Search IPC Sections:</label>
-                    <input type="text" id="searchInput" class="form-control shadow-sm" placeholder="Enter IPC Sections..." autocomplete="off">
+        <nav class="navbar shadow fixed-top" style="background: linear-gradient(to right, #008b74, #2b9900); border-bottom: 3px solid rgb(0, 74, 80); border-top: 3px solid rgb(0, 74, 80);">
+            <div class="container">
+                <div class="d-flex align-items-center gap-2 w-100" style="padding-top: 2px;">
+                    
+                    <!-- IPC Logo (Left Side) -->
+                    <img src="info.png" alt="IPC Logo" class="fade-in-logo" style="height: 40px; width: auto;">
+        
+                    <div class="flex-grow-1">
+                        <input type="text" id="searchInput" class="form-control shadow-sm fade-in-bt" placeholder="Enter IPC Sections..." autocomplete="off">
+                    </div>
+        
+                    <button id="toggleColumnBtn" class="btn btn-warning shadow fade-in-bt" title="Hide first column">Hide</button>
+                    <button id="toggleTimeoutBtn" class="btn btn-primary shadow fade-in-bt" title="On/Off Auto Clear">Off AutoClear</button>
+        
                 </div>
-                <button id="toggleColumnBtn" class="btn btn-warning shadow mt-4">Hide</button>
             </div>
-        </div>
-    </nav>
+        </nav>
+        
 
    
     
-  <div class="container mt-5" style="padding-top: 50px;">
+  <div class="container mt-5" style="padding-top: 20px;">
 
-        <table class="shadow">
+        <table class="">
             <thead >
                 <tr class="bg-dark text-white" >
                     <td class="fw-bold">IPC</td>
@@ -97,7 +273,7 @@ th:first-child, td:first-child {
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <tr><td class="fw-bold">1</td><td>Title and extent of operation of the Code.</td></tr>
+                <tr class="cstr"><td class="fw-bold">1</td><td>Title and extent of operation of the Code.</td></tr>
                 <tr><td class="fw-bold">2</td><td>Punishment of offences committed within India.</td></tr>
                 <tr><td class="fw-bold">3</td><td>Punishment of offences committed beyond, but which by law may be tried within, India.</td></tr>
                 <tr><td class="fw-bold">4</td><td>Extension of Code to extra-territorial offences.</td></tr>
@@ -685,30 +861,55 @@ th:first-child, td:first-child {
             applyColumnVisibility(); // Apply saved column visibility
         });
     
+        // document.getElementById('searchInput').addEventListener('input', function () {
+        //     let searchValue = this.value.trim();
+        //     let rows = document.querySelectorAll("#tableBody tr");
+    
+        //     if (searchValue === "") {
+        //         // Show all rows when search is cleared
+        //         rows.forEach(row => {
+        //             row.style.display = "";
+        //         });
+        //         return;
+        //     }
+    
+        //     rows.forEach(row => {
+        //         let serialNumberCell = row.cells[0].innerText.trim();
+        //         let textCell = row.cells[1].innerText.trim(); // Get the text column
+    
+        //         if (serialNumberCell === searchValue) {
+        //             row.style.display = "";
+        //             copyToClipboard(serialNumberCell, textCell); // Copy and show Serial Number + Text
+        //         } else {
+        //             row.style.display = "none";
+        //         }
+        //     });
+        // });
         document.getElementById('searchInput').addEventListener('input', function () {
-            let searchValue = this.value.trim();
-            let rows = document.querySelectorAll("#tableBody tr");
-    
-            if (searchValue === "") {
-                // Show all rows when search is cleared
-                rows.forEach(row => {
-                    row.style.display = "";
-                });
-                return;
-            }
-    
-            rows.forEach(row => {
-                let serialNumberCell = row.cells[0].innerText.trim();
-                let textCell = row.cells[1].innerText.trim(); // Get the text column
-    
-                if (serialNumberCell === searchValue) {
-                    row.style.display = "";
-                    copyToClipboard(serialNumberCell, textCell); // Copy and show Serial Number + Text
-                } else {
-                    row.style.display = "none";
-                }
-            });
+    let searchValue = this.value.trim().toLowerCase(); // Convert input to lowercase
+    let rows = document.querySelectorAll("#tableBody tr");
+
+    if (searchValue === "") {
+        // Show all rows when search is cleared
+        rows.forEach(row => {
+            row.style.display = "";
         });
+        return;
+    }
+
+    rows.forEach(row => {
+        let serialNumberCell = row.cells[0].innerText.trim().toLowerCase(); // Convert table text to lowercase
+        let textCell = row.cells[1].innerText.trim().toLowerCase(); // Convert table text to lowercase
+
+        if (serialNumberCell === searchValue) {
+            row.style.display = "";
+            copyToClipboard(row.cells[0].innerText.trim(), row.cells[1].innerText.trim()); // Copy original text
+        } else {
+            row.style.display = "none";
+        }
+    });
+});
+
     
         function copyToClipboard(serialNumber, text) {
             //let combinedText = `(${serialNumber}) ${text}`;
@@ -720,24 +921,61 @@ th:first-child, td:first-child {
                 console.error("Failed to copy:", err);
             });
         }
+
+        document.addEventListener("DOMContentLoaded", function () {
+    let autoClearEnabled = localStorage.getItem("autoClear") !== "false"; // Default: Enabled
+    updateButtonText();
+
+    document.getElementById("toggleTimeoutBtn").addEventListener("click", function () {
+        autoClearEnabled = !autoClearEnabled; // Toggle state
+        localStorage.setItem("autoClear", autoClearEnabled); // Save to localStorage
+        updateButtonText();
+        location.reload();
+    });
+
+    function updateButtonText() {
+        document.getElementById("toggleTimeoutBtn").innerText = autoClearEnabled ? "Off AutoClear" : "On AutoClear";
+    }
+});
+
+function showToast(message) {
+    let toastMessage = document.getElementById("toastMessage");
+    toastMessage.innerText = message;
     
-        function showToast(message) {
-            let toastMessage = document.getElementById("toastMessage");
-            toastMessage.innerText = message;
-            
-            let toast = new bootstrap.Toast(document.getElementById("copyToast"));
-            toast.show();
+    let toast = new bootstrap.Toast(document.getElementById("copyToast"));
+    toast.show();
 
-            // Reset search input after 7 seconds
-            setTimeout(() => {
-                document.getElementById("searchInput").value = "";
+    // Check if auto clear is enabled before running setTimeout
+    if (localStorage.getItem("autoClear") !== "false") {
+        setTimeout(() => {
+            document.getElementById("searchInput").value = "";
 
-                // Show all table rows
-                let rows = document.querySelectorAll("#tableBody tr");
-                rows.forEach(row => row.style.display = "");
-            }, 7000);
-            
-        }
+            // Show all table rows
+            let rows = document.querySelectorAll("#tableBody tr");
+            rows.forEach(row => row.style.display = "");
+        }, 7000);
+    }
+}
+
+    
+function showToast(message) {
+    let toastMessage = document.getElementById("toastMessage");
+    toastMessage.innerText = message;
+    
+    let toast = new bootstrap.Toast(document.getElementById("copyToast"));
+    toast.show();
+
+    // Check if auto clear is enabled before running setTimeout
+    if (localStorage.getItem("autoClear") !== "false") {
+        setTimeout(() => {
+            document.getElementById("searchInput").value = "";
+
+            // Show all table rows
+            let rows = document.querySelectorAll("#tableBody tr");
+            rows.forEach(row => row.style.display = "");
+        }, 7000);
+    }
+}
     
         function sortTableBySerialNumber() {
             let tableBody = document.getElementById("tableBody");
