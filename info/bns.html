@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Information</title>
+    <link rel="icon" type="image/png" href="info.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+</head>
+<style>
+ 
+</style>
+<body>
+    <div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+     </div>
+     <!-- 🔐 Password Modal -->
+     <div class="modal fade" id="passwordModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: linear-gradient(to right, #008b74, #2b9900);">
+                <div class="modal-header">
+                    <h5 class="modal-title text-light">Enter Password</h5>
+                </div>
+                <div class="modal-body">
+                    <input type="password" id="passwordInput" class="form-control shadow-sm" placeholder="Enter Password">
+                    <div class="text-danger mt-2 d-none bg-light rounded px-3" id="errorText">Incorrect Password! Try again.</div>
+                </div>
+                <div class="modal-footer d-flex justify-content-center">
+                    <button type="button" class="btn btn-primary shadow w-100" id="submitPassword">Submit</button>
+                </div>                
+            </div>
+        </div>
+    </div>
+
+    <div class="content d-none"> 
+        <nav class="navbar shadow fixed-top" style="background: linear-gradient(to right, #008b74, #2b9900); border-bottom: 3px solid rgb(0, 74, 80); border-top: 3px solid rgb(0, 74, 80);">
+            <div class="container">
+                <div class="d-flex align-items-center gap-2 w-100" style="padding-top: 2px;">
+                    
+                    <!-- IPC Logo (Left Side) -->
+                    <a href="index.html" title="IPC Page">
+                    <img src="ipc_logo.png" alt="IPC Logo" class="logo" style="height: 40px; width: auto;">
+                    </a>
+        
+                    <div class="flex-grow-1">
+                        <input type="text" id="searchInput" class="form-control shadow-sm fade-in-bt" placeholder="Enter Sections..." autocomplete="off">
+                        
+                    </div>
+                    <select id="tableSelect" class="form-select shadow-sm fade-in-bt" style="width: auto;">
+                        <option value="bns">BHARATIYA NYAYA SANHITA</option>
+                        <option value="bnss">BHARATIYA NAGARIK SURAKSHA SANHITA</option>
+                    </select>
+        
+                    <button id="toggleTimeoutBtn" class="btn btn-primary shadow fade-in-bt" title="On/Off Auto Clear">Off AutoClear</button>
+                    
+        
+                </div>
+            </div>
+        </nav>
+        
+    
+  <div class="container mt-5" style="padding-top: 20px;">
+
+    <table id="bns">
+        <thead>
+            <tr class="bg-dark text-white">
+                <td class="fw-bold">BNS</td>
+                <td class="fw-bold text-center">BNS Sections Text</td>
+            </tr>
+        </thead>
+        <tbody id="bnsTableBody">
+            <tr class="cstr"><td class="fw-bold">Coming Soon</td><td>Coming Soon</td></tr>
+           
+        </tbody>
+    </table>
+
+    <table id="bnss">
+        <thead>
+            <tr class="bg-dark text-white">
+                <td class="fw-bold">BNSS</td>
+                <td class="fw-bold text-center">BNSS Sections Text </td>
+            </tr>
+        </thead>
+        <tbody id="bnssTableBody">
+            <tr class="cstr"><td class="fw-bold">Coming Soon</td><td>Coming Soon</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+</div>
+
+    <!-- Bootstrap Toast for Copy Notification -->
+    <div class="position-fixed buttom start-50 translate-middle-x p-3" style="z-index: 11">
+        <div id="copyToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true" style="background: linear-gradient(to right, #008b74, #2b9900); border: 5px solid rgb(0, 20, 197);">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMessage" style="font-size: small;"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔹 Back to Top Button -->
+    <button id="backToTop" class="btn btn-danger">↑</button>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+    const tableSelect = document.getElementById("tableSelect");
+    const bnsTable = document.getElementById("bns");
+    const bnssTable = document.getElementById("bnss");
+
+    // Function to toggle table visibility
+    function toggleTableVisibility() {
+        if (tableSelect.value === "bns") {
+            bnsTable.style.display = "";
+            bnssTable.style.display = "none";
+        } else {
+            bnsTable.style.display = "none";
+            bnssTable.style.display = "";
+        }
+        // Auto-focus on search input after changing the table
+        document.getElementById("searchInput").focus();
+    }
+
+    // Initial call to set the correct table visibility
+    toggleTableVisibility();
+   
+    // Add event listener to handle changes in the dropdown
+    tableSelect.addEventListener("change", toggleTableVisibility);
+});
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("searchInput").focus(); // Auto-focus on search input
+            sortTableBySerialNumber(); // Sort table when page loads
+        });
+    
+       
+        document.getElementById('searchInput').addEventListener('input', function () {
+    const searchValue = this.value.trim().toLowerCase();
+    const selectedTable = document.getElementById("tableSelect").value;
+    const tableBody = document.querySelector(`#${selectedTable} tbody`);
+    const rows = tableBody.querySelectorAll("tr");
+
+    if (searchValue === "") {
+        rows.forEach(row => row.style.display = "");
+        return;
+    }
+
+    rows.forEach(row => {
+        const serialNumberCell = row.cells[0].innerText.trim().toLowerCase();
+        const textCell = row.cells[1].innerText.trim().toLowerCase();
+
+        if (serialNumberCell === searchValue) {
+            row.style.display = "";
+            copyToClipboard(row.cells[0].innerText.trim(), row.cells[1].innerText.trim());
+        } else {
+            row.style.display = "none";
+        }
+    });
+});
+
+function copyToClipboard(serialNumber, text) {
+    const combinedText = `${text}`;
+    navigator.clipboard.writeText(combinedText).then(() => {
+        showToast(`Copied: ${serialNumber} - ${text}`);
+    }).catch(err => {
+        console.error("Failed to copy:", err);
+    });
+}
+        document.addEventListener("DOMContentLoaded", function () {
+    let autoClearEnabled = localStorage.getItem("autoClear") !== "false"; // Default: Enabled
+    updateButtonText();
+
+    document.getElementById("toggleTimeoutBtn").addEventListener("click", function () {
+    autoClearEnabled = !autoClearEnabled; // Toggle state
+    localStorage.setItem("autoClear", autoClearEnabled); // Save to localStorage
+    updateButtonText();
+    document.getElementById("searchInput").value = ""; // Clear search input
+    refreshTable(); // Refresh the table instead of reloading the page
+});
+
+function refreshTable() {
+    // Get the selected table
+    const selectedTable = document.getElementById("tableSelect").value;
+    const tableBody = document.querySelector(`#${selectedTable} tbody`);
+
+    // Show all rows in the selected table
+    const rows = tableBody.querySelectorAll("tr");
+    rows.forEach(row => row.style.display = "");
+}
+
+
+    function updateButtonText() {
+        document.getElementById("toggleTimeoutBtn").innerText = autoClearEnabled ? "Off AutoClear" : "On AutoClear";
+    }
+});
+
+function showToast(message) {
+    let toastMessage = document.getElementById("toastMessage");
+    toastMessage.innerText = message;
+
+    let toast = new bootstrap.Toast(document.getElementById("copyToast"));
+    toast.show();
+
+    // Check if auto clear is enabled before running setTimeout
+    if (localStorage.getItem("autoClear") !== "false") {
+        setTimeout(() => {
+            document.getElementById("searchInput").value = "";
+
+            // Get the selected table
+            const selectedTable = document.getElementById("tableSelect").value;
+            const tableBody = document.querySelector(`#${selectedTable} tbody`);
+
+            // Show all rows in the selected table
+            const rows = tableBody.querySelectorAll("tr");
+            rows.forEach(row => row.style.display = "");
+        }, 7000);
+    }
+}
+
+
+    
+        function sortTableBySerialNumber() {
+            let tableBody = document.getElementById("tableBody");
+            let rows = Array.from(tableBody.querySelectorAll("tr"));
+    
+            rows.sort((a, b) => {
+                let serialA = a.cells[0].innerText.trim();
+                let serialB = b.cells[0].innerText.trim();
+    
+                // Extract numeric and non-numeric parts
+                let numA = parseInt(serialA) || 0;  // Convert to number, default to 0
+                let numB = parseInt(serialB) || 0;
+    
+                if (numA !== numB) {
+                    return numA - numB; // Sort numerically first
+                }
+                
+                return serialA.localeCompare(serialB); // Sort alphabetically if numbers are equal
+            });
+    
+            // Re-append sorted rows
+            tableBody.innerHTML = "";
+            rows.forEach(row => tableBody.appendChild(row));
+        }
+       
+
+    function applyColumnVisibility() {
+    const isHidden = localStorage.getItem("hideSerialColumn") === "true";
+    const selectedTable = document.getElementById("tableSelect").value;
+    const headerCell = document.querySelector(`#${selectedTable} thead tr td:first-child`);
+    const rows = document.querySelectorAll(`#${selectedTable} tbody tr`);
+
+    if (isHidden) {
+        headerCell.style.display = "none";
+        rows.forEach(row => row.cells[0].style.display = "none");
+        button.innerText = "Show";
+    } else {
+        headerCell.style.display = "";
+        rows.forEach(row => row.cells[0].style.display = "");
+        button.innerText = "Hide";
+    }
+}
+    </script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let password = "Pass@alipurduar"; // Correct Password
+            let passwordModal = new bootstrap.Modal(document.getElementById("passwordModal"), {keyboard: false, backdrop: 'static'});
+            let content = document.querySelector(".content"); // Select the content div
+        
+            // Check if the password has already been entered correctly
+            if (!localStorage.getItem("passwordEntered")) {
+                passwordModal.show(); // Show password modal on first visit
+            } else {
+                content.classList.remove("d-none"); // Show content
+                document.getElementById("searchInput").focus(); // Auto-focus on search
+            }
+        
+            // Handle password submission
+            document.getElementById("submitPassword").addEventListener("click", function () {
+                let userInput = document.getElementById("passwordInput").value;
+        
+                if (userInput === password) {
+                    localStorage.setItem("passwordEntered", "true"); // Store flag in localStorage
+                    content.classList.remove("d-none"); // Show content
+                    passwordModal.hide(); // Close modal
+                    document.getElementById("searchInput").focus(); // Auto-focus on search
+                } else {
+                    document.getElementById("errorText").classList.remove("d-none"); // Show error message
+                }
+            });
+        });
+        </script>
+          
+          <script>
+            // Get the button
+            let backToTop = document.getElementById("backToTop");
+    
+            // Show the button when scrolling down
+            window.onscroll = function () {
+                if (document.documentElement.scrollTop > 100) {
+                    backToTop.style.display = "block";
+                } else {
+                    backToTop.style.display = "none";
+                }
+            };
+    
+            // Smooth Scroll to Top
+            backToTop.addEventListener("click", function () {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+        </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
