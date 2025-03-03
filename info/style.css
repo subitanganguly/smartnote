@@ -227,3 +227,9 @@ transform: translateY(0);
 #tableSelect:focus {
     border-color: #1d0056;
     }
+
+    #tableTitle{
+        background-color: rgba(250, 253, 225, 0.192);
+        border: 1px solid rgb(0, 105, 0);
+        font-size: large;
+     }

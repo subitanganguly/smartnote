@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
 </head>
 <style>
- 
+
 </style>
 <body>
     <div>
@@ -54,8 +54,8 @@
                         
                     </div>
                     <select id="tableSelect" class="form-select shadow-sm fade-in-bt" style="width: auto;">
-                        <option value="bns">BHARATIYA NYAYA SANHITA</option>
-                        <option value="bnss">BHARATIYA NAGARIK SURAKSHA SANHITA</option>
+                        <option value="bns">BNS</option>
+                        <option value="bnss">BNSS</option>
                     </select>
         
                     <button id="toggleTimeoutBtn" class="btn btn-primary shadow fade-in-bt" title="On/Off Auto Clear">Off AutoClear</button>
@@ -68,15 +68,375 @@
     
   <div class="container mt-5" style="padding-top: 20px;">
 
+    <!-- Dynamic Title -->
+    <div id="tableTitle" class="text-center fw-bold"></div>
+
     <table id="bns">
         <thead>
             <tr class="bg-dark text-white">
-                <td class="fw-bold">BNS</td>
-                <td class="fw-bold text-center">BNS Sections Text</td>
+                <td class="fw-bold">Section</td>
+                <td class="fw-bold text-center">Subject</td>
             </tr>
         </thead>
         <tbody id="bnsTableBody">
-            <tr class="cstr"><td class="fw-bold">Coming Soon</td><td>Coming Soon</td></tr>
+            <tr class="cstr"><td class="fw-bold">1</td><td>Short title, commencement and application.</td></tr>
+            <tr><td class="fw-bold">2</td><td>Definitions.</td></tr>
+            <tr><td class="fw-bold">3</td><td>General explanations.</td></tr>
+            <tr><td class="fw-bold">4</td><td>Punishments.</td></tr>
+            <tr><td class="fw-bold">5</td><td>Commutation of sentence.</td></tr>
+            <tr><td class="fw-bold">6</td><td>Fractions of terms of punishment.</td></tr>
+            <tr><td class="fw-bold">7</td><td>Sentence may be (in certain cases of imprisonment) wholly or partly rigorous or simple.</td></tr>
+            <tr><td class="fw-bold">8</td><td>Amount of fine, liability in default of payment of fine, etc.</td></tr>
+            <tr><td class="fw-bold">9</td><td>Limit of punishment of offence made up of several offences.</td></tr>
+            <tr><td class="fw-bold">10</td><td>Punishment of person guilty of one of several offences, judgment stating that it is doubtful of which.</td></tr>
+            <tr><td class="fw-bold">11</td><td>Solitary confinement.</td></tr>
+            <tr><td class="fw-bold">12</td><td>Limit of solitary confinement.</td></tr>
+            <tr><td class="fw-bold">13</td><td>Enhanced punishment for certain offences after previous conviction.</td></tr>
+            <tr><td class="fw-bold">14</td><td>Act done by a person bound, or by mistake of fact believing himself bound, by law.</td></tr>
+            <tr><td class="fw-bold">15</td><td>Act of Judge when acting judicially.</td></tr>
+            <tr><td class="fw-bold">16</td><td>Act done pursuant to judgment or order of Court.</td></tr>
+            <tr><td class="fw-bold">17</td><td>Act done by a person justified, or by mistake of fact believing himself justified, by law.</td></tr>
+            <tr><td class="fw-bold">18</td><td>Accident in doing a lawful act.</td></tr>
+            <tr><td class="fw-bold">19</td><td>Act likely to cause harm, but done without criminal intent, and to prevent other harm.</td></tr>
+            <tr><td class="fw-bold">20</td><td>Act of a child under seven years of age.</td></tr>
+            <tr><td class="fw-bold">21</td><td>Act of a child above seven and under twelve years of age of immature understanding.</td></tr>
+            <tr><td class="fw-bold">22</td><td>Act of a person of unsound mind.</td></tr>
+            <tr><td class="fw-bold">23</td><td>Act of a person incapable of judgment by reason of intoxication caused against his will.</td></tr>
+            <tr><td class="fw-bold">24</td><td>Offence requiring a particular intent or knowledge committed by one who is intoxicated.</td></tr>
+            <tr><td class="fw-bold">25</td><td>Act not intended and not known to be likely to cause death or grievous hurt, done by consent.</td></tr>
+            <tr><td class="fw-bold">26</td><td>Act not intended to cause death, done by consent in good faith for person's benefit.</td></tr>
+            <tr><td class="fw-bold">27</td><td>Act done in good faith for benefit of child or person of unsound mind, by, or by consent of guardian.</td></tr>
+            <tr><td class="fw-bold">28</td><td>Consent known to be given under fear or misconception.</td></tr>
+            <tr><td class="fw-bold">29</td><td>Exclusion of acts which are offences independently of harm caused.</td></tr>
+            <tr><td class="fw-bold">30</td><td>Act done in good faith for benefit of a person without consent.</td></tr>
+            <tr><td class="fw-bold">31</td><td>Communication made in good faith.</td></tr>
+            <tr><td class="fw-bold">32</td><td>Act to which a person is compelled by threats.</td></tr>
+            <tr><td class="fw-bold">33</td><td>Act causing slight harm.</td></tr>
+            <tr><td class="fw-bold">34</td><td>Things done in private defence.</td></tr>
+            <tr><td class="fw-bold">35</td><td>Right of private defence of body and of property.</td></tr>
+            <tr><td class="fw-bold">36</td><td>Right of private defence against act of a person of unsound mind, etc.</td></tr>
+            <tr><td class="fw-bold">37</td><td>Acts against which there is no right of private defence.</td></tr>
+            <tr><td class="fw-bold">38</td><td>When right of private defence of body extends to causing death.</td></tr>
+            <tr><td class="fw-bold">39</td><td>When such right extends to causing any harm other than death.</td></tr>
+            <tr><td class="fw-bold">40</td><td>Commencement and continuance of right of private defence of body.</td></tr>
+            <tr><td class="fw-bold">41</td><td>When right of private defence of property extends to causing death.</td></tr>
+            <tr><td class="fw-bold">42</td><td>When such right extends to causing any harm other than death.</td></tr>
+            <tr><td class="fw-bold">43</td><td>Commencement and continuance of right of private defence of property.</td></tr>
+            <tr><td class="fw-bold">44</td><td>Right of private defence against deadly assault when there is risk of harm to innocent person.</td></tr>
+            <tr><td class="fw-bold">45</td><td>Abetment of a thing.</td></tr>
+            <tr><td class="fw-bold">46</td><td>Abettor.</td></tr>
+            <tr><td class="fw-bold">47</td><td>Abetment in India of offences outside India.</td></tr>
+            <tr><td class="fw-bold">48</td><td>Abetment outside India for offence in India.</td></tr>
+            <tr><td class="fw-bold">49</td><td>Punishment of abetment if act abetted is committed in consequence and where no express provision is made for its punishment.</td></tr>
+            <tr><td class="fw-bold">50</td><td>Punishment of abetment if person abetted does act with different intention from that of abettor.</td></tr>
+            <tr><td class="fw-bold">51</td><td>Liability of abettor when one act abetted and different act done.</td></tr>
+            <tr><td class="fw-bold">52</td><td>Abettor when liable to cumulative punishment for act abetted and for act done.</td></tr>
+            <tr><td class="fw-bold">53</td><td>Liability of abettor for an effect caused by act abetted different from that intended by abettor.</td></tr>
+            <tr><td class="fw-bold">54</td><td>Abettor present when offence is committed.</td></tr>
+            <tr><td class="fw-bold">55</td><td>Abetment of offence punishable with death or imprisonment for life.</td></tr>
+            <tr><td class="fw-bold">56</td><td>Abetment of offence punishable with imprisonment.</td></tr>
+            <tr><td class="fw-bold">57</td><td>Abetting commission of offence by public or by more than ten persons.</td></tr>
+            <tr><td class="fw-bold">58</td><td>Concealing design to commit offence punishable with death or imprisonment for life.</td></tr>
+            <tr><td class="fw-bold">59</td><td>Public servant concealing design to commit offence which it is his duty to prevent.</td></tr>
+            <tr><td class="fw-bold">60</td><td>Concealing design to commit offence punishable with imprisonment.</td></tr>
+            <tr><td class="fw-bold">61</td><td>Criminal conspiracy.</td></tr>
+            <tr><td class="fw-bold">62</td><td> Punishment for attempting to commit offences punishable with imprisonment for life or other imprisonment.</td></tr>
+            <tr><td class="fw-bold">63</td><td>Rape.</td></tr>
+            <tr><td class="fw-bold">64</td><td>Punishment for rape.</td></tr>
+            <tr><td class="fw-bold">65</td><td>Punishment for rape in certain cases.</td></tr>
+            <tr><td class="fw-bold">66</td><td>Punishment for causing death or resulting in persistent vegetative state of victim.</td></tr>
+            <tr><td class="fw-bold">67</td><td>Sexual intercourse by husband upon his wife during separation.</td></tr>
+            <tr><td class="fw-bold">68</td><td>Sexual intercourse by a person in authority.</td></tr>
+            <tr><td class="fw-bold">69</td><td>Sexual intercourse by employing deceitful means, etc.</td></tr>
+            <tr><td class="fw-bold">70</td><td>Gang rape.</td></tr>
+            <tr><td class="fw-bold">71</td><td>Punishment for repeat offenders.</td></tr>
+            <tr><td class="fw-bold">72</td><td>Disclosure of identity of victim of certain offences, etc.</td></tr>
+            <tr><td class="fw-bold">73</td><td>Printing or publishing any matter relating to Court proceedings without permission.</td></tr>
+            <tr><td class="fw-bold">74</td><td>Assault or use of criminal force to woman with intent to outrage her modesty.</td></tr>
+            <tr><td class="fw-bold">75</td><td>Sexual harassment.</td></tr>
+            <tr><td class="fw-bold">76</td><td>Assault or use of criminal force to woman with intent to disrobe.</td></tr>
+            <tr><td class="fw-bold">77</td><td>Voyeurism.</td></tr>
+            <tr><td class="fw-bold">78</td><td>Stalking.</td></tr>
+            <tr><td class="fw-bold">79</td><td>Word, gesture or act intended to insult modesty of a woman.</td></tr>
+            <tr><td class="fw-bold">80</td><td>Dowry death.</td></tr>
+            <tr><td class="fw-bold">81</td><td>Cohabitation caused by man deceitfully inducing belief of lawful marriage.</td></tr>
+            <tr><td class="fw-bold">82</td><td>Marrying again during lifetime of husband or wife.</td></tr>
+            <tr><td class="fw-bold">83</td><td>Marriage ceremony fraudulently gone through without lawful marriage.</td></tr>
+            <tr><td class="fw-bold">84</td><td>Enticing or taking away or detaining with criminal intent a married woman.</td></tr>
+            <tr><td class="fw-bold">85</td><td>Husband or relative of husband of a woman subjecting her to cruelty.</td></tr>
+            <tr><td class="fw-bold">86</td><td>Cruelty defined.</td></tr>
+            <tr><td class="fw-bold">87</td><td>Kidnapping, abducting or inducing woman to compel her marriage, etc.</td></tr>
+            <tr><td class="fw-bold">88</td><td>Causing miscarriage.</td></tr>
+            <tr><td class="fw-bold">89</td><td>Causing miscarriage without woman's consent.</td></tr>
+            <tr><td class="fw-bold">90</td><td>Death caused by act done with intent to cause miscarriage.</td></tr>
+            <tr><td class="fw-bold">91</td><td>Act done with intent to prevent child being born alive or to cause to die after birth.</td></tr>
+            <tr><td class="fw-bold">92</td><td>Causing death of quick unborn child by act amounting to culpable homicide.</td></tr>
+            <tr><td class="fw-bold">93</td><td>Exposure and abandonment of child under twelve years of age, by parent or person having care of it.</td></tr>
+            <tr><td class="fw-bold">94</td><td>Concealment of birth by secret disposal of dead body.</td></tr>
+            <tr><td class="fw-bold">95</td><td>Hiring, employing or engaging a child to commit an offence.</td></tr>
+            <tr><td class="fw-bold">96</td><td>Procuration of child.</td></tr>
+            <tr><td class="fw-bold">97</td><td>Kidnapping or abducting child under ten years of age with intent to steal from its person.</td></tr>
+            <tr><td class="fw-bold">98</td><td>Selling child for purposes of prostitution, etc.</td></tr>
+            <tr><td class="fw-bold">99</td><td>Buying child for purposes of prostitution, etc.</td></tr>
+            <tr><td class="fw-bold">100</td><td>Culpable homicide.</td></tr>
+            <tr><td class="fw-bold">101</td><td>Murder.</td></tr>
+            <tr><td class="fw-bold">102</td><td>Culpable homicide by causing death of person other than person whose death was intended.</td></tr>
+            <tr><td class="fw-bold">103</td><td>Punishment for murder.</td></tr>
+            <tr><td class="fw-bold">104</td><td>Punishment for murder by life-convict.</td></tr>
+            <tr><td class="fw-bold">105</td><td>Punishment for culpable homicide not amounting to murder.</td></tr>
+            <tr><td class="fw-bold">106</td><td>Causing death by negligence.</td></tr>
+            <tr><td class="fw-bold">107</td><td>Abetment of suicide of child or person of unsound mind.</td></tr>
+            <tr><td class="fw-bold">108</td><td>Abetment of suicide.</td></tr>
+            <tr><td class="fw-bold">109</td><td>Attempt to murder.</td></tr>
+            <tr><td class="fw-bold">110</td><td>Attempt to commit culpable homicide.</td></tr>
+            <tr><td class="fw-bold">111</td><td>Organised crime.</td></tr>
+            <tr><td class="fw-bold">112</td><td>Petty organised crime.</td></tr>
+            <tr><td class="fw-bold">113</td><td>Terrorist act.</td></tr>
+            <tr><td class="fw-bold">114</td><td>Hurt.</td></tr>
+            <tr><td class="fw-bold">115</td><td>Voluntarily causing hurt.</td></tr>
+            <tr><td class="fw-bold">116</td><td>Grievous hurt.</td></tr>
+            <tr><td class="fw-bold">117</td><td>Voluntarily causing grievous hurt.</td></tr>
+            <tr><td class="fw-bold">118</td><td>Voluntarily causing hurt or grievous hurt by dangerous weapons or means.</td></tr>
+            <tr><td class="fw-bold">119</td><td>Voluntarily causing hurt or grievous hurt to extort property, or to constrain to an illegal act.</td></tr>
+            <tr><td class="fw-bold">120</td><td>Voluntarily causing hurt or grievous hurt to extort confession, or to compel restoration of property.</td></tr>
+            <tr><td class="fw-bold">121</td><td>Voluntarily causing hurt or grievous hurt to deter public servant from his duty.</td></tr>
+            <tr><td class="fw-bold">122</td><td>Voluntarily causing hurt or grievous hurt on provocation.</td></tr>
+            <tr><td class="fw-bold">123</td><td>Causing hurt by means of poison, etc., with intent to commit an offence.</td></tr>
+            <tr><td class="fw-bold">124</td><td>Voluntarily causing grievous hurt by use of acid, etc.</td></tr>
+            <tr><td class="fw-bold">125</td><td>Act endangering life or personal safety of others.</td></tr>
+            <tr><td class="fw-bold">126</td><td>Wrongful restraint.</td></tr>
+            <tr><td class="fw-bold">127</td><td>Wrongful confinement.</td></tr>
+            <tr><td class="fw-bold">128</td><td>Force.</td></tr>
+            <tr><td class="fw-bold">129</td><td>Criminal force.</td></tr>
+            <tr><td class="fw-bold">130</td><td>Assault.</td></tr>
+            <tr><td class="fw-bold">131</td><td>Punishment for assault or criminal force otherwise than on grave provocation.</td></tr>
+            <tr><td class="fw-bold">132</td><td>Assault or criminal force to deter public servant from discharge of his duty.</td></tr>
+            <tr><td class="fw-bold">133</td><td>Assault or criminal force with intent to dishonour person, otherwise than on grave provocation.</td></tr>
+            <tr><td class="fw-bold">134</td><td>Assault or criminal force in attempt to commit theft of property carried by a person.</td></tr>
+            <tr><td class="fw-bold">135</td><td>Assault or criminal force in attempt to wrongfully confine a person.</td></tr>
+            <tr><td class="fw-bold">136</td><td>Assault or criminal force on grave provocation.</td></tr>
+            <tr><td class="fw-bold">137</td><td>Kidnapping.</td></tr>
+            <tr><td class="fw-bold">138</td><td>Abduction.</td></tr>
+            <tr><td class="fw-bold">139</td><td>Kidnapping or maiming a child for purposes of begging.</td></tr>
+            <tr><td class="fw-bold">140</td><td>Kidnapping or abducting in order to murder or for ransom, etc.</td></tr>
+            <tr><td class="fw-bold">141</td><td>Importation of girl or boy from foreign country.</td></tr>
+            <tr><td class="fw-bold">142</td><td>Wrongfully concealing or keeping in confinement, kidnapped or abducted person.</td></tr>
+            <tr><td class="fw-bold">143</td><td>Trafficking of person.</td></tr>
+            <tr><td class="fw-bold">144</td><td>Exploitation of a trafficked person.</td></tr>
+            <tr><td class="fw-bold">145</td><td>Habitual dealing in slaves.</td></tr>
+            <tr><td class="fw-bold">146</td><td>Unlawful compulsory labour.</td></tr>
+            <tr><td class="fw-bold">147</td><td>Waging, or attempting to wage war, or abetting waging of war, against Government of India.</td></tr>
+            <tr><td class="fw-bold">148</td><td>Conspiracy to commit offences punishable by section 147.</td></tr>
+            <tr><td class="fw-bold">149</td><td>Collecting arms, etc., with intention of waging war against Government of India.</td></tr>
+            <tr><td class="fw-bold">150</td><td>Concealing with intent to facilitate design to wage war.</td></tr>
+            <tr><td class="fw-bold">151</td><td>Assaulting President, Governor, etc., with intent to compel or restrain exercise of any lawful power.</td></tr>
+            <tr><td class="fw-bold">152</td><td>Act endangering sovereignty, unity and integrity of India.</td></tr>
+            <tr><td class="fw-bold">153</td><td>Waging war against Government of any foreign State at peace with Government of India.</td></tr>
+            <tr><td class="fw-bold">154</td><td>Committing depredation on territories of foreign State at peace with Government of India.</td></tr>
+            <tr><td class="fw-bold">155</td><td>Receiving property taken by war or depredation mentioned in sections 153 and 154.</td></tr>
+            <tr><td class="fw-bold">156</td><td>Public servant voluntarily allowing prisoner of State or war to escape.</td></tr>
+            <tr><td class="fw-bold">157</td><td>Public servant negligently suffering such prisoner to escape.</td></tr>
+            <tr><td class="fw-bold">158</td><td>Aiding escape of, rescuing or harbouring such prisoner.</td></tr>
+            <tr><td class="fw-bold">159</td><td>Abetting mutiny, or attempting to seduce a soldier, sailor or airman from his duty.</td></tr>
+            <tr><td class="fw-bold">160</td><td>Abetment of mutiny, if mutiny is committed in consequence thereof.</td></tr>
+            <tr><td class="fw-bold">161</td><td>Abetment of assault by soldier, sailor or airman on his superior officer, when in execution of his office.</td></tr>
+            <tr><td class="fw-bold">162</td><td>Abetment of such assault, if assault committed.</td></tr>
+            <tr><td class="fw-bold">163</td><td>Abetment of desertion of soldier, sailor or airman.</td></tr>
+            <tr><td class="fw-bold">164</td><td>Harbouring deserter.</td></tr>
+            <tr><td class="fw-bold">165</td><td>Deserter concealed on board merchant vessel through negligence of master.</td></tr>
+            <tr><td class="fw-bold">166</td><td>Abetment of act of insubordination by soldier, sailor or airman.</td></tr>
+            <tr><td class="fw-bold">167</td><td>Persons subject to certain Acts.</td></tr>
+            <tr><td class="fw-bold">168</td><td>Wearing garb or carrying token used by soldier, sailor or airman.</td></tr>
+            <tr><td class="fw-bold">169</td><td>Candidate, electoral right defined.</td></tr>
+            <tr><td class="fw-bold">170</td><td>Bribery.</td></tr>
+            <tr><td class="fw-bold">171</td><td>Undue influence at elections.</td></tr>
+            <tr><td class="fw-bold">172</td><td>Personation at elections.</td></tr>
+            <tr><td class="fw-bold">173</td><td>Punishment for bribery.</td></tr>
+            <tr><td class="fw-bold">174</td><td>Punishment for undue influence or personation at an election.</td></tr>
+            <tr><td class="fw-bold">175</td><td>False statement in connection with an election.</td></tr>
+            <tr><td class="fw-bold">176</td><td>Illegal payments in connection with an election.</td></tr>
+            <tr><td class="fw-bold">177</td><td>Failure to keep election accounts.</td></tr>
+            <tr><td class="fw-bold">178</td><td>Counterfeiting coin, Government stamps, currency-notes or bank-notes.</td></tr>
+            <tr><td class="fw-bold">179</td><td>Using as genuine, forged or counterfeit coin, Government stamp, currency-notes or bank-notes.</td></tr>
+            <tr><td class="fw-bold">180</td><td>Possession of forged or counterfeit coin, Government stamp, currency-notes or bank-notes.</td></tr>
+            <tr><td class="fw-bold">181</td><td>Making or possessing instruments or materials for forging or counterfeiting coin, Government stamp, currency-notes or bank-notes.</td></tr>
+            <tr><td class="fw-bold">182</td><td>Making or using documents resembling currency-notes or bank-notes.</td></tr>
+            <tr><td class="fw-bold">183</td><td>Effacing writing from substance bearing Government stamp, or removing from document a stamp used for it, with intent to cause loss to Government.</td></tr>
+            <tr><td class="fw-bold">184</td><td>Using Government stamp known to have been before used.</td></tr>
+            <tr><td class="fw-bold">185</td><td>Erasure of mark denoting that stamp has been used.</td></tr>
+            <tr><td class="fw-bold">186</td><td>Prohibition of fictitious stamps.</td></tr>
+            <tr><td class="fw-bold">187</td><td>Person employed in mint causing coin to be of different weight or composition from that fixed by law.</td></tr>
+            <tr><td class="fw-bold">188</td><td>Unlawfully taking coining instrument from mint.</td></tr>
+            <tr><td class="fw-bold">189</td><td>Unlawful assembly.</td></tr>
+            <tr><td class="fw-bold">190</td><td>Every member of unlawful assembly guilty of offence committed in prosecution of common object.</td></tr>
+            <tr><td class="fw-bold">191</td><td>Rioting.</td></tr>
+            <tr><td class="fw-bold">192</td><td>Wantonly giving provocation with intent to cause riot-if rioting be committed; if not committed.</td></tr>
+            <tr><td class="fw-bold">193</td><td>Liability of owner, occupier, etc., of land on which an unlawful assembly or riot takes place.</td></tr>
+            <tr><td class="fw-bold">194</td><td>Affray.</td></tr>
+            <tr><td class="fw-bold">195</td><td>Assaulting or obstructing public servant when suppressing riot, etc.</td></tr>
+            <tr><td class="fw-bold">196</td><td>Promoting enmity between different groups on grounds of religion, race, place of birth, residence, language, etc., and doing acts prejudicial to maintenance of harmony.</td></tr>
+            <tr><td class="fw-bold">197</td><td>Imputations, assertions prejudicial to national integration.</td></tr>
+            <tr><td class="fw-bold">198</td><td>Public servant disobeying law, with intent to cause injury to any person.</td></tr>
+            <tr><td class="fw-bold">199</td><td>Public servant disobeying direction under law.</td></tr>
+            <tr><td class="fw-bold">200</td><td>Punishment for non-treatment of victim.</td></tr>
+            <tr><td class="fw-bold">201</td><td>Public servant framing an incorrect document with intent to cause injury.</td></tr>
+            <tr><td class="fw-bold">202</td><td>Public servant unlawfully engaging in trade.</td></tr>
+            <tr><td class="fw-bold">203</td><td>Public servant unlawfully buying or bidding for property.</td></tr>
+            <tr><td class="fw-bold">204</td><td>Personating a public servant.</td></tr>
+            <tr><td class="fw-bold">205</td><td>Wearing garb or carrying token used by public servant with fraudulent intent.</td></tr>
+            <tr><td class="fw-bold">206</td><td>Absconding to avoid service of summons or other proceeding.</td></tr>
+            <tr><td class="fw-bold">207</td><td>Preventing service of summons or other proceeding, or preventing publication thereof.</td></tr>
+            <tr><td class="fw-bold">208</td><td>Non-attendance in obedience to an order from public servant.</td></tr>
+            <tr><td class="fw-bold">209</td><td>Non-appearance in response to a proclamation under section 84 of Bharatiya Nagarik Suraksha Sanhita, 2023.</td></tr>
+            <tr><td class="fw-bold">210</td><td>Omission to produce document or electronic record to public servant by person legally bound to produce it</td></tr>
+            <tr><td class="fw-bold">211</td><td>Omission to give notice or information to public servant by person legally bound to give it.</td></tr>
+            <tr><td class="fw-bold">212</td><td>Furnishing false information.</td></tr>
+            <tr><td class="fw-bold">213</td><td>Refusing oath or affirmation when duly required by public servant to make it.</td></tr>
+            <tr><td class="fw-bold">214</td><td>Refusing to answer public servant authorised to question.</td></tr>
+            <tr><td class="fw-bold">215</td><td>Refusing to sign statement.</td></tr>
+            <tr><td class="fw-bold">216</td><td>False statement on oath or affirmation to public servant or person authorised to administer an oath or affirmation.</td></tr>
+            <tr><td class="fw-bold">217</td><td>False information, with intent to cause public servant to use his lawful power to injury of another person.</td></tr>
+            <tr><td class="fw-bold">218</td><td>Resistance to taking of property by lawful authority of a public servant.</td></tr>
+            <tr><td class="fw-bold">219</td><td>Obstructing sale of property offered for sale by authority of public servant.</td></tr>
+            <tr><td class="fw-bold">220</td><td>Illegal purchase or bid for property offered for sale by authority of public servant.</td></tr>
+            <tr><td class="fw-bold">221</td><td>Obstructing public servant in discharge of public functions.</td></tr>
+            <tr><td class="fw-bold">222</td><td>Omission to assist public servant when bound by law to give assistance.</td></tr>
+            <tr><td class="fw-bold">223</td><td>Disobedience to order duly promulgated by public servant.</td></tr>
+            <tr><td class="fw-bold">224</td><td>Threat of injury to public servant.</td></tr>
+            <tr><td class="fw-bold">225</td><td>Threat of injury to induce person to refrain from applying for protection to public servant.</td></tr>
+            <tr><td class="fw-bold">226</td><td>Attempt to commit suicide to compel or restrain exercise of lawful power.</td></tr>
+            <tr><td class="fw-bold">227</td><td>Giving false evidence.</td></tr>
+            <tr><td class="fw-bold">228</td><td>Fabricating false evidence.</td></tr>
+            <tr><td class="fw-bold">229</td><td>Punishment for false evidence.</td></tr>
+            <tr><td class="fw-bold">230</td><td>Giving or fabricating false evidence with intent to procure conviction of capital offence.</td></tr>
+            <tr><td class="fw-bold">231</td><td>Giving or fabricating false evidence with intent to procure conviction of offence punishable with imprisonment for life or imprisonment.</td></tr>
+            <tr><td class="fw-bold">232</td><td>Threatening any person to give false evidence.</td></tr>
+            <tr><td class="fw-bold">233</td><td>Using evidence known to be false.</td></tr>
+            <tr><td class="fw-bold">234</td><td>Issuing or signing false certificate.</td></tr>
+            <tr><td class="fw-bold">235</td><td>Using as true a certificate known to be false.</td></tr>
+            <tr><td class="fw-bold">236</td><td>False statement made in declaration which is by law receivable as evidence.</td></tr>
+            <tr><td class="fw-bold">237</td><td>Using as true such declaration knowing it to be false.</td></tr>
+            <tr><td class="fw-bold">238</td><td>Causing disappearance of evidence of offence, or giving false information to screen offender.</td></tr>
+            <tr><td class="fw-bold">239</td><td>Intentional omission to give information of offence by person bound to inform.</td></tr>
+            <tr><td class="fw-bold">240</td><td>Giving false information respecting an offence committed.</td></tr>
+            <tr><td class="fw-bold">241</td><td>Destruction of document or electronic record to prevent its production as evidence.</td></tr>
+            <tr><td class="fw-bold">242</td><td>False personation for purpose of act or proceeding in suit or prosecution.</td></tr>
+            <tr><td class="fw-bold">243</td><td>Fraudulent removal or concealment of property to prevent its seizure as forfeited or in execution.</td></tr>
+            <tr><td class="fw-bold">244</td><td>Fraudulent claim to property to prevent its seizure as forfeited or in execution.</td></tr>
+            <tr><td class="fw-bold">245</td><td>Fraudulently suffering decree for sum not due.</td></tr>
+            <tr><td class="fw-bold">246</td><td>Dishonestly making false claim in Court.</td></tr>
+            <tr><td class="fw-bold">247</td><td>Fraudulently obtaining decree for sum not due.</td></tr>
+            <tr><td class="fw-bold">248</td><td>False charge of offence made with intent to injure.</td></tr>
+            <tr><td class="fw-bold">249</td><td>Harbouring offender.</td></tr>
+            <tr><td class="fw-bold">250</td><td>Taking gift, etc., to screen an offender from punishment.</td></tr>
+            <tr><td class="fw-bold">251</td><td>Offering gift or restoration of property in consideration of screening offender.</td></tr>
+            <tr><td class="fw-bold">252</td><td>Taking gift to help to recover stolen property, etc.</td></tr>
+            <tr><td class="fw-bold">253</td><td>Harbouring offender who has escaped from custody or whose apprehension has been ordered.</td></tr>
+            <tr><td class="fw-bold">254</td><td>Penalty for harbouring robbers or dacoits.</td></tr>
+            <tr><td class="fw-bold">255</td><td>Public servant disobeying direction of law with intent to save person from punishment or property from forfeiture.</td></tr>
+            <tr><td class="fw-bold">256</td><td>Public servant framing incorrect record or writing with intent to save person from punishment or property from forfeiture.</td></tr>
+            <tr><td class="fw-bold">257</td><td>Public servant in judicial proceeding corruptly making report, etc., contrary to law.</td></tr>
+            <tr><td class="fw-bold">258</td><td>Commitment for trial or confinement by person having authority who knows that he is acting contrary to law</td></tr>
+            <tr><td class="fw-bold">259</td><td>Intentional omission to apprehend on part of public servant bound to apprehend.</td></tr>
+            <tr><td class="fw-bold">260</td><td>Intentional omission to apprehend on part of public servant bound to apprehend person under sentence or lawfully committed.</td></tr>
+            <tr><td class="fw-bold">261</td><td>Escape from confinement or custody negligently suffered by public servant.</td></tr>
+            <tr><td class="fw-bold">262</td><td>Resistance or obstruction by a person to his lawful apprehension.</td></tr>
+            <tr><td class="fw-bold">263</td><td>Resistance or obstruction to lawful apprehension of another person.</td></tr>
+            <tr><td class="fw-bold">264</td><td>Omission to apprehend, or sufferance of escape, on part of public servant, in cases not otherwise provided for</td></tr>
+            <tr><td class="fw-bold">265</td><td>Resistance or obstruction to lawful apprehension or escape or rescue in cases not otherwise provided for.</td></tr>
+            <tr><td class="fw-bold">266</td><td>Violation of condition of remission of punishment.</td></tr>
+            <tr><td class="fw-bold">267</td><td>Intentional insult or interruption to public servant sitting in judicial proceeding.</td></tr>
+            <tr><td class="fw-bold">268</td><td>Personation of assessor.</td></tr>
+            <tr><td class="fw-bold">269</td><td>Failure by person released on bail bond or bond to appear in Court.</td></tr>
+            <tr><td class="fw-bold">270</td><td>Public nuisance.</td></tr>
+            <tr><td class="fw-bold">271</td><td>Negligent act likely to spread infection of disease dangerous to life.</td></tr>
+            <tr><td class="fw-bold">272</td><td>Malignant act likely to spread infection of disease dangerous to life.</td></tr>
+            <tr><td class="fw-bold">273</td><td>Disobedience to quarantine rule.</td></tr>
+            <tr><td class="fw-bold">274</td><td>Adulteration of food or drink intended for sale.</td></tr>
+            <tr><td class="fw-bold">275</td><td>Sale of noxious food or drink.</td></tr>
+            <tr><td class="fw-bold">276</td><td>Adulteration of drugs.</td></tr>
+            <tr><td class="fw-bold">277</td><td>Sale of adulterated drugs.</td></tr>
+            <tr><td class="fw-bold">278</td><td>Sale of drug as a different drug or preparation.</td></tr>
+            <tr><td class="fw-bold">279</td><td>Fouling water of public spring or reservoir.</td></tr>
+            <tr><td class="fw-bold">280</td><td>Making atmosphere noxious to health.</td></tr>
+            <tr><td class="fw-bold">281</td><td>Rash driving or riding on a public way.</td></tr>
+            <tr><td class="fw-bold">282</td><td>Rash navigation of vessel.</td></tr>
+            <tr><td class="fw-bold">283</td><td>Exhibition of false light, mark or buoy.</td></tr>
+            <tr><td class="fw-bold">284</td><td>Conveying person by water for hire in unsafe or overloaded vessel.</td></tr>
+            <tr><td class="fw-bold">285</td><td>Danger or obstruction in public way or line of navigation.</td></tr>
+            <tr><td class="fw-bold">286</td><td>Negligent conduct with respect to poisonous substance.</td></tr>
+            <tr><td class="fw-bold">287</td><td>Negligent conduct with respect to fire or combustible matter.</td></tr>
+            <tr><td class="fw-bold">288</td><td>Negligent conduct with respect to explosive substance.</td></tr>
+            <tr><td class="fw-bold">289</td><td>Negligent conduct with respect to machinery.</td></tr>
+            <tr><td class="fw-bold">290</td><td>Negligent conduct with respect to pulling down, repairing or constructing buildings, etc.</td></tr>
+            <tr><td class="fw-bold">291</td><td>Negligent conduct with respect to animal.</td></tr>
+            <tr><td class="fw-bold">292</td><td>Punishment for public nuisance in cases not otherwise provided for.</td></tr>
+            <tr><td class="fw-bold">293</td><td>Continuance of nuisance after injunction to discontinue.</td></tr>
+            <tr><td class="fw-bold">294</td><td>Sale, etc., of obscene books, etc.</td></tr>
+            <tr><td class="fw-bold">295</td><td>Sale, etc., of obscene objects to child.</td></tr>
+            <tr><td class="fw-bold">296</td><td>Obscene acts and songs.</td></tr>
+            <tr><td class="fw-bold">297</td><td>Keeping lottery office.</td></tr>
+            <tr><td class="fw-bold">298</td><td>Injuring or defiling place of worship with intent to insult religion of any class.</td></tr>
+            <tr><td class="fw-bold">299</td><td>Deliberate and malicious acts, intended to outrage religious feelings of any class by insulting its religion or religious beliefs.</td></tr>
+            <tr><td class="fw-bold">300</td><td>Disturbing religious assembly.</td></tr>
+            <tr><td class="fw-bold">301</td><td>Trespassing on burial places, etc.</td></tr>
+            <tr><td class="fw-bold">302</td><td>Uttering words, etc., with deliberate intent to wound religious feelings of any person.</td></tr>
+            <tr><td class="fw-bold">303</td><td>Theft.</td></tr>
+            <tr><td class="fw-bold">304</td><td>Snatching.</td></tr>
+            <tr><td class="fw-bold">305</td><td>Theft in a dwelling house, or means of transportation or place of worship, etc.</td></tr>
+            <tr><td class="fw-bold">306</td><td>Theft by clerk or servant of property in possession of master.</td></tr>
+            <tr><td class="fw-bold">307</td><td> Theft after preparation made for causing death, hurt or restraint in order to committing of theft.</td></tr>
+            <tr><td class="fw-bold">308</td><td>Extortion.</td></tr>
+            <tr><td class="fw-bold">309</td><td>Robbery.</td></tr>
+            <tr><td class="fw-bold">310</td><td>Dacoity.</td></tr>
+            <tr><td class="fw-bold">311</td><td>Robbery, or dacoity, with attempt to cause death or grievous hurt.</td></tr>
+            <tr><td class="fw-bold">312</td><td>Attempt to commit robbery or dacoity when armed with deadly weapon.</td></tr>
+            <tr><td class="fw-bold">313</td><td>Punishment for belonging to gang of robbers, etc.</td></tr>
+            <tr><td class="fw-bold">314</td><td>Dishonest misappropriation of property.</td></tr>
+            <tr><td class="fw-bold">315</td><td>Dishonest misappropriation of property possessed by deceased person at the time of his death.</td></tr>
+            <tr><td class="fw-bold">316</td><td>Criminal breach of trust.</td></tr>
+            <tr><td class="fw-bold">317</td><td>Stolen property.</td></tr>
+            <tr><td class="fw-bold">318</td><td>Cheating.</td></tr>
+            <tr><td class="fw-bold">319</td><td>Cheating by personation.</td></tr>
+            <tr><td class="fw-bold">320</td><td>Dishonest or fraudulent removal or concealment of property to prevent distribution among creditors.</td></tr>
+            <tr><td class="fw-bold">321</td><td>Dishonestly or fraudulently preventing debt being available for creditors.</td></tr>
+            <tr><td class="fw-bold">322</td><td>Dishonest or fraudulent execution of deed of transfer containing false statement of consideration.</td></tr>
+            <tr><td class="fw-bold">323</td><td>Dishonest or fraudulent removal or concealment of property.</td></tr>
+            <tr><td class="fw-bold">324</td><td>Mischief.</td></tr>
+            <tr><td class="fw-bold">325</td><td>Mischief by killing or maiming animal.</td></tr>
+            <tr><td class="fw-bold">326</td><td>Mischief by injury, inundation, fire or explosive substance, etc.</td></tr>
+            <tr><td class="fw-bold">327</td><td>Mischief with intent to destroy or make unsafe a rail, aircraft, decked vessel or one of twenty tons burden.</td></tr>
+            <tr><td class="fw-bold">328</td><td>Intentionally running vessel aground or ashore with intent to commit theft, etc.</td></tr>
+            <tr><td class="fw-bold">329</td><td>Criminal trespass and house-trespass.</td></tr>
+            <tr><td class="fw-bold">330</td><td>House-trespass and hous-ebreaking.</td></tr>
+            <tr><td class="fw-bold">331</td><td>House-trespass or house-breaking.</td></tr>
+            <tr><td class="fw-bold">332</td><td>House-trespass in order to commit offence.</td></tr>
+            <tr><td class="fw-bold">333</td><td>House-trespass after preparation for hurt, assault or wrongful restraint.</td></tr>
+            <tr><td class="fw-bold">334</td><td>Dishonestly breaking open receptacle containing property.</td></tr>
+            <tr><td class="fw-bold">335</td><td>Making a false document.</td></tr>
+            <tr><td class="fw-bold">336</td><td>Forgery.</td></tr>
+            <tr><td class="fw-bold">337</td><td>Forgery of record of Court or of public register, etc.</td></tr>
+            <tr><td class="fw-bold">338</td><td>Forgery of valuable security, will, etc.</td></tr>
+            <tr><td class="fw-bold">339</td><td>Having possession of document described in section 337 or section 338, knowing it to be forged and intending to use it as genuine.</td></tr>
+            <tr><td class="fw-bold">340</td><td>Forged document or electronic record and using it as genuine.</td></tr>
+            <tr><td class="fw-bold">341</td><td>Making or possessing counterfeit seal, etc., with intent to commit forgery punishable under section 338.</td></tr>
+            <tr><td class="fw-bold">342</td><td>Counterfeiting device or mark used for authenticating documents described in section 338, or possessing counterfeit marked material.</td></tr>
+            <tr><td class="fw-bold">343</td><td>Fraudulent cancellation, destruction, etc., of will, authority to adopt, or valuable security.</td></tr>
+            <tr><td class="fw-bold">344</td><td>Falsification of accounts.</td></tr>
+            <tr><td class="fw-bold">345</td><td>Property mark.</td></tr>
+            <tr><td class="fw-bold">346</td><td>Tampering with property mark with intent to cause injury.</td></tr>
+            <tr><td class="fw-bold">347</td><td>Counterfeiting a property mark.</td></tr>
+            <tr><td class="fw-bold">348</td><td>Making or possession of any instrument for counterfeiting a property mark.</td></tr>
+            <tr><td class="fw-bold">349</td><td>Selling goods marked with a counterfeit property mark.</td></tr>
+            <tr><td class="fw-bold">350</td><td> Making a false mark upon any receptacle containing goods.</td></tr>
+            <tr><td class="fw-bold">351</td><td>Criminal intimidation.</td></tr>
+            <tr><td class="fw-bold">352</td><td>Intentional insult with intent to provoke breach of peace.</td></tr>
+            <tr><td class="fw-bold">353</td><td>Statements conducing to public mischief.</td></tr>
+            <tr><td class="fw-bold">354</td><td>Act caused by inducing person to believe that he will be rendered an object of Divine displeasure.</td></tr>
+            <tr><td class="fw-bold">355</td><td>Misconduct in public by a drunken person.</td></tr>
+            <tr><td class="fw-bold">356</td><td>Defamation.</td></tr>
+            <tr><td class="fw-bold">357</td><td>Breach of contract to attend on and supply wants of helpless person.</td></tr>
+            <tr><td class="fw-bold">358</td><td>Repeal and savings.</td></tr>
            
         </tbody>
     </table>
@@ -84,8 +444,8 @@
     <table id="bnss">
         <thead>
             <tr class="bg-dark text-white">
-                <td class="fw-bold">BNSS</td>
-                <td class="fw-bold text-center">BNSS Sections Text </td>
+                <td class="fw-bold">Sections</td>
+                <td class="fw-bold text-center">Subject</td>
             </tr>
         </thead>
         <tbody id="bnssTableBody">
@@ -621,7 +981,7 @@
             <tr><td class="fw-bold">530</td><td>Saving of inherent powers of High Court.</td></tr>
             <tr><td class="fw-bold">531</td><td>Duty of High Court to exercise continuous superintendence over Courts.</td></tr>
             <tr><td class="fw-bold">532</td><td>Trial and proceedings to be held in electronic mode.</td></tr>
-            <tr><td class="fw-bold">533</td><td>Repeal and savings.</td></tr>            
+            <tr><td class="fw-bold">533</td><td>Repeal and savings.</td></tr>                    
         </tbody>
     </table>
     </div>
@@ -648,17 +1008,34 @@
     const bnssTable = document.getElementById("bnss");
 
     // Function to toggle table visibility
+    // function toggleTableVisibility() {
+    //     if (tableSelect.value === "bns") {
+    //         bnsTable.style.display = "";
+    //         bnssTable.style.display = "none";
+    //     } else {
+    //         bnsTable.style.display = "none";
+    //         bnssTable.style.display = "";
+    //     }
+    //     // Auto-focus on search input after changing the table
+    //     document.getElementById("searchInput").focus();
+    // }
+
     function toggleTableVisibility() {
-        if (tableSelect.value === "bns") {
-            bnsTable.style.display = "";
-            bnssTable.style.display = "none";
-        } else {
-            bnsTable.style.display = "none";
-            bnssTable.style.display = "";
-        }
-        // Auto-focus on search input after changing the table
-        document.getElementById("searchInput").focus();
+    const titleDiv = document.getElementById("tableTitle"); // Get the title div
+
+    if (tableSelect.value === "bns") {
+        bnsTable.style.display = "";
+        bnssTable.style.display = "none";
+        titleDiv.innerText = "Bharatiya Nyaya Sanhita"; // Set title for BNS
+    } else {
+        bnsTable.style.display = "none";
+        bnssTable.style.display = "";
+        titleDiv.innerText = "Bharatiya Nagarik Suraksha Sanhita"; // Set title for BNSS
     }
+
+    // Auto-focus on search input after changing the table
+    document.getElementById("searchInput").focus();
+}
 
     // Initial call to set the correct table visibility
     toggleTableVisibility();
@@ -685,13 +1062,20 @@
         return;
     }
 
-    rows.forEach(row => {
+    let showNextRow = false;
+
+    rows.forEach((row, index) => {
         const serialNumberCell = row.cells[0].innerText.trim().toLowerCase();
-        const textCell = row.cells[1].innerText.trim().toLowerCase();
+        const textCell = row.cells[1] ? row.cells[1].innerText.trim().toLowerCase() : "";
 
         if (serialNumberCell === searchValue) {
             row.style.display = "";
+            showNextRow = true; // Flag to show the next row
             copyToClipboard(row.cells[0].innerText.trim(), row.cells[1].innerText.trim());
+        } else if (showNextRow && !row.cells[0].classList.contains("fw-bold")) {
+            // If the previous row was a match and this row doesn't have a number, show it
+            row.style.display = "";
+            showNextRow = false; // Reset the flag
         } else {
             row.style.display = "none";
         }
