@@ -582,5 +582,44 @@ function deleteEvent(eventId) {
             }
         }
     </script>
+    <script>
+         // Theme Toggle Functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        
+        // Check for saved theme preference or default to light mode
+        const currentTheme = localStorage.getItem('theme') || 'light-mode';
+        
+        // Apply the saved theme on page load
+        body.classList.add(currentTheme);
+        updateThemeIcon();
+        
+        // Toggle theme function
+        function toggleTheme() {
+            if (body.classList.contains('light-mode')) {
+                body.classList.replace('light-mode', 'dark-mode');
+                localStorage.setItem('theme', 'dark-mode');
+            } else {
+                body.classList.replace('dark-mode', 'light-mode');
+                localStorage.setItem('theme', 'light-mode');
+            }
+            updateThemeIcon();
+        }
+        
+        // Update the theme toggle icon
+        function updateThemeIcon() {
+            const icon = themeToggle.querySelector('i');
+            if (body.classList.contains('dark-mode')) {
+                icon.classList.replace('fa-moon', 'fa-sun');
+                themeToggle.setAttribute('title', 'Switch to Light Mode');
+            } else {
+                icon.classList.replace('fa-sun', 'fa-moon');
+                themeToggle.setAttribute('title', 'Switch to Dark Mode');
+            }
+        }
+        
+        // Add event listener to theme toggle button
+        themeToggle.addEventListener('click', toggleTheme);
+    </script>
 </body>
 </html>

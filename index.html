@@ -24,10 +24,6 @@
     text-decoration: none;
 }
 
-body{
-    font-family: Protest;   
-}
-
 /* Glassmorphism card styling */
 .card-body {
     display: flex;
@@ -40,8 +36,8 @@ body{
     padding: 20px;
     position: relative;
     gap: 15px; /* Adds space between the image and text */
+    transition: all 0.3s ease;
 }
-
 
 /* Style the image inside the card */
 .card-image {
@@ -49,7 +45,6 @@ body{
     height: 60px;
     border-radius: 50%;
     box-shadow: 1px 1px 10px #ffffff;
-
 }
 
 /* Title styling */
@@ -60,9 +55,8 @@ body{
     align-items: center; /* Vertically centers text within its container */
 }
 
-
 </style>
-<body>
+<body class="light-mode">
     <div class="area" >
         <ul class="circles">
                 <li></li>
@@ -81,7 +75,13 @@ body{
         <div class="glass2 text-light mb-3">
             <div class="d-flex justify-content-between align-items-center">
                 <p id="greetingMessage" class="mb-0">Welcome!</p>
-                <button id="logoutButton" class="btn btn-light" style="border-radius: 50px;">Log Out</button>
+                <div class="d-flex align-items-center">
+                    <!-- Theme Toggle Button -->
+                    <button id="themeToggle" class="theme-toggle me-2" title="Toggle Dark/Light Mode">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button id="logoutButton" class="btn btn-light" style="border-radius: 50px;">Log Out</button>
+                </div>
             </div>
         </div>
         
@@ -99,6 +99,12 @@ body{
             <div class="card-body glass zoom text-light mb-2">
                 <i class="fas fa-wallet icons" style="color: aquamarine;"></i>                
                 <h5 class="card-title text-center mt-3" style="color: rgb(139, 219, 192);">Expenditure</h5>
+            </div>
+        </a>
+         <a href="password.html"  class="card-link caveat">
+            <div class="card-body glass zoom text-light mb-2">
+                <i class="fas fa-lock icons" style="color: rgb(224, 0, 105);"></i>                
+                <h5 class="card-title text-center mt-3" style="color: rgb(224, 0, 105);">Password</h5>
             </div>
         </a>
         <a href="calendar.html"  class="card-link caveat">
@@ -156,67 +162,99 @@ body{
 
 
     </div>
+
     <script>
+        // Theme Toggle Functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        
+        // Check for saved theme preference or default to light mode
+        const currentTheme = localStorage.getItem('theme') || 'light-mode';
+        
+        // Apply the saved theme on page load
+        body.classList.add(currentTheme);
+        updateThemeIcon();
+        
+        // Toggle theme function
+        function toggleTheme() {
+            if (body.classList.contains('light-mode')) {
+                body.classList.replace('light-mode', 'dark-mode');
+                localStorage.setItem('theme', 'dark-mode');
+            } else {
+                body.classList.replace('dark-mode', 'light-mode');
+                localStorage.setItem('theme', 'light-mode');
+            }
+            updateThemeIcon();
+        }
+        
+        // Update the theme toggle icon
+        function updateThemeIcon() {
+            const icon = themeToggle.querySelector('i');
+            if (body.classList.contains('dark-mode')) {
+                icon.classList.replace('fa-moon', 'fa-sun');
+                themeToggle.setAttribute('title', 'Switch to Light Mode');
+            } else {
+                icon.classList.replace('fa-sun', 'fa-moon');
+                themeToggle.setAttribute('title', 'Switch to Dark Mode');
+            }
+        }
+        
+        // Add event listener to theme toggle button
+        themeToggle.addEventListener('click', toggleTheme);
   
-    // Firebase Authentication State Listener
-    firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-        currentUser = user;
+        // Firebase Authentication State Listener
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
 
-        // Check user role from localStorage
-        const userRole = localStorage.getItem("userRole");
-        if (userRole === "admin") {
-            document.getElementById("adminLink").classList.remove("d-none");
-        }
+                // Check user role from localStorage
+                const userRole = localStorage.getItem("userRole");
+                if (userRole === "admin") {
+                    document.getElementById("adminLink").classList.remove("d-none");
+                }
 
-        // Extract user ID
-        const userId = user.uid;
+                // Extract user ID
+                const userId = user.uid;
 
-        // Get the first name, fallback to 'User' if displayName is null
-        const firstName = user.displayName ? user.displayName.split(' ')[0] : 'User';
+                // Get the first name, fallback to 'User' if displayName is null
+                const firstName = user.displayName ? user.displayName.split(' ')[0] : 'User';
 
-        // Ensure greetingMessage element exists before updating it
-        const greetingElement = document.getElementById("greetingMessage");
-        if (greetingElement) {
-            greetingElement.innerHTML = `Hello <span class="" style="color: cyan;"><b>${firstName}</b>,</span> Welcome`;
-        } else {
-            console.error("Element with ID 'greetingMessage' not found.");
-        }
+                // Ensure greetingMessage element exists before updating it
+                const greetingElement = document.getElementById("greetingMessage");
+                if (greetingElement) {
+                    greetingElement.innerHTML = `Hello <span class="" style="color: cyan;"><b>${firstName}</b>,</span> Welcome`;
+                } else {
+                    console.error("Element with ID 'greetingMessage' not found.");
+                }
 
-        // Update `lastUse` in Firebase Database
-        firebase.database().ref(`users/${userId}`).update({
-            lastUse: Date.now(),
-            lastUseFormatted: new Date().toLocaleString()
-        }).then(() => {
-            console.log("Last use timestamp updated successfully.");
-        }).catch((error) => {
-            console.error("Error updating last use timestamp:", error);
+                // Update `lastUse` in Firebase Database
+                firebase.database().ref(`users/${userId}`).update({
+                    lastUse: Date.now(),
+                    lastUseFormatted: new Date().toLocaleString()
+                }).then(() => {
+                    console.log("Last use timestamp updated successfully.");
+                }).catch((error) => {
+                    console.error("Error updating last use timestamp:", error);
+                });
+
+            } else {
+                window.location.href = "login.html"; // Redirect to login if not authenticated
+            }
         });
 
-    } else {
-        window.location.href = "login.html"; // Redirect to login if not authenticated
-    }
-});
-
-
-    // Log out function
-    document.getElementById("logoutButton").addEventListener("click", () => {
-        firebase.auth().signOut().then(() => {
-            window.location.href = "login.html";
-        }).catch((error) => {
-            alert("Error logging out: " + error.message);
+        // Log out function
+        document.getElementById("logoutButton").addEventListener("click", () => {
+            firebase.auth().signOut().then(() => {
+                window.location.href = "login.html";
+            }).catch((error) => {
+                alert("Error logging out: " + error.message);
+            });
         });
-    });
-
-
-
-</script>
+    </script>
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-
 
 </body>
 </html>
