@@ -1,63 +1,23 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
-    <link rel="icon" type="image/png" href="logo.png">
-     <!-- Font Awesome for icons -->
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="style/backStar.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-   
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SmartNote V2</title>
+    <link rel="icon" type="image/png" href="img/logo.png">
+    <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-    <script src="style/sb.js"></script>
+    <script src="js/gradient-loader.js"></script>
+    <script src="js/auth.js"></script>
 </head>
-<style>
-/* Remove underline from links */
-.card-link {
-    text-decoration: none;
-}
-
-/* Glassmorphism card styling */
-.card-body {
-    display: flex;
-    align-items: center; /* Vertically centers the image and text */
-    justify-content: start;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
-    border-radius: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    padding: 20px;
-    position: relative;
-    gap: 15px; /* Adds space between the image and text */
-    transition: all 0.3s ease;
-}
-
-/* Style the image inside the card */
-.card-image {
-    width: 60px; /* Adjust size as needed */
-    height: 60px;
-    border-radius: 50%;
-    box-shadow: 1px 1px 10px #ffffff;
-}
-
-/* Title styling */
-.card-title {
-    font-size: 1.5em;
-    margin-bottom: 27px;
-    display: flex;
-    align-items: center; /* Vertically centers text within its container */
-}
-
-</style>
-<body class="light-mode">
-    <div class="area" >
+  <body>
+     <div class="area" >
         <ul class="circles">
                 <li></li>
                 <li></li>
@@ -70,137 +30,91 @@
                 <li></li>
                 <li></li>
         </ul>
-   
-    <div class="container mt-1">
-        <div class="glass2 text-light mb-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <p id="greetingMessage" class="mb-0">Welcome!</p>
-                <div class="d-flex align-items-center">
-                    <!-- Theme Toggle Button -->
-                    <button id="themeToggle" class="theme-toggle me-2" title="Toggle Dark/Light Mode">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button id="logoutButton" class="btn btn-light" style="border-radius: 50px;">Log Out</button>
-                </div>
-            </div>
-        </div>
-        
-        
-        
-        <!-- Link to Your Notes Page -->
-        <a href="note.html"  class="card-link caveat">
-            <div class="card-body glass zoom text-light mb-2">
-                <i class="fas fa-book icons" style="color: aqua;"></i> <!-- Font Awesome icon for a note -->
-                <h5 class="card-title text-center mt-3" style="color: rgb(109, 214, 214);">Your Notes</h5>
-            </div>
-        </a>
-        <!-- Link to Your expenditure Page -->
-        <a href="expenditure.html"  class="card-link caveat">
-            <div class="card-body glass zoom text-light mb-2">
-                <i class="fas fa-wallet icons" style="color: aquamarine;"></i>                
-                <h5 class="card-title text-center mt-3" style="color: rgb(139, 219, 192);">Expenditure</h5>
-            </div>
-        </a>
-         <a href="password.html"  class="card-link caveat">
-            <div class="card-body glass zoom text-light mb-2">
-                <i class="fas fa-lock icons" style="color: rgb(224, 0, 105);"></i>                
-                <h5 class="card-title text-center mt-3" style="color: rgb(224, 0, 105);">Password</h5>
-            </div>
-        </a>
-        <a href="calendar.html"  class="card-link caveat">
-            <div class="card-body glass zoom text-light mb-2">
-                <i class="fas fa-calendar-alt icons" style="color: rgb(218, 30, 221);"></i>               
-                <h5 class="card-title text-center mt-3" style="color:rgba(252, 6, 240, 0.874);">Calendar</h5>
-            </div>
-        </a>
-         <!-- Link to Your PDF Page -->
-         <a href="pdf.html" class="card-link caveat d-none d-lg-inline-block w-100">
-            <div class="card-body glass zoom text-light mb-2 ">
-                <i class="fas fa-file-pdf icons" style="color: rgb(74, 221, 30);"></i>                
-                <h5 class="card-title text-center mt-3" style="color:rgba(50, 219, 28, 0.532);">Convert to PDF</h5>
-            </div>
-        </a>
-        <a href="QR/index.html" class="card-link caveat">
-            <div class="card-body glass zoom text-light mb-2 ">
-                <i class="fas fa-indian-rupee-sign icons" style="color: rgb(212, 221, 30);"></i>               
-                <h5 class="card-title text-center mt-3" style="color:rgba(219, 171, 28, 0.532);">UPI ID to Qr</h5>
-            </div>
-        </a>
-        <!-- Link to Your expenditure Page -->
-        <a href="feedback.html" class="card-link caveat">
-            <div class="card-body glass zoom text-light mb-2 ">
-                <i class="fas fa-thumbs-up icons" style="color: rgb(188, 219, 76);"></i>                
-                <h5 class="card-title text-center mt-3" style="color: rgb(220, 240, 151);">Feedback</h5>
-            </div>
-        </a>
-        <a href="admin_report.html" class="card-link caveat d-none" id="adminLink">
-            <div class="card-body glass zoom text-light mb-2">
-                <i class="fas fa-database icons" style="color: deeppink;"></i>
-                <h5 class="card-title text-center mt-3" style="color: rgb(230, 88, 163);">App Users</h5>
-            </div>
-        </a>
-      
-      
-        <!-- Modal For App Update -->
-<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="updateModalLabel">Update Available</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                A new version of the application is available. Please update to continue.
-            </div>
-            <div class="modal-footer">
-                <a id="appUpdateLink" href="#" target="_blank" class="btn btn-primary">Update Now</a>
-            </div>
-        </div>
+
+    <nav class="navbar bg-light fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="#">
+    <img src="img/logo.png" alt="Bootstrap" width="40" height="34" class="brand-logo">
+    <span id="greetingMessage" class="mb-0">Welcome!</span>
+    </a>
+    <div class="d-flex align-items-center">
+    <div class="dropstart" >
+    <a class="btn" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fa-solid fa-gear" style="font-size: larger;"></i>
+    </a>
+
+    <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="theme.html"><i class="fa-brands fa-themeisle"></i> Theme</a></li>
+        <li><a class="dropdown-item d-none" href="admin_report.html"  id="adminLink"><i class="fas fa-database"></i> App Users</a></li>
+        <li><a class="dropdown-item " href="feedback.html"><i class="fas fa-thumbs-up"></i> Feedback</a></li>
+        <li><a  class="dropdown-item" href="#" id="logoutButton"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a></li>
+    </ul>
+  </div>
     </div>
+  </div>
+   </nav>
+  
+   <div class="container main-content" style="margin-top: 100px;">
+
+    <div class="container text-center">
+  <div class="row g-2">
+        <div class="col-6 mb-2">
+            <a href="note.html" class="text-decoration-none">
+                <div class="p-4 border glass d-flex align-items-center justify-content-center flex-column text-center  hover-card">
+                <i class="fas fa-book icons-index"></i>
+                <span class="icons-index-text">Notes</span>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 mb-2">
+            <a href="expenditure.html" class="text-decoration-none">
+                <div class="p-4 border glass d-flex align-items-center justify-content-center flex-column text-center hover-card">
+                <i class="fas fa-wallet icons-index"></i>
+                <span class="icons-index-text">Expenditure</span>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 mb-2">
+            <a href="password.html" class="text-decoration-none">
+                <div class="p-4 border glass d-flex align-items-center justify-content-center flex-column text-center hover-card">
+                <i class="fas fa-lock icons-index"></i>
+                <span class="icons-index-text">passwords</span>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 mb-2">
+            <a href="calendar.html" class="text-decoration-none">
+                <div class="p-4 border glass d-flex align-items-center justify-content-center flex-column text-center hover-card">
+                <i class="fas fa-calendar-alt icons-index"></i>
+                <span class="icons-index-text">Calendar</span>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 mb-2">
+            <a href="qr-index.html" class="text-decoration-none">
+                <div class="p-4 border glass d-flex align-items-center justify-content-center flex-column text-center  hover-card">
+                <i class="fas fa-indian-rupee-sign icons-index"></i>
+                <span class="icons-index-text">UPI to Qr</span>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 mb-2">
+            <a href="pdf.html" class="text-decoration-none">
+                <div class="p-4 border glass d-flex align-items-center justify-content-center flex-column text-center hover-card">
+                <i class="fas fa-file-pdf icons-index"></i>
+                <span class="icons-index-text">Convert to PDF</span>
+                </div>
+            </a>
+        </div>
+
+
+    
+  </div>
+</div>
+</div>
 </div>
 
-
-
-    </div>
-
-    <script>
-        // Theme Toggle Functionality
-        const themeToggle = document.getElementById('themeToggle');
-        const body = document.body;
-        
-        // Check for saved theme preference or default to light mode
-        const currentTheme = localStorage.getItem('theme') || 'light-mode';
-        
-        // Apply the saved theme on page load
-        body.classList.add(currentTheme);
-        updateThemeIcon();
-        
-        // Toggle theme function
-        function toggleTheme() {
-            if (body.classList.contains('light-mode')) {
-                body.classList.replace('light-mode', 'dark-mode');
-                localStorage.setItem('theme', 'dark-mode');
-            } else {
-                body.classList.replace('dark-mode', 'light-mode');
-                localStorage.setItem('theme', 'light-mode');
-            }
-            updateThemeIcon();
-        }
-        
-        // Update the theme toggle icon
-        function updateThemeIcon() {
-            const icon = themeToggle.querySelector('i');
-            if (body.classList.contains('dark-mode')) {
-                icon.classList.replace('fa-moon', 'fa-sun');
-                themeToggle.setAttribute('title', 'Switch to Light Mode');
-            } else {
-                icon.classList.replace('fa-sun', 'fa-moon');
-                themeToggle.setAttribute('title', 'Switch to Dark Mode');
-            }
-        }
-        
-        // Add event listener to theme toggle button
-        themeToggle.addEventListener('click', toggleTheme);
+ <script>
   
         // Firebase Authentication State Listener
         firebase.auth().onAuthStateChanged((user) => {
@@ -222,7 +136,7 @@
                 // Ensure greetingMessage element exists before updating it
                 const greetingElement = document.getElementById("greetingMessage");
                 if (greetingElement) {
-                    greetingElement.innerHTML = `Hello <span class="" style="color: cyan;"><b>${firstName}</b>,</span> Welcome`;
+                    greetingElement.innerHTML = `Hello <b>${firstName}</b>,</span> Welcome`;
                 } else {
                     console.error("Element with ID 'greetingMessage' not found.");
                 }
@@ -232,7 +146,7 @@
                     lastUse: Date.now(),
                     lastUseFormatted: new Date().toLocaleString()
                 }).then(() => {
-                    console.log("Last use timestamp updated successfully.");
+                    //console.log("Last use timestamp updated successfully.");
                 }).catch((error) => {
                     console.error("Error updating last use timestamp:", error);
                 });
@@ -251,10 +165,7 @@
             });
         });
     </script>
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    
+  </body>
 </html>

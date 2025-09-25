@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SmartNote V2</title>
+    <link rel="icon" type="image/png" href="img/logo.png">
+    <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="js/gradient-loader.js"></script>
+        <!-- QRCode.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script src="js/auth.js"></script>
+    <style>
+        /* Additional style for icon buttons */
+.btn-icon i {
+    color: white;
+}
+
+.btn-share {
+    background-color: #007bff; /* Share button color */
+}
+
+.btn-download {
+    background-color: #28a745; /* Download button color */
+}
+
+.headt {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    border-radius: 20px;
+    border-top-right-radius: 90px;
+    border: 3px solid rgba(0, 247, 255, 0.26);
+    box-shadow: 0 0px 8px 0 rgba(0, 222, 252, 0.37);
+    padding: 1rem; /* Optional: Adds padding to space the content from the borders */
+    
+}
+
+.glow-on-hover {
+height: 50px;
+border: none;
+outline: none;
+color: #fff;
+background: #111111;
+cursor: pointer;
+position: relative;
+z-index: 0;
+border-radius: 10px;
+border: 1px solid rgba(245, 222, 179, 0.322);
+}
+
+.glow-on-hover:before {
+content: '';
+background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+position: absolute;
+top: -2px;
+left:-2px;
+background-size: 400%;
+z-index: -1;
+filter: blur(5px);
+width: calc(100% + 4px);
+height: calc(100% + 4px);
+animation: glowing 20s linear infinite;
+opacity: 0;
+transition: opacity .3s ease-in-out;
+border-radius: 10px;
+}
+
+.glow-on-hover:active {
+color: #000000
+}
+
+.glow-on-hover:active:after {
+background: transparent;
+}
+
+.glow-on-hover:hover:before {
+opacity: 1;
+}
+
+.glow-on-hover:after {
+z-index: -1;
+content: '';
+position: absolute;
+width: 100%;
+height: 100%;
+background: #00090a;
+left: 0;
+top: 0;
+border-radius: 10px;
+}
+
+@keyframes glowing {
+0% { background-position: 0 0; }
+50% { background-position: 400% 0; }
+100% { background-position: 0 0; }
+}
+
+.input {
+padding: 10px;
+border-radius: 25px;
+box-shadow: 0 0 15px #00aced, inset 0 0 7px rgba(7, 7, 7, 0.822); /* Outer and inner shadow */
+border-color: aqua;
+}
+.input:hover {
+border-color: rgb(255, 0, 170);
+box-shadow: 0 0 20px  rgb(255, 0, 170), inset 0 0 10px rgba(255, 0, 170, 0.664); /* Larger shadows on hover */
+}
+.glass {
+background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+border-radius: 25px;
+border: 1px solid rgba(255, 255, 255, 0.18);
+box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+padding: 1rem; /* Optional: Adds padding to space the content from the borders */
+}
+
+.glass-qr {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    border-radius: 20px;
+    border: 3px solid rgba(0, 255, 221, 0.918);
+    box-shadow: 0 1px 20px 0 rgb(0, 252, 231);
+    padding: 1rem; /* Optional: Adds padding to space the content from the borders */
+    }
+    </style>
+</head>
+  <body>
+     <div class="area" >
+        <ul class="circles">
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+        </ul>
+
+        <nav class="navbar bg-light fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="#">
+    <img src="img/logo.png" alt="Bootstrap" width="40" height="34" class="brand-logo">
+    <span id="greetingMessage" class="mb-0">QR Generator</span>
+    </a>
+    <div class="d-flex align-items-center">
+        <a class="dropdown-item" alt="Log Out" href="#" id="logoutButton"><i class="fa-solid fa-right-from-bracket"></i></a>
+    
+    </div>
+  </div>
+   </nav>
+  
+   <div class="container main-content" style="margin-top: 100px;">
+      <div class="container mt-3 text-light">
+        <div class="row justify-content-center">
+            <div class="col-md-8">            
+               <form id="upiForm" class="glass mt-3 mb-5">
+  <!-- UPI ID -->
+  <div class="mb-3">
+    <label for="upiId" class="form-label">UPI ID <span class="text-danger">*</span></label>
+    <input type="text" class="form-control" id="upiId" placeholder="Enter UPI ID" required>
+  </div>
+
+  <!-- Amount -->
+  <div class="mb-3">
+    <label for="amount" class="form-label">Amount (INR) <span class="text-danger">*</span></label>
+    <input type="number" class="form-control" id="amount" placeholder="Enter Amount" required>
+  </div>
+
+  <!-- Switch -->
+  <div class="form-check form-switch mb-3">
+    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
+    <label class="form-check-label" for="flexSwitchCheckChecked">Off For Without Amount</label>
+  </div>
+
+  <!-- Remember Me -->
+  <div class="form-check mb-3">
+    <input type="checkbox" class="form-check-input" id="rememberMe">
+    <label class="form-check-label" for="rememberMe">Remember UPI ID</label>
+  </div>
+
+  <!-- Buttons -->
+  <div class="d-grid gap-2">
+    <button type="submit" class="btn btn-primary glow-on-hover">Generate QR Code</button>
+    <a href="index.html" class="btn btn-secondary glow-on-hover">Generate New QR</a>
+  </div>
+</form>
+
+                <div id="qrCodeContainer" class="mt-4 text-center">
+                    <!-- QR code will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 4 JS and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Load saved UPI ID when the page is loaded
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedUpiId = localStorage.getItem('upiId');
+            if (savedUpiId) {
+                document.getElementById('upiId').value = savedUpiId;
+                document.getElementById('rememberMe').checked = true;
+            }
+            const switchInput = document.getElementById('flexSwitchCheckChecked');
+            toggleAmountField(switchInput.checked);
+        });
+
+        // Function to toggle the amount field
+        function toggleAmountField(isChecked) {
+            const amountInput = document.getElementById('amount');
+            const amountLabel = document.getElementById('amountLabel');
+            amountInput.required = isChecked;
+            amountInput.disabled = !isChecked;
+            amountLabel.style.visibility = isChecked ? 'visible' : 'hidden';
+        }
+
+        // Listen for switch toggle
+        document.getElementById('flexSwitchCheckChecked').addEventListener('change', function () {
+            toggleAmountField(this.checked);
+        });
+
+        // Handle form submission and generate QR Code
+        document.getElementById('upiForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const upiId = document.getElementById('upiId').value.trim();
+            const amount = document.getElementById('amount').value.trim();
+            const isAmountRequired = document.getElementById('flexSwitchCheckChecked').checked;
+
+            if (!upiId || (isAmountRequired && (!amount || isNaN(amount) || amount <= 0))) {
+                alert("Please enter valid UPI ID and amount!");
+                return;
+            }
+
+            const upiLink = isAmountRequired
+                ? `upi://pay?pa=${upiId}&am=${amount}&cu=INR`
+                : `upi://pay?pa=${upiId}&cu=INR`;
+
+            if (document.getElementById('rememberMe').checked) {
+                localStorage.setItem('upiId', upiId);
+            } else {
+                localStorage.removeItem('upiId');
+            }
+
+            QRCode.toDataURL(upiLink, { errorCorrectionLevel: 'H' }, 
+            function (error, url) {
+                if (error) {
+                    console.error(error);
+                    alert('Failed to generate QR Code');
+                } else {
+                    window.location.href = `qr.html?qrCode=${encodeURIComponent(url)}`;
+                }
+            });
+        });
+    </script>
+     <script>
+        document.getElementById("reloadButton").addEventListener("click", function () {
+            location.reload(); // Reloads the current page
+        });
+    </script>
+
+   </div>
+  </div>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    
+  </body>
+</html>

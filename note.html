@@ -1,40 +1,25 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Note - Note</title>
-    <link rel="icon" type="image/png" href="logo.png">
-    <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="style/backStar.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <!-- Font Awesome for icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <!-- Bootstrap CSS -->
-
-
-
-    <!-- Firebase SDK -->
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SmartNote V2</title>
+    <link rel="icon" type="image/png" href="img/logo.png">
+    <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="style/sb.js"></script>
-</head>
-<style>
-body {
-   background: radial-gradient(ellipse at bottom, #0d1d31 0%,#0d1d31);  
-   font-family: Protest;
-}
-
+    <script src="js/gradient-loader.js"></script>
+    <script src="js/auth.js"></script>
+    <style>
 /* Switch styles */
 .switch {
     position: relative;
     display: inline-block;
     width: 34px;
-    height: 16px;
-
-    
+    height: 16px;   
 }
 
 .switch input {
@@ -68,7 +53,7 @@ body {
 }
 
 input:checked + .slider {
-    background-color: #ff6c0a; /* Set color for the 'Important' state */
+    background-color: #003cff; /* Set color for the 'Important' state */
 }
 
 input:checked + .slider:before {
@@ -95,15 +80,41 @@ input:checked + .slider:before {
         flex: 0 0 48%; /* Two columns per row */
     }
 
+  .floating-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .floating-btn:hover {
+            transform: scale(1.1);
+        }
 
-
-
-
-
-
+   @media (max-width: 480px) {
+   .floating-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+                bottom: 15px;
+                right: 15px;
+            }
+}
+     
+       
 </style>
-<body>
-    <div class="area" >
+</head>
+  <body>
+     <div class="area" >
         <ul class="circles">
                 <li></li>
                 <li></li>
@@ -116,25 +127,27 @@ input:checked + .slider:before {
                 <li></li>
                 <li></li>
         </ul>
-    <div class="container mt-1 text-light " >
-        
-        <div class="glass2 text-light mb-2">
-            <!-- Button to Open Modal -->     
-           <div class="d-flex justify-content-between align-items-center">
-             <!-- Back Button with Icon -->
-             <a href="#" class="btn btn-lg btn-outline-light me-2 scroll" style="border-radius: 50px;" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i>
-             </a>
-                <!-- Notes Count Display -->
-               <h5 class="mt-1">Notes</h5>
-               <button id="logoutButton" class="btn btn-light" style="border-radius: 70px; font-size: small;">Log Out</button>
-           </div>
-        </div>
-        
-         <!-- Add Note Button with Icon -->
-         <button id="openModalBtn" class="btn btn-outline-light" style="border-radius: 20px; font-size: small;">
-         <i class="fas fa-plus"></i> Add Note
-         </button>
+
+    <nav class="navbar bg-light fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="#">
+    <img src="img/logo.png" alt="Bootstrap" width="40" height="34" class="brand-logo">
+    <span id="greetingMessage" class="mb-0">Note Found <span class="text-light" id="noteCount">0</span></span>
+    </a>
+    <div class="d-flex align-items-center">
+        <a class="dropdown-item" alt="Log Out" href="#" id="logoutButton"><i class="fa-solid fa-right-from-bracket"></i></a>
+    
+    </div>
+  </div>
+   </nav>
+  
+   <div class="container main-content" style="margin-top: 80px;">
+      <div class="container" >
+         <div class="mb-3">
+         <!-- Floating Add Button -->
+        <button type="button" class="floating-btn btn btn-warning" id="openModalBtn">
+            <i class="fas fa-plus"></i>
+        </button>
 
         <!-- Important Filter Button with Icon -->
         <button id="importantFilterBtn" class="btn btn-outline-warning" style="border-radius: 20px; font-size: small">
@@ -143,32 +156,35 @@ input:checked + .slider:before {
         <button id="toggleViewBtn" class="btn btn-outline-info d-none d-md-inline-block" style="border-radius: 20px; font-size: small">
             <i class="fas fa-th-large"></i> Grid View
         </button>
-        
-        
-        <P class="mt-1">Your Notes [<span class="text-light" id="noteCount">0</span>]</P>
-
-        
+        </div>
         <!-- Search Input for Notes -->
            <!-- Search Filter Section -->
-        <div class="mb-2">
-            <div class="input-group zoom mb-2" >
-                <span class="input-group-text" id="searchIcon">
-                    <i class="fas fa-search"></i>
-                </span>
-                <input id="searchInput" class="form-control" type="text" placeholder="Search notes...">
-            </div>
-            
-            <select id="labelFilter" class="form-control mt-2">
-                <option value="">All Labels</option>
-            </select>
-            
-        </div>
+    <div class="row mb-2">
+  <!-- Search Input -->
+  <div class="col-md-6 mb-2 mb-md-0">
+    <div class="input-group zoom">
+      <span class="input-group-text" id="searchIcon">
+        <i class="fas fa-search"></i>
+      </span>
+      <input id="searchInput" class="form-control" type="text" placeholder="Search notes...">
+    </div>
+  </div>
+
+  <!-- Label Filter -->
+  <div class="col-md-6">
+    <select id="labelFilter" class="form-control">
+      <option value="">All Labels</option>
+      <option value=""></option>
+    </select>
+  </div>
+</div>
+
         
         <ul id="notesList" class="list-view"></ul>
         <ul id="notesList" class="list-group"></ul>
         
        <!-- Modal for Adding/Editing Note -->
-<div class="modal fade glass" id="addNoteModal" tabindex="-1" aria-labelledby="addNoteModalLabel" aria-hidden="true">
+<div class="modal  glass" id="addNoteModal" tabindex="-1" aria-labelledby="addNoteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content text-dark">
             <div class="modal-header">
@@ -350,14 +366,14 @@ document.getElementById("labelFilter").addEventListener("change", () => {
             hour12: true  // Use 12-hour format (AM/PM)
         });
 
-        const listItem = document.createElement("div");
+        const listItem = document.createElement("li");
         listItem.classList.add("group-item");
         if (noteData.important) listItem.classList.add("important-note");
 
         listItem.innerHTML = `
             <div class="zoom mb-2 "> 
-           <a class="btn btn-sm btn-light d-block w-100 " style="position: relative; background-color: rgba(240, 250, 94, 0.507);">           
-            <p class="text-left" style="margin-bottom: 1px; font-family: Protest;">
+           <a class="btn btn-sm btn-light d-block w-100 " style="position: relative; background-color: rgba(255, 255, 255, 0.322);">           
+            <p class="text-start" style="margin-bottom: 1px; font-family: Protest;">
             <b>${noteData.title}</b>
            </p>
             <label class="switch" style="position: absolute; top: 50%; transform: translateY(-50%); right: 10px;">
@@ -588,5 +604,13 @@ toggleViewBtn.addEventListener("click", () => {
         themeToggle.addEventListener('click', toggleTheme);
     </script>
 
-</body>
+
+
+
+   </div>
+   </div>
+  
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    
+  </body>
 </html>
