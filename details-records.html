@@ -161,6 +161,7 @@
                 bottom: 15px;
                 right: 15px;
             }
+        
         }
 
         /* Neon Glow for Active Buttons */
@@ -246,17 +247,22 @@
             <div class="row justify-content-center">
                 <div class="">
                     <!-- Record Header -->
-                    <div class="glass record-header text-light">
-                        <h5 id="recordTitle">Record Title</h5>
-                       
+                    <div class="glass record-header d-flex justify-content-between align-items-center">
+                    <h5 id="recordTitle" class="mb-0">Record Title</h5>
+                    <button class="btn btn-info btn-sm" id="copyTransactionsBtn">
+                        <i class="fas fa-copy"></i>
+                    </button>
                     </div>
 
+                    
 
                     
                     <!-- Total Amount -->
-                    <div class="total-amount glass p-3 mb-3">
+                    <div class="total-amount glass text-start  p-2 mb-3">
                         Total: ₹<span id="totalAmount">0.00</span>
                     </div>
+                   
+
 
                     <div class="text-center" id="transactionsLoader">
                 <!-- Records will be dynamically added here -->
@@ -481,7 +487,7 @@ function loadTransactions(userId, recordId) {
     <div class="d-flex justify-content-between align-items-center">
         <!-- Date + Description -->
         <div>
-            <div style="font-size: 14px; color: #ffc107;">
+            <div style="font-size: 14px;">
                 <i class="fas fa-calendar-alt me-1"></i> ${formattedDate}
             </div>
             <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">
@@ -599,6 +605,8 @@ function loadTransactions(userId, recordId) {
             }
         }
 
+
+
         // Log out function
         document.getElementById("logoutButton").addEventListener("click", () => {
             firebase.auth().signOut().then(() => {
@@ -615,6 +623,49 @@ function loadTransactions(userId, recordId) {
             // Set positive as default transaction type
             document.getElementById('positiveBtn').classList.add('active');
         });
+
+
+       // Copy all transactions to clipboard with running total
+document.getElementById("copyTransactionsBtn").addEventListener("click", () => {
+    if (transactions.length === 0) {
+        alert("No transactions to copy.");
+        return;
+    }
+
+    let copyText = "";
+    let runningTotal = 0;
+
+    // Since transactions are already sorted by date (newest first), 
+    // we'll iterate from the end to show oldest → newest
+    const sortedTransactions = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    sortedTransactions.forEach(t => {
+        const formattedDate = new Date(t.date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+
+        const sign = t.type === "negative" ? "-" : "+";
+        const amount = parseFloat(t.amount);
+
+        // Update running total
+        runningTotal += (t.type === "negative" ? -amount : amount);
+
+        const description = t.description && t.description.trim() !== "" ? t.description : "Null";
+        
+        copyText += `${description} | ${formattedDate} | ${sign} ₹${amount.toFixed(2)} | Total: ₹${runningTotal.toFixed(2)}\n`;
+    });
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(copyText).then(() => {
+       // alert("Transactions with totals copied to clipboard!");
+    }).catch(err => {
+        console.error("Failed to copy: ", err);
+        alert("Failed to copy transactions.");
+    });
+});
+
     </script>
   </body>
 </html>
