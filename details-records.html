@@ -312,9 +312,16 @@
                             <input type="hidden" id="transactionType" value="positive">
                         </div>
                         <div class="mb-3">
-                            <label for="transactionDate" class="form-label">Date</label>
-                            <input type="date" class="form-control" id="transactionDate" required>
+                        <label for="transactionDate" class="form-label">Date</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="date" class="form-control" id="transactionDate">
+                            <!-- Toggle Button -->
+                            <button type="button" class="btn btn-outline-warning" id="toggleDateBtn">
+                                <i class="fas fa-toggle-on"></i>
+                            </button>
                         </div>
+                    </div>
+
                         <div class="mb-3">
                             <label for="transactionAmount" class="form-label">Amount</label>
                             <input type="number" class="form-control" id="transactionAmount" placeholder="Enter amount" step="0.01" required>
@@ -454,36 +461,44 @@ function loadTransactions(userId, recordId) {
 }
 
         // Display transactions in the list
-        function displayTransactions() {
-            const transactionsList = document.getElementById('transactionsList');
-            
-            if (transactions.length === 0) {
-                transactionsList.innerHTML = `
-                    <div class="empty-transactions">
-                        <i class="fas fa-exchange-alt"></i>
-                        <h4>No Transactions Yet</h4>
-                        <p>Click the "Add Transaction" button to create your first transaction.</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            transactionsList.innerHTML = '';
-            
-            transactions.forEach(transaction => {
-                const formattedDate = new Date(transaction.date).toLocaleDateString('en-US', {
+// Display transactions in the list
+function displayTransactions() {
+    const transactionsList = document.getElementById('transactionsList');
+    
+    if (transactions.length === 0) {
+        transactionsList.innerHTML = `
+            <div class="empty-transactions">
+                <i class="fas fa-exchange-alt"></i>
+                <h4>No Transactions Yet</h4>
+                <p>Click the "Add Transaction" button to create your first transaction.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    transactionsList.innerHTML = '';
+    
+    transactions.forEach(transaction => {
+        // Fix for null/undefined dates
+        let formattedDate = "Not Provided";
+        if (transaction.date) {
+            const dateObj = new Date(transaction.date);
+            if (!isNaN(dateObj.getTime())) { // Check if valid date
+                formattedDate = dateObj.toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'short',
                     day: 'numeric'
                 });
-                
-                const isNegative = transaction.type === 'negative';
-                const amountClass = isNegative ? 'amount-negative' : 'amount-positive';
-                const sign = isNegative ? '-' : '+';
-                
-                const listItem = document.createElement('div');
-                listItem.className = `transaction-item glass p-3 text-light zoom ${isNegative ? 'negative' : ''}`;
-               listItem.innerHTML = `
+            }
+        }
+        
+        const isNegative = transaction.type === 'negative';
+        const amountClass = isNegative ? 'amount-negative' : 'amount-positive';
+        const sign = isNegative ? '-' : '+';
+        
+        const listItem = document.createElement('div');
+        listItem.className = `transaction-item glass p-3 text-light zoom ${isNegative ? 'negative' : ''}`;
+        listItem.innerHTML = `
     <div class="d-flex justify-content-between align-items-center">
         <!-- Date + Description -->
         <div>
@@ -512,10 +527,9 @@ function loadTransactions(userId, recordId) {
     </div>
 `;
 
-                
-                transactionsList.appendChild(listItem);
-            });
-        }
+        transactionsList.appendChild(listItem);
+    });
+}
 
         // Calculate and display total amount
         function calculateTotal() {
@@ -552,7 +566,7 @@ function loadTransactions(userId, recordId) {
             const amount = document.getElementById('transactionAmount').value;
             const description = document.getElementById('transactionDescription').value.trim();
             
-            if (!date || !amount) {
+            if (!amount) {
                 alert('Please fill in all required fields.');
                 return;
             }
@@ -616,15 +630,62 @@ function loadTransactions(userId, recordId) {
             });
         });
 
-       document.getElementById('addTransactionModal').addEventListener('show.bs.modal', () => {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('transactionDate').value = today;
-            
-            // Set positive as default transaction type
-            document.getElementById('positiveBtn').classList.add('active');
-        });
+      // Track toggle state globally
+// Track toggle state globally
+let dateEnabled = true; // default ON
 
+// Modal open listener - FIXED VERSION
+document.getElementById('addTransactionModal').addEventListener('show.bs.modal', () => {
+    // Set today's date when modal opens and date is enabled
+    if (dateEnabled) {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('transactionDate').value = today;
+        document.getElementById('transactionDate').disabled = false;
+        
+        // Update button appearance
+        toggleDateBtn.classList.remove("btn-danger");
+        toggleDateBtn.classList.add("btn-outline-warning");
+        toggleDateBtn.innerHTML = `<i class="fas fa-toggle-on"></i>`;
+    } else {
+        document.getElementById('transactionDate').value = "";
+        document.getElementById('transactionDate').disabled = true;
+        
+        // Update button appearance
+        toggleDateBtn.classList.remove("btn-outline-warning");
+        toggleDateBtn.classList.add("btn-danger");
+        toggleDateBtn.innerHTML = `<i class="fas fa-toggle-off"></i>`;
+    }
 
+    // Default transaction type = positive
+    document.getElementById('positiveBtn').classList.add('active');
+    document.getElementById('negativeBtn').classList.remove('active');
+});
+
+// Toggle button functionality - FIXED VERSION
+const toggleDateBtn = document.getElementById("toggleDateBtn");
+const transactionDate = document.getElementById("transactionDate");
+
+toggleDateBtn.addEventListener("click", () => {
+    dateEnabled = !dateEnabled;
+
+    if (dateEnabled) {
+        // Set today's date when enabling
+        const today = new Date().toISOString().split('T')[0];
+        transactionDate.value = today;
+        transactionDate.disabled = false;
+        
+        toggleDateBtn.classList.remove("btn-danger");
+        toggleDateBtn.classList.add("btn-outline-warning");
+        toggleDateBtn.innerHTML = `<i class="fas fa-toggle-on"></i>`;
+    } else {
+        transactionDate.value = "";
+        transactionDate.disabled = true;
+        
+        toggleDateBtn.classList.remove("btn-outline-warning");
+        toggleDateBtn.classList.add("btn-danger");
+        toggleDateBtn.innerHTML = `<i class="fas fa-toggle-off"></i>`;
+    }
+});
        // Copy all transactions to clipboard with running total
 document.getElementById("copyTransactionsBtn").addEventListener("click", () => {
     if (transactions.length === 0) {
@@ -640,11 +701,18 @@ document.getElementById("copyTransactionsBtn").addEventListener("click", () => {
     const sortedTransactions = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
 
     sortedTransactions.forEach(t => {
-        const formattedDate = new Date(t.date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
+        // Fix for null/undefined dates - same logic as display function
+        let formattedDate = "Date Not Provided";
+        if (t.date) {
+            const dateObj = new Date(t.date);
+            if (!isNaN(dateObj.getTime())) { // Check if valid date
+                formattedDate = dateObj.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            }
+        }
 
         const sign = t.type === "negative" ? "-" : "+";
         const amount = parseFloat(t.amount);
@@ -665,6 +733,7 @@ document.getElementById("copyTransactionsBtn").addEventListener("click", () => {
         alert("Failed to copy transactions.");
     });
 });
+
 
     </script>
   </body>
