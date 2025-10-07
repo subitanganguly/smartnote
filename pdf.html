@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SmartNote V2</title>
+    <title>SmartNote V2 - Enhanced PDF Converter</title>
     <link rel="icon" type="image/png" href="img/logo.png">
     <link rel="stylesheet" href="style/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -17,6 +17,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <!-- jsPDF library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Cropper.js for image cropping -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script src="js/gradient-loader.js"></script>
     <script src="js/auth.js"></script>
     <style>
@@ -24,6 +27,17 @@
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
+            min-height: 100px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .image-preview-container.empty {
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
         }
 
         .image-preview {
@@ -55,8 +69,115 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
+            z-index: 10;
         }
 
+        .image-preview .rotate-btn {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .image-preview .crop-btn {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .slider-container {
+            margin-bottom: 15px;
+        }
+
+        .slider-label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .progress {
+            height: 10px;
+            margin-bottom: 15px;
+        }
+
+        .drop-text {
+            color: #6c757d;
+            text-align: center;
+        }
+
+        .settings-panel {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .preview-modal-img {
+            max-width: 100%;
+            max-height: 70vh;
+        }
+
+        .image-count-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.7);
+            padding: 5px;
+            display: flex;
+            justify-content: space-around;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .image-preview:hover .image-controls {
+            opacity: 1;
+        }
+
+        .image-controls button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
     </style>
 </head>
   <body>
@@ -75,85 +196,256 @@
         </ul>
 
         <nav class="navbar bg-light fixed-top">
-  <div class="container">
-    <a class="navbar-brand" href="#">
-    <img src="img/logo.png" alt="Bootstrap" width="40" height="34" class="brand-logo">
-    <span id="greetingMessage" class="mb-0">PDF Converter </span>
-    </a>
-    <div class="d-flex align-items-center">
-        <a class="dropdown-item" alt="Log Out" href="#" id="logoutButton"><i class="fa-solid fa-right-from-bracket"></i></a>
-    
-    </div>
-  </div>
-   </nav>
+          <div class="container">
+            <a class="navbar-brand" href="#">
+            <img src="img/logo.png" alt="Bootstrap" width="40" height="34" class="brand-logo">
+            <span id="greetingMessage" class="mb-0">Enhanced PDF Converter </span>
+            </a>
+            <div class="d-flex align-items-center">
+                <a class="dropdown-item" alt="Log Out" href="#" id="logoutButton"><i class="fa-solid fa-right-from-bracket"></i></a>
+            </div>
+          </div>
+        </nav>
   
-   <div class="container main-content" style="margin-top: 100px;">
-     <div class="container mt-1 text-light">
-       
-            <!-- Modal -->
- <div class="modal fade text-dark" id="offlineModal" tabindex="-1" aria-labelledby="offlineModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="offlineModalLabel">You are offline</h5>
-        </div>
-        <div class="modal-body">
-          You have lost connection to the internet. Please check your connection.
-        </div>
-      </div>
-    </div>
-  </div>
-        <div class="row justify-content-center mt-3">
-            <p>Total PDFs Converted: <span id="pdfCountDisplay" class="text-info">Loading....</span></p>
-            <div class="col">
-                <!-- Image Upload Section -->
-                <div class="mb-3">
-                    <label for="fileInput" class="form-label">Choose images (JPG, JPEG, PNG)</label>
-                    <input class="form-control" type="file" id="fileInput" accept=".jpg, .jpeg, .png" multiple>
+        <div class="container main-content" style="margin-top: 100px;">
+            <div class="container mt-1 text-light">
+                <!-- Offline Modal -->
+                <div class="modal fade text-dark" id="offlineModal" tabindex="-1" aria-labelledby="offlineModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="offlineModalLabel">You are offline</h5>
+                        </div>
+                        <div class="modal-body">
+                          You have lost connection to the internet. Please check your connection.
+                        </div>
+                      </div>
+                    </div>
                 </div>
 
-                <!-- Image Preview Section -->
-                <div id="imagePreview" class="image-preview-container"></div>
-
-                <!-- Brightness Slider -->
-                <div class="slider-container">
-                    <label for="brightness" class="slider-label">Brightness: </label><span id="brightnessValue">1</span>
-                    <input type="range" id="brightness" class="form-range" min="0" max="2" step="0.01" value="1">
+                <!-- PDF Preview Modal -->
+                <div class="modal fade text-dark" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="previewModalLabel">PDF Preview</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                          <div id="pdfPreview" class="border p-3">
+                            <p class="text-muted">PDF preview will be generated here</p>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                          <button type="button" class="btn btn-primary" id="downloadPdfBtn">Download PDF</button>
+                        </div>
+                      </div>
+                    </div>
                 </div>
 
-                <!-- Contrast Slider -->
-                <div class="slider-container">
-                    <label for="contrast" class="slider-label">Contrast:</label><span id="contrastValue">1</span>
-                    <input type="range" id="contrast" class="form-range" min="0" max="2" step="0.01" value="1">
+                <!-- Crop Modal -->
+                <div class="modal fade text-dark" id="cropModal" tabindex="-1" aria-labelledby="cropModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="cropModalLabel">Crop Image</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                          <div class="img-container">
+                            <img id="cropImage" src="" alt="Image to crop" style="max-width: 100%;">
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                          <button type="button" class="btn btn-primary" id="applyCropBtn">Apply Crop</button>
+                        </div>
+                      </div>
+                    </div>
                 </div>
 
-                <!-- Convert Button -->
-                <button class="btn btn-primary w-100" id="convertBtn">Convert to PDF</button>
+                <div class="row justify-content-center mt-3">
+                    <div class="col-md-8">
+                        <div class="card bg-dark bg-opacity-75">
+                            <div class="card-body">
+                                <p>Total PDFs Converted: <span id="pdfCountDisplay" class="text-info">Loading....</span></p>
+                                
+                                <!-- Settings Panel -->
+                                <div class="settings-panel mb-4">
+                                    <h5 class="mb-3">PDF Settings</h5>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="pageSize" class="form-label">Page Size</label>
+                                                <select class="form-select" id="pageSize">
+                                                    <option value="a4">A4</option>
+                                                    <option value="letter">Letter</option>
+                                                    <option value="legal">Legal</option>
+                                                    <option value="a3">A3</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="quality" class="form-label">Image Quality</label>
+                                                <select class="form-select" id="quality">
+                                                    <option value="0.7">Standard</option>
+                                                    <option value="1" selected>High</option>
+                                                    <option value="0.5">Low (Smaller File)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="autoRotate" checked>
+                                        <label class="form-check-label" for="autoRotate">Auto-rotate images</label>
+                                    </div>
+                                </div>
+
+                                <!-- Image Upload Section -->
+                                <div class="mb-3">
+                                    <label for="fileInput" class="form-label">Choose images (JPG, JPEG, PNG) or drag and drop</label>
+                                    <input class="form-control" type="file" id="fileInput" accept=".jpg, .jpeg, .png" multiple>
+                                </div>
+
+                                <!-- Image Preview Section -->
+                                <div id="imagePreview" class="image-preview-container empty">
+                                    <div class="drop-text">Drag & drop images here or click to browse</div>
+                                </div>
+
+                                <!-- Progress Bar -->
+                                <div class="progress d-none" id="conversionProgress">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                                </div>
+
+                                <!-- Image Adjustment Controls -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <!-- Brightness Slider -->
+                                        <div class="slider-container">
+                                            <label for="brightness" class="slider-label">Brightness: </label><span id="brightnessValue">1</span>
+                                            <input type="range" id="brightness" class="form-range" min="0" max="2" step="0.01" value="1">
+                                        </div>
+
+                                        <!-- Contrast Slider -->
+                                        <div class="slider-container">
+                                            <label for="contrast" class="slider-label">Contrast:</label><span id="contrastValue">1</span>
+                                            <input type="range" id="contrast" class="form-range" min="0" max="2" step="0.01" value="1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <!-- Saturation Slider -->
+                                        <div class="slider-container">
+                                            <label for="saturation" class="slider-label">Saturation:</label><span id="saturationValue">1</span>
+                                            <input type="range" id="saturation" class="form-range" min="0" max="2" step="0.01" value="1">
+                                        </div>
+
+                                        <!-- Grayscale Toggle -->
+                                        <div class="form-check form-switch mt-3">
+                                            <input class="form-check-input" type="checkbox" id="grayscale">
+                                            <label class="form-check-label" for="grayscale">Grayscale</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                    <button class="btn btn-outline-light me-md-2" id="previewBtn">Preview PDF</button>
+                                    <button class="btn btn-primary" id="convertBtn">Convert to PDF</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Variables for brightness and contrast
+        // Variables for image adjustments
         let brightness = 1;
         let contrast = 1;
+        let saturation = 1;
+        let grayscale = false;
+        let cropper = null;
+        let currentCropImageIndex = null;
+
+        // Initialize Firebase (you need to add your config here)
+
 
         // Handle file input and preview generation
         document.getElementById('fileInput').addEventListener('change', function () {
-            const files = Array.from(this.files);
-            const previewContainer = document.getElementById('imagePreview');
-            previewContainer.innerHTML = ''; // Clear previous previews
+            handleFiles(this.files);
+        });
 
-            files.forEach((file, index) => {
+        // Drag and drop functionality
+        const dropArea = document.getElementById('imagePreview');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropArea.classList.add('bg-light', 'bg-opacity-25');
+        }
+
+        function unhighlight() {
+            dropArea.classList.remove('bg-light', 'bg-opacity-25');
+        }
+
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            const fileList = Array.from(files);
+            const previewContainer = document.getElementById('imagePreview');
+            
+            if (fileList.length > 0) {
+                previewContainer.classList.remove('empty');
+                // Don't clear previous previews - allow adding more images
+            }
+
+            fileList.forEach((file, index) => {
+                // Check if file is an image
+                if (!file.type.match('image.*')) {
+                    alert(`File "${file.name}" is not an image. Please select only image files.`);
+                    return; // Skip this file instead of using continue
+                }
+                
                 const reader = new FileReader();
                 reader.onload = function (e) {
                     const div = document.createElement('div');
                     div.className = 'image-preview';
                     div.dataset.index = index;
+                    div.dataset.rotation = 0;
 
                     div.innerHTML = `
                         <img src="${e.target.result}" alt="Image Preview">
                         <button class="remove-btn" title="Remove">&times;</button>
+                        <div class="image-controls">
+                            <button class="rotate-left-btn" title="Rotate Left"><i class="fas fa-undo"></i></button>
+                            <button class="rotate-right-btn" title="Rotate Right"><i class="fas fa-redo"></i></button>
+                            <button class="crop-btn" title="Crop"><i class="fas fa-crop"></i></button>
+                        </div>
                     `;
                     previewContainer.appendChild(div);
                 };
@@ -161,19 +453,121 @@
             });
 
             // Make the preview container sortable
-            Sortable.create(previewContainer, {
-                animation: 150
-            });
+            if (previewContainer.children.length > 0) {
+                Sortable.create(previewContainer, {
+                    animation: 150
+                });
+            }
 
-            // Remove button functionality
-            previewContainer.addEventListener('click', function (e) {
-                if (e.target.classList.contains('remove-btn')) {
-                    e.target.parentElement.remove();
-                }
-            });
+            updateImageCount();
+        }
+
+        // Update image count badge
+        function updateImageCount() {
+            const previews = document.querySelectorAll('.image-preview');
+            const count = previews.length;
+            
+            if (count > 0) {
+                document.getElementById('imagePreview').classList.remove('empty');
+            } else {
+                document.getElementById('imagePreview').classList.add('empty');
+                document.getElementById('imagePreview').innerHTML = '<div class="drop-text">Drag & drop images here or click to browse</div>';
+            }
+        }
+
+        // Remove button functionality
+        document.getElementById('imagePreview').addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-btn') || 
+                e.target.parentElement.classList.contains('remove-btn')) {
+                const btn = e.target.classList.contains('remove-btn') ? e.target : e.target.parentElement;
+                btn.parentElement.remove();
+                updateImageCount();
+            }
+            
+            // Rotate buttons
+            if (e.target.classList.contains('rotate-left-btn') || 
+                e.target.parentElement.classList.contains('rotate-left-btn')) {
+                const btn = e.target.classList.contains('rotate-left-btn') ? e.target : e.target.parentElement;
+                rotateImage(btn.closest('.image-preview'), -90);
+            }
+            
+            if (e.target.classList.contains('rotate-right-btn') || 
+                e.target.parentElement.classList.contains('rotate-right-btn')) {
+                const btn = e.target.classList.contains('rotate-right-btn') ? e.target : e.target.parentElement;
+                rotateImage(btn.closest('.image-preview'), 90);
+            }
+            
+            // Crop button
+            if (e.target.classList.contains('crop-btn') || 
+                e.target.parentElement.classList.contains('crop-btn')) {
+                const btn = e.target.classList.contains('crop-btn') ? e.target : e.target.parentElement;
+                openCropModal(btn.closest('.image-preview'));
+            }
         });
 
-        // Update brightness and contrast for previews
+        // Rotate image function
+        function rotateImage(previewElement, degrees) {
+            const img = previewElement.querySelector('img');
+            const currentRotation = parseInt(previewElement.dataset.rotation) || 0;
+            const newRotation = (currentRotation + degrees) % 360;
+            previewElement.dataset.rotation = newRotation;
+            
+            img.style.transform = `rotate(${newRotation}deg)`;
+        }
+
+        // Open crop modal
+        function openCropModal(previewElement) {
+            const img = previewElement.querySelector('img');
+            const modal = new bootstrap.Modal(document.getElementById('cropModal'));
+            const cropImage = document.getElementById('cropImage');
+            
+            cropImage.src = img.src;
+            currentCropImageIndex = Array.from(document.querySelectorAll('.image-preview')).indexOf(previewElement);
+            
+            modal.show();
+            
+            // Initialize cropper after modal is shown
+            document.getElementById('cropModal').addEventListener('shown.bs.modal', function () {
+                if (cropper) {
+                    cropper.destroy();
+                }
+                
+                cropper = new Cropper(cropImage, {
+                    aspectRatio: NaN, // Free ratio
+                    viewMode: 1,
+                    autoCropArea: 0.8,
+                    responsive: true,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                });
+            }, { once: true });
+        }
+
+        // Apply crop
+        document.getElementById('applyCropBtn').addEventListener('click', function() {
+            if (cropper) {
+                const canvas = cropper.getCroppedCanvas();
+                const dataURL = canvas.toDataURL();
+                
+                // Update the original image with cropped version
+                const previews = document.querySelectorAll('.image-preview');
+                if (previews[currentCropImageIndex]) {
+                    previews[currentCropImageIndex].querySelector('img').src = dataURL;
+                }
+                
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById('cropModal')).hide();
+                cropper.destroy();
+                cropper = null;
+            }
+        });
+
+        // Update image adjustment values
         document.getElementById('brightness').addEventListener('input', function () {
             brightness = parseFloat(this.value);
             document.getElementById('brightnessValue').textContent = brightness.toFixed(2);
@@ -186,137 +580,237 @@
             updateImageFilters();
         });
 
+        document.getElementById('saturation').addEventListener('input', function () {
+            saturation = parseFloat(this.value);
+            document.getElementById('saturationValue').textContent = saturation.toFixed(2);
+            updateImageFilters();
+        });
+
+        document.getElementById('grayscale').addEventListener('change', function () {
+            grayscale = this.checked;
+            updateImageFilters();
+        });
+
         function updateImageFilters() {
             const images = document.querySelectorAll('#imagePreview img');
             images.forEach(img => {
-                img.style.filter = `brightness(${brightness}) contrast(${contrast})`;
+                let filter = `brightness(${brightness}) contrast(${contrast}) saturate(${saturation})`;
+                if (grayscale) {
+                    filter += ' grayscale(1)';
+                }
+                img.style.filter = filter;
             });
         }
 
+        // Display PDF Count from Firebase
+        const database = firebase.database();
+        const pdfCountRef = database.ref("pdfcount");
 
-// Display PDF Count from Firebase
-const database = firebase.database();
-const pdfCountRef = database.ref("pdfcount");
+        pdfCountRef.on("value", (snapshot) => {
+            const pdfCount = snapshot.val() || 0;
+            document.getElementById("pdfCountDisplay").textContent = pdfCount;
+        });
 
-pdfCountRef.on("value", (snapshot) => {
-    const pdfCount = snapshot.val() || 0;
-    document.getElementById("pdfCountDisplay").textContent = pdfCount;
-});
-
-
-// Increment PDF Count and Save to Firebase
-function incrementPdfCount() {
-    pdfCountRef.transaction(
-        (currentValue) => {
-            return (currentValue || 0) + 1; // Increment count by 1
-        },
-        (error, committed, snapshot) => {
-            if (error) {
-                console.error("Error updating PDF count:", error);
-            } else if (!committed) {
-                console.warn("Transaction not committed.");
-            } else {
-                console.log("PDF count updated:", snapshot.val());
-            }
+        // Increment PDF Count and Save to Firebase
+        function incrementPdfCount() {
+            pdfCountRef.transaction(
+                (currentValue) => {
+                    return (currentValue || 0) + 1;
+                },
+                (error, committed, snapshot) => {
+                    if (error) {
+                        console.error("Error updating PDF count:", error);
+                    } else if (!committed) {
+                        console.warn("Transaction not committed.");
+                    } else {
+                        console.log("PDF count updated:", snapshot.val());
+                    }
+                }
+            );
         }
-    );
-}
 
-
-        // Generate PDF and Increment Count
-        document.getElementById('convertBtn').addEventListener('click', function () {
+        // Generate PDF with enhanced options
+        function generatePDF(download = true) {
             const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF();
-
+            
+            // Get PDF settings
+            const pageSize = document.getElementById('pageSize').value;
+            const quality = parseFloat(document.getElementById('quality').value);
+            
+            // Create PDF with selected page size
+            let pdf;
+            switch(pageSize) {
+                case 'a4':
+                    pdf = new jsPDF('p', 'mm', 'a4');
+                    break;
+                case 'letter':
+                    pdf = new jsPDF('p', 'mm', 'letter');
+                    break;
+                case 'legal':
+                    pdf = new jsPDF('p', 'mm', 'legal');
+                    break;
+                case 'a3':
+                    pdf = new jsPDF('p', 'mm', 'a3');
+                    break;
+                default:
+                    pdf = new jsPDF('p', 'mm', 'a4');
+            }
+            
             const previews = Array.from(document.querySelectorAll('.image-preview img'));
-
+            
             if (previews.length === 0) {
                 alert("Please add images!");
-                return;
+                return null;
             }
-
-            previews.forEach((img, index) => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-
-                const imgElement = new Image();
-                imgElement.src = img.src;
-
-                imgElement.onload = function () {
-                    canvas.width = imgElement.width;
-                    canvas.height = imgElement.height;
-
-                    ctx.filter = `brightness(${brightness}) contrast(${contrast})`;
-                    ctx.drawImage(imgElement, 0, 0);
-
-                    const imgData = canvas.toDataURL("image/jpeg");
-
-                    const pageWidth = pdf.internal.pageSize.width;
-                    const pageHeight = pdf.internal.pageSize.height;
-                    const ratio = imgElement.width / imgElement.height;
-
-                    let pdfWidth = pageWidth;
-                    let pdfHeight = pageWidth / ratio;
-
-                    if (pdfHeight > pageHeight) {
-                        pdfHeight = pageHeight;
-                        pdfWidth = pageHeight * ratio;
-                    }
-
-                    if (index > 0) pdf.addPage();
-                    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-
-                    if (index === previews.length - 1) {
-                        pdf.save("converted-images.pdf");
+            
+            // Show progress bar
+            const progressBar = document.getElementById('conversionProgress');
+            progressBar.classList.remove('d-none');
+            
+            let processed = 0;
+            const total = previews.length;
+            
+            // Process each image
+            const processImage = (index) => {
+                return new Promise((resolve) => {
+                    const img = previews[index];
+                    const previewElement = img.closest('.image-preview');
+                    const rotation = parseInt(previewElement.dataset.rotation) || 0;
                     
-
-                // Increment PDF count in Firebase after saving
-                incrementPdfCount();
-            }
-        };
-    });
-});
-    </script>
-   <script>
-    
-    // Firebase Authentication State Listener
-    firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-            // User is signed in, display a personalized greeting (if applicable)
-            const firstName = user.displayName ? user.displayName.split(' ')[0] : 'User';
-            console.log(`Welcome, ${firstName}!`);
-        } else {
-            // No user is signed in, redirect to login page
-            window.location.href = "login.html";
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    const imgElement = new Image();
+                    imgElement.src = img.src;
+                    
+                    imgElement.onload = function () {
+                        // Set canvas size
+                        canvas.width = imgElement.width;
+                        canvas.height = imgElement.height;
+                        
+                        // Apply filters
+                        ctx.filter = `brightness(${brightness}) contrast(${contrast}) saturate(${saturation}) ${grayscale ? 'grayscale(1)' : ''}`;
+                        
+                        // Apply rotation if needed
+                        if (rotation !== 0) {
+                            ctx.save();
+                            ctx.translate(canvas.width / 2, canvas.height / 2);
+                            ctx.rotate(rotation * Math.PI / 180);
+                            ctx.drawImage(imgElement, -imgElement.width / 2, -imgElement.height / 2);
+                            ctx.restore();
+                        } else {
+                            ctx.drawImage(imgElement, 0, 0);
+                        }
+                        
+                        const imgData = canvas.toDataURL("image/jpeg", quality);
+                        
+                        // Calculate dimensions for PDF
+                        const pageWidth = pdf.internal.pageSize.width;
+                        const pageHeight = pdf.internal.pageSize.height;
+                        
+                        let imgWidth = pageWidth - 20; // 10mm margin on each side
+                        let imgHeight = (imgElement.height * imgWidth) / imgElement.width;
+                        
+                        // If image is too tall, scale to fit height
+                        if (imgHeight > pageHeight - 20) {
+                            imgHeight = pageHeight - 20;
+                            imgWidth = (imgElement.width * imgHeight) / imgElement.height;
+                        }
+                        
+                        // Center image on page
+                        const x = (pageWidth - imgWidth) / 2;
+                        const y = (pageHeight - imgHeight) / 2;
+                        
+                        if (index > 0) pdf.addPage();
+                        pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
+                        
+                        // Update progress
+                        processed++;
+                        const progressPercent = (processed / total) * 100;
+                        progressBar.querySelector('.progress-bar').style.width = `${progressPercent}%`;
+                        
+                        resolve();
+                    };
+                });
+            };
+            
+            // Process all images sequentially
+            const processAll = async () => {
+                for (let i = 0; i < previews.length; i++) {
+                    await processImage(i);
+                }
+                
+                // Hide progress bar when done
+                progressBar.classList.add('d-none');
+                
+                if (download) {
+                    pdf.save("converted-images.pdf");
+                    incrementPdfCount();
+                }
+                
+                return pdf;
+            };
+            
+            return processAll();
         }
-    });
 
-    document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("logoutButton").addEventListener("click", () => {
-        firebase.auth().signOut().then(() => {
-            window.location.href = "login.html";
-        }).catch((error) => {
-            alert("Error logging out: " + error.message);
+        // Convert button
+        document.getElementById('convertBtn').addEventListener('click', function () {
+            generatePDF(true);
         });
-    });
-});
-console.log(document.getElementById("logoutButton")); // Should log the element or `null`
 
+        // Preview button
+        document.getElementById('previewBtn').addEventListener('click', function () {
+            generatePDF(false).then(pdf => {
+                if (pdf) {
+                    // Create a blob from the PDF
+                    const pdfBlob = pdf.output('blob');
+                    const pdfUrl = URL.createObjectURL(pdfBlob);
+                    
+                    // Display in modal
+                    const previewContainer = document.getElementById('pdfPreview');
+                    previewContainer.innerHTML = `
+                        <embed src="${pdfUrl}" type="application/pdf" width="100%" height="500px">
+                        <p class="mt-2"><small>Note: Preview may vary slightly from the final downloaded PDF</small></p>
+                    `;
+                    
+                    // Show modal
+                    const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+                    previewModal.show();
+                    
+                    // Set up download button
+                    document.getElementById('downloadPdfBtn').onclick = function() {
+                        pdf.save("converted-images.pdf");
+                        incrementPdfCount();
+                        previewModal.hide();
+                    };
+                }
+            });
+        });
 
-    // Back button function
-    function goBack() {
-        if (window.history.length > 1) {
-            window.history.back();
-        } else {
-            window.location.href = "index.html"; // Redirect to a default page if no history
-        }
-    }
-</script>
+        // Firebase Authentication State Listener
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                // User is signed in, display a personalized greeting (if applicable)
+                const firstName = user.displayName ? user.displayName.split(' ')[0] : 'User';
+                console.log(`Welcome, ${firstName}!`);
+            } else {
+                // No user is signed in, redirect to login page
+                window.location.href = "login.html";
+            }
+        });
 
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("logoutButton").addEventListener("click", () => {
+                firebase.auth().signOut().then(() => {
+                    window.location.href = "login.html";
+                }).catch((error) => {
+                    alert("Error logging out: " + error.message);
+                });
+            });
+        });
+    </script>
 
-   </div>
-  </div>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
-    
   </body>
 </html>
