@@ -1,0 +1,978 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Barman Construction</title>
+  <link rel="icon" type="image/png" href="img/tab-logo.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="style/style.css" rel="stylesheet">
+    <style>
+      #greetingText {
+  font-size: 1.1rem;
+}
+
+#greetingText span {
+  font-weight: 600;
+}
+
+#greetingSubText {
+  font-size: 0.85rem;
+}
+
+    </style>
+</head>
+<body>
+
+<!-- Create Project Modal -->
+<div class="modal fade" id="createProjectModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create Project</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input
+          type="text"
+          id="projectName"
+          class="form-control"
+          placeholder="Enter project name"
+        />
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" onclick="saveProject()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Navbar will load here -->
+<div id="nav-placeholder"></div>
+
+<!-- Main Content -->
+<div class="content p-1">
+
+  
+  <div class="d-flex justify-content-between align-items-center mb-1 p-2">
+        <div class="mb-1">
+  <h5 class="fw-semibold mb-0" id="greetingText">
+    Hello! 👋
+  </h5>
+  <small class="text-muted" id="greetingSubText">
+    Nice day at work
+  </small>
+</div>
+
+    <h4 class="text-nowrap top-h d-none">
+        <span class="d-none d-lg-inline"><i class="bi bi-buildings"></i> Projects Management</span>
+        </h4>
+    <button class="btn button2 floating-tab foradmin" data-bs-toggle="modal" data-bs-target="#createProjectModal" id="createProjectBtn">
+      <i class="fas fa-plus"></i> <span class="d-none d-lg-inline">Create Project</span>
+    </button>
+  </div>
+
+
+  
+  <!-- Projects Container -->
+  <div class="row" id="projectsContainer">
+    <!-- Projects will be loaded here -->
+  </div>
+  
+    <div class="loader text-center mt-4" id="loadingMessage">
+    <section class="loader">
+      <div class="slider" style="--i:0"></div>
+      <div class="slider" style="--i:1"></div>
+      <div class="slider" style="--i:2"></div>
+      <div class="slider" style="--i:3"></div>
+      <div class="slider" style="--i:4"></div>
+    </section>
+  </div>
+</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="js/firebaseconfig.js"></script>
+<script src="js/all.js"></script>
+
+<script>
+  // Initialize Firebase
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+
+  const auth = firebase.auth();
+  const database = firebase.database();
+  let currentUser = null;
+  let currentUserRole = 'user';
+  let currentUserData = null;
+
+  // Check authentication
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+    } else {
+      currentUser = user;
+      await getUserRoleAndLoadProjects();
+      showUserGreeting();
+    }
+  });
+
+  // Get user role and load projects
+  async function getUserRoleAndLoadProjects() {
+    try {
+
+      // Get current user's data
+      const userSnapshot = await database.ref(`users/${currentUser.uid}`).once('value');
+      currentUserData = userSnapshot.val();
+      
+      if (!currentUserData) {
+        console.error("User data not found");
+        showNoProjectsMessage("User data not found. Please contact administrator.");
+        return;
+      }
+      
+      // Get user role
+      currentUserRole = currentUserData.role || 'user';
+      
+      // Call toggleAdminElements from all.js if available
+      if (typeof toggleAdminElements === 'function') {
+        toggleAdminElements(currentUserRole);
+      } else {
+        // Fallback if all.js doesn't have the function
+        toggleAdminElementsFallback(currentUserRole);
+      }
+      
+      // Load projects
+      await loadProjects();
+      
+    } catch (error) {
+      showNoProjectsMessage("Error loading user data: " + error.message);
+    }
+  }
+
+  // Fallback function for admin elements
+  function toggleAdminElementsFallback(role) {
+    const adminElements = document.querySelectorAll('.foradmin');
+    if (role !== 'admin') {
+      adminElements.forEach(element => {
+        element.style.display = 'none';
+      });
+    } else {
+      adminElements.forEach(element => {
+        element.style.display = 'block';
+      });
+    }
+  }
+
+  // Load projects based on user role
+  async function loadProjects() {
+    try {
+      
+      const loadingMessage = document.getElementById('loadingMessage');
+      const container = document.getElementById('projectsContainer');
+      
+      // Show loading
+      if (loadingMessage) {
+        loadingMessage.style.display = 'flex';
+      }
+      container.innerHTML = '';
+      
+      let projects = [];
+      
+      // ADMIN: Load all projects
+      if (currentUserRole === 'admin') {
+        const snapshot = await database.ref('projects').once('value');
+        const allProjects = snapshot.val();
+        
+        if (allProjects) {
+          Object.keys(allProjects).forEach(projectId => {
+            projects.push({
+              id: projectId,
+              ...allProjects[projectId]
+            });
+          });
+        }
+      } 
+      // USER: Load only assigned projects
+      else {
+
+        if (!currentUserData.projects) {
+          showNoProjectsMessage("No projects assigned to you yet.");
+          return;
+        }
+        
+        // Get project IDs where value is true
+        const projectIds = Object.keys(currentUserData.projects).filter(
+          projectId => currentUserData.projects[projectId] === true
+        );
+        
+        if (projectIds.length === 0) {
+          showNoProjectsMessage("No projects assigned to you yet.");
+          return;
+        }
+        
+        // Load each project individually
+        for (const projectId of projectIds) {
+          try {
+            const projectSnap = await database.ref(`projects/${projectId}`).once('value');
+            if (projectSnap.exists()) {
+              projects.push({
+                id: projectId,
+                ...projectSnap.val()
+              });
+            } else {
+              console.warn(`Project ${projectId} not found or no access`);
+            }
+          } catch (error) {
+            console.error(`Error loading project ${projectId}:`, error);
+          }
+        }
+      }
+      
+      await displayProjects(projects);
+      
+    } catch (error) {
+      console.error("Error loading projects:", error);
+      showNoProjectsMessage("Error loading projects: " + error.message);
+    } finally {
+      const loadingMessage = document.getElementById('loadingMessage');
+      if (loadingMessage) {
+        loadingMessage.style.display = 'none';
+      }
+    }
+  }
+
+  // Display projects in the container with attendance data
+  async function displayProjects(projects) {
+    const container = document.getElementById('projectsContainer');
+    
+    if (!projects || projects.length === 0) {
+      const message = currentUserRole === 'admin' 
+        ? 'No projects found. Create your first project!' 
+        : 'No projects assigned to you yet.';
+      showNoProjectsMessage(message);
+      return;
+    }
+    
+    // Sort projects by creation date (newest first)
+    projects.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+      const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+      return dateB - dateA;
+    });
+    
+    container.innerHTML = '';
+    
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Create project cards with loading attendance data
+    for (const project of projects) {
+      // First show card with loading animation
+      const loadingCard = `
+        <div class="col-md-4 col-lg-4 mb-2">
+          <div class="card h-100 border-0">
+              <div class="card-header d-flex justify-content-between align-items-center">
+              <h6 class="fw-bold text-primary text-truncate">
+               <i class="bi bi-buildings"></i> ${escapeHtml(project.projectName || 'Unnamed Project')}
+                </h6>
+               </div>
+            <div class="card-body">
+             
+              <p class="card-text d-none">
+                <small class="text-muted">
+                  <i class="fas fa-calendar"></i> Created: ${formatDate(project.createdAt)}<br>
+                  ${project.createdBy ? `<i class="fas fa-user"></i> Created by: ${project.createdBy.substring(0, 8)}...` : ''}
+                </small>
+              </p>
+              <div class="mt-1">
+                <small class="text-muted">Today's Attendance</small>
+                <div class="progress mt-1">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer d-flex justify-content-between">
+              <div>
+                
+                <button class="btn flex-fill me-2 btn-outline-success btn-sm ms-2" onclick="markAttendance('${project.id}')">
+                  <i class="fas fa-clipboard-check"></i> Attendance
+                </button>
+              </div>
+              ${currentUserRole === 'admin' ? `
+              <button class="btn flex-fill me-2 btn-outline-primary btn-sm" onclick="viewProject('${project.id}')">
+                  <i class="bi bi-binoculars"></i> View
+                </button>
+                <button class="btn flex-fill me-2 btn-outline-success btn-sm" onclick="exportProjectData('${project.id}')">
+                  <i class="fas fa-file-excel"></i> Export
+                </button>
+                <button class="btn flex-fill me-2 btn-outline-danger btn-sm" onclick="deleteProject('${project.id}', '${escapeHtml(project.projectName || 'Unnamed Project')}')">
+                  <i class="fas fa-trash"></i><span class="d-none d-sm-inline"> Delete</span> 
+                </button>
+
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+      
+      container.innerHTML += loadingCard;
+      
+      // Load attendance data for this project
+      try {
+        await loadAndUpdateAttendance(project.id, today, container.children[container.children.length - 1]);
+      } catch (error) {
+        console.error(`Error loading attendance for project ${project.id}:`, error);
+      }
+    }
+  }
+
+  // Load attendance data and update the card
+  async function loadAndUpdateAttendance(projectId, date, cardElement) {
+    try {
+      // Load employees count for this project
+      const employeesSnapshot = await database.ref(`employees/${projectId}`).once('value');
+      const employees = employeesSnapshot.val();
+      const totalEmployees = employees ? Object.keys(employees).length : 0;
+      
+      // Load today's attendance
+      const attendanceSnapshot = await database.ref(`projects/${projectId}/attendance/${date}`).once('value');
+      const attendanceData = attendanceSnapshot.val();
+      
+      // Count attendance status
+      let presentCount = 0;
+      let absentCount = 0;
+      let halfdayCount = 0;
+      let markedCount = 0;
+      
+      if (attendanceData) {
+        Object.values(attendanceData).forEach(record => {
+          if (record.status === 'present') presentCount++;
+          else if (record.status === 'absent') absentCount++;
+          else if (record.status === 'halfday') halfdayCount++;
+        });
+        markedCount = presentCount + absentCount + halfdayCount;
+      }
+      
+      // Update the card with attendance data
+      const attendanceHtml = generateAttendanceHtml(
+        totalEmployees, 
+        presentCount, 
+        absentCount, 
+        halfdayCount, 
+        markedCount
+      );
+      
+      const cardBody = cardElement.querySelector('.card-body');
+      const existingAttendanceDiv = cardBody.querySelector('.mt-1');
+      if (existingAttendanceDiv) {
+        existingAttendanceDiv.outerHTML = attendanceHtml;
+      }
+      
+    } catch (error) {
+      console.error(`Error in loadAndUpdateAttendance for ${projectId}:`, error);
+      // Show error state
+      const cardBody = cardElement.querySelector('.card-body');
+      const existingAttendanceDiv = cardBody.querySelector('.mt-1');
+      if (existingAttendanceDiv) {
+        existingAttendanceDiv.outerHTML = `
+          <div class="mt-1">
+            <small class="text-muted">Today's Attendance</small>
+            <div class="text-danger">
+              <small><i class="fas fa-exclamation-circle"></i> Error loading attendance</small>
+            </div>
+          </div>
+        `;
+      }
+    }
+  }
+
+  // Generate attendance HTML for the chart
+  function generateAttendanceHtml(totalEmployees, presentCount, absentCount, halfdayCount, markedCount) {
+    if (totalEmployees === 0) {
+      return `
+        <div class="mt-1">
+          <small class="text-muted">Today's Attendance</small>
+          <div class="text-muted">
+            <small><i class="fas fa-info-circle"></i> No employees in project</small>
+          </div>
+        </div>
+      `;
+    }
+    
+    // Calculate percentages for the chart
+    const presentPercent = totalEmployees > 0 ? (presentCount / totalEmployees) * 100 : 0;
+    const absentPercent = totalEmployees > 0 ? (absentCount / totalEmployees) * 100 : 0;
+    const halfdayPercent = totalEmployees > 0 ? (halfdayCount / totalEmployees) * 100 : 0;
+    const unmarkedPercent = totalEmployees > 0 ? ((totalEmployees - markedCount) / totalEmployees) * 100 : 0;
+    
+    // Create chart bars
+    let chartHtml = '';
+    
+    if (markedCount > 0) {
+      chartHtml = `
+        <div class="progress mt-1" style="height: 20px;" title="Present: ${presentCount}, Absent: ${absentCount}, Half Day: ${halfdayCount}, Not Marked: ${totalEmployees - markedCount}">
+          ${presentCount > 0 ? `<div class="progress-bar bg-success" style="width: ${presentPercent}%"></div>` : ''}
+          ${absentCount > 0 ? `<div class="progress-bar bg-danger" style="width: ${absentPercent}%"></div>` : ''}
+          ${halfdayCount > 0 ? `<div class="progress-bar bg-warning" style="width: ${halfdayPercent}%"></div>` : ''}
+          ${markedCount < totalEmployees ? `<div class="progress-bar bg-light" style="width: ${unmarkedPercent}%"></div>` : ''}
+        </div>
+      `;
+    }
+    
+    // Create legend
+    const legendHtml = markedCount > 0 ? `
+      <div class="d-flex justify-content-between mt-1">
+        ${presentCount > 0 ? `<div class="d-flex align-items-center"><span class="badge bg-success me-1">${presentCount}</span><small>Present</small></div>` : ''}
+        ${absentCount > 0 ? `<div class="d-flex align-items-center"><span class="badge bg-danger me-1">${absentCount}</span><small>Absent</small></div>` : ''}
+        ${halfdayCount > 0 ? `<div class="d-flex align-items-center"><span class="badge bg-warning me-1">${halfdayCount}</span><small>Half Day</small></div>` : ''}
+        ${markedCount < totalEmployees ? `<div class="d-flex align-items-center"><span class="badge bg-light text-dark me-1">${totalEmployees - markedCount}</span><small>Not Marked</small></div>` : ''}
+      </div>
+    ` : '';
+    
+    // Create stats text
+    let statsText = '';
+    if (markedCount === 0) {
+      statsText = `<small class="text-muted"><i class="fas fa-clock"></i> Not marked yet</small>`;
+    } else if (markedCount === totalEmployees) {
+      statsText = `<small class="text-success"><i class="fas fa-check-circle"></i> All ${markedCount} employees marked</small>`;
+    } else {
+      statsText = `<small class="text-warning"><i class="fas fa-exclamation-circle"></i> ${markedCount}/${totalEmployees} marked</small>`;
+    }
+    
+    // Create percentage badge
+    let percentageBadge = '';
+    if (markedCount > 0) {
+      const percentage = Math.round((markedCount / totalEmployees) * 100);
+      let badgeClass = 'bg-secondary';
+      if (percentage === 100) badgeClass = 'bg-success';
+      else if (percentage >= 75) badgeClass = 'bg-primary';
+      else if (percentage >= 50) badgeClass = 'bg-warning';
+      else badgeClass = 'bg-danger';
+      
+      percentageBadge = `<span class="badge ${badgeClass}">${percentage}%</span>`;
+    }
+    
+    return `
+      <div class="mt-1">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <small class="text-muted">Today's Attendance</small>
+          ${percentageBadge}
+        </div>
+        ${chartHtml}
+        ${legendHtml}
+        <div class="mt-1">
+          ${statsText}
+        </div>
+      </div>
+    `;
+  }
+
+  // Show message when no projects
+  function showNoProjectsMessage(message) {
+    const container = document.getElementById('projectsContainer');
+    const loadingMessage = document.getElementById('loadingMessage');
+    
+    if (loadingMessage) {
+      loadingMessage.style.display = 'none';
+    }
+    
+    container.innerHTML = `
+      <div class="col-12 text-center py-5">
+        <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+        <h4 class="text-muted">${message}</h4>
+        ${currentUserRole === 'admin' ? 
+          `<button class="btn btn-primary mt-1" data-bs-toggle="modal" data-bs-target="#createProjectModal">
+            <i class="fas fa-plus"></i> Create Your First Project
+          </button>` : 
+          `<p class="text-muted">Contact administrator to get assigned to projects.</p>`
+        }
+      </div>
+    `;
+  }
+
+  // Mark attendance for project
+  function markAttendance(projectId) {
+    window.location.href = `attendance.html?projectId=${projectId}`;
+  }
+
+  // Save new project
+  async function saveProject() {
+    const projectNameInput = document.getElementById('projectName');
+    const projectName = projectNameInput.value.trim();
+    
+    if (!projectName) {
+      alert('Please enter a project name');
+      projectNameInput.focus();
+      return;
+    }
+    
+    // Check if user is admin
+    if (currentUserRole !== 'admin') {
+      alert('Only administrators can create projects');
+      return;
+    }
+    
+    try {
+      // Create new project
+      const newProjectRef = database.ref('projects').push();
+      const projectId = newProjectRef.key;
+      
+      const projectData = {
+        projectName: projectName,
+        createdAt: new Date().toISOString(),
+        createdBy: currentUser.uid,
+        lastUpdated: new Date().toISOString()
+      };
+      
+      await newProjectRef.set(projectData);
+      console.log("Project created:", projectId);
+      
+      // Close modal and reset
+      projectNameInput.value = '';
+      const modal = bootstrap.Modal.getInstance(document.getElementById('createProjectModal'));
+      if (modal) {
+        modal.hide();
+      }
+      
+      // Reload projects
+      await loadProjects();
+      
+    } catch (error) {
+      console.error("Error saving project:", error);
+      alert('Error creating project: ' + error.message);
+    }
+  }
+
+  // View project details
+  function viewProject(projectId) {
+    // Check if user has access to this project
+    if (currentUserRole === 'admin') {
+      // Admin can view all projects
+      window.location.href = `project-details.html?id=${projectId}`;
+    } else {
+      // User needs to check if they have access
+      if (currentUserData && currentUserData.projects && currentUserData.projects[projectId] === true) {
+        window.location.href = `project-details.html?id=${projectId}`;
+      } else {
+        alert('You do not have access to this project');
+      }
+    }
+  }
+
+  // Delete project
+  async function deleteProject(projectId, projectName) {
+    if (currentUserRole !== 'admin') {
+      alert('Only administrators can delete projects');
+      return;
+    }
+    
+    if (!confirm(`Are you sure you want to delete project "${projectName}"?\nThis action cannot be undone.`)) {
+      return;
+    }
+    
+    try {
+      // Delete the project
+      await database.ref(`projects/${projectId}`).remove();
+      console.log("Project deleted:", projectId);
+      
+      // Remove project from all users' projects list
+      const usersSnapshot = await database.ref('users').once('value');
+      const users = usersSnapshot.val();
+      
+      if (users) {
+        const updates = {};
+        Object.keys(users).forEach(userId => {
+          if (users[userId].projects && users[userId].projects[projectId]) {
+            updates[`users/${userId}/projects/${projectId}`] = null;
+          }
+        });
+        
+        if (Object.keys(updates).length > 0) {
+          await database.ref().update(updates);
+        }
+      }
+      
+      // Reload projects
+      await loadProjects();
+      
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      alert('Error deleting project: ' + error.message);
+    }
+  }
+
+  // Helper function to format date
+  function formatDate(dateString) {
+    if (!dateString) return 'Unknown date';
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Invalid date';
+      
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return 'Invalid date';
+    }
+  }
+
+  // Helper function to escape HTML (prevents XSS)
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Add event listener for Enter key in project name input
+  document.addEventListener('DOMContentLoaded', function() {
+    const projectNameInput = document.getElementById('projectName');
+    if (projectNameInput) {
+      projectNameInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          saveProject();
+        }
+      });
+    }
+  });
+
+
+
+
+
+  // Display greeting with user name
+async function showUserGreeting() {
+  try {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    const snap = await firebase.database().ref(`users/${user.uid}`).once("value");
+    const userData = snap.val();
+
+    const name =
+      userData?.name ||
+      userData?.fullName ||
+      user.displayName ||
+      "User";
+
+    const greetingEl = document.getElementById("greetingText");
+    const subTextEl = document.getElementById("greetingSubText");
+
+    if (greetingEl) {
+      greetingEl.innerHTML = `Hello! <span class="text-primary">${name}</span> 👋`;
+    }
+
+    if (subTextEl) {
+      const hour = new Date().getHours();
+      let message = "Nice day at work";
+
+      if (hour < 12) message = "Have a productive morning ☀️";
+      else if (hour < 17) message = "Hope your work is going well 💼";
+      else message = "Good evening, wrap up strong 🌙";
+
+      subTextEl.textContent = message;
+    }
+  } catch (err) {
+    console.error("Greeting error:", err);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Export project data to Excel
+async function exportProjectData(projectId) {
+    try {
+        // Show loading
+        const exportBtn = event.target.closest('.btn');
+        const originalHtml = exportBtn.innerHTML;
+        exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+        exportBtn.disabled = true;
+        
+        // Get project data
+        const projectRef = database.ref(`projects/${projectId}`);
+        const projectSnap = await projectRef.once('value');
+        const projectData = projectSnap.val();
+        
+        if (!projectData) {
+            alert('Project data not found');
+            resetButton(exportBtn, originalHtml);
+            return;
+        }
+        
+        // Get all data in parallel
+        const [earningsSnap, expensesSnap, attendanceSnap, employeesSnap] = await Promise.all([
+            database.ref(`projects/${projectId}/earnings`).once('value'),
+            database.ref(`projects/${projectId}/expenses`).once('value'),
+            database.ref(`projects/${projectId}/attendance`).once('value'),
+            database.ref(`employees/${projectId}`).once('value')
+        ]);
+        
+        const earnings = earningsSnap.val();
+        const expenses = expensesSnap.val();
+        const attendance = attendanceSnap.val();
+        const employees = employeesSnap.val();
+        
+        // Create a map of employee IDs to details for quick lookup
+        const employeeMap = {};
+        if (employees) {
+            Object.keys(employees).forEach(empId => {
+                const emp = employees[empId];
+                employeeMap[empId] = {
+                    name: emp.employeeName || "Unknown Employee",
+                    designation: emp.designation || "N/A",
+                    type: emp.employeeType || "N/A",
+                    salaryAmount: emp.salaryAmount || 0,
+                    remarks: emp.remarks || ""
+                };
+            });
+        }
+        
+        // Create Excel workbook
+        const wb = XLSX.utils.book_new();
+        
+        // 1. PROJECT SUMMARY SHEET
+        const summaryData = [
+            ["PROJECT SUMMARY REPORT"],
+            ["Project Name:", projectData.projectName || "N/A"],
+            ["Created Date:", formatDate(projectData.createdAt)],
+            ["Created By:", projectData.createdBy || "N/A"],
+            [],
+            ["STATISTICS"],
+            ["Total Employees:", employees ? Object.keys(employees).length : 0],
+            ["Total Earnings:", calculateTotal(earnings)],
+            ["Total Expenses:", calculateTotal(expenses)],
+            ["Net Balance:", calculateTotal(earnings) - calculateTotal(expenses)],
+            [],
+            ["Report Generated:", new Date().toLocaleString()]
+        ];
+        
+        const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+        XLSX.utils.book_append_sheet(wb, summaryWs, "Project Summary");
+        
+        // 2. EARNINGS REPORT SHEET
+        const earningsData = [["EARNINGS REPORT"], [], ["Date", "Title", "Amount", "Remarks"]];
+        
+        if (earnings) {
+            let totalEarnings = 0;
+            Object.values(earnings).forEach(item => {
+                const amount = parseFloat(item.amount) || 0;
+                totalEarnings += amount;
+                earningsData.push([
+                    item.date || "N/A",
+                    item.title || "N/A",
+                    amount,
+                    item.remarks || ""
+                ]);
+            });
+            // Add total row
+            earningsData.push([]);
+            earningsData.push(["TOTAL", "", totalEarnings, ""]);
+        } else {
+            earningsData.push(["No earnings data available"]);
+        }
+        
+        const earningsWs = XLSX.utils.aoa_to_sheet(earningsData);
+        XLSX.utils.book_append_sheet(wb, earningsWs, "Earnings");
+        
+        // 3. EXPENSES REPORT SHEET
+        const expensesData = [["EXPENSES REPORT"], [], ["Date", "Title", "Amount", "Remarks"]];
+        
+        if (expenses) {
+            let totalExpenses = 0;
+            Object.values(expenses).forEach(item => {
+                const amount = parseFloat(item.amount) || 0;
+                totalExpenses += amount;
+                expensesData.push([
+                    item.date || "N/A",
+                    item.title || "N/A",
+                    amount,
+                    item.remarks || ""
+                ]);
+            });
+            // Add total row
+            expensesData.push([]);
+            expensesData.push(["TOTAL", "", totalExpenses, ""]);
+        } else {
+            expensesData.push(["No expenses data available"]);
+        }
+        
+        const expensesWs = XLSX.utils.aoa_to_sheet(expensesData);
+        XLSX.utils.book_append_sheet(wb, expensesWs, "Expenses");
+        
+        // 4. EMPLOYEE DETAILS SHEET
+        const employeeDetailsData = [["EMPLOYEE DETAILS"], [], ["#", "Employee Name", "Designation", "Type", "Salary Amount", "Remarks"]];
+        
+        if (employees) {
+            let index = 1;
+            let totalSalary = 0;
+            
+            Object.values(employees).forEach(emp => {
+                const salary = parseFloat(emp.salaryAmount) || 0;
+                totalSalary += salary;
+                
+                employeeDetailsData.push([
+                    index++,
+                    emp.employeeName || "N/A",
+                    emp.designation || "N/A",
+                    emp.employeeType || "N/A",
+                    salary,
+                    emp.remarks || ""
+                ]);
+            });
+            
+            // Add total row
+            employeeDetailsData.push([]);
+            employeeDetailsData.push(["TOTAL", "", "", "", totalSalary, ""]);
+        } else {
+            employeeDetailsData.push(["No employee data available"]);
+        }
+        
+        const employeeDetailsWs = XLSX.utils.aoa_to_sheet(employeeDetailsData);
+        XLSX.utils.book_append_sheet(wb, employeeDetailsWs, "Employee Details");
+        
+        // 5. ATTENDANCE REPORT SHEET
+        const attendanceData = [["ATTENDANCE REPORT"], [], ["Date", "Employee Name", "Status", "Time", "Remarks"]];
+        
+        if (attendance) {
+            // Collect all attendance records
+            const allAttendanceRecords = [];
+            
+            Object.keys(attendance).forEach(date => {
+                const dayAttendance = attendance[date];
+                Object.keys(dayAttendance).forEach(empId => {
+                    const record = dayAttendance[empId];
+                    
+                    // Get employee name from employeeMap
+                    const employeeInfo = employeeMap[empId];
+                    const employeeName = employeeInfo ? employeeInfo.name : `Employee ID: ${empId}`;
+                    
+                    allAttendanceRecords.push({
+                        date: date,
+                        name: employeeName,
+                        status: record.status || "N/A",
+                        time: record.time || "N/A",
+                        remarks: record.remarks || ""
+                    });
+                });
+            });
+            
+            // Sort attendance records by date (newest first)
+            allAttendanceRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Add sorted records to Excel data
+            allAttendanceRecords.forEach(record => {
+                attendanceData.push([
+                    record.date,
+                    record.name,
+                    record.status,
+                    record.time,
+                    record.remarks
+                ]);
+            });
+            
+            // Add summary if no records found
+            if (allAttendanceRecords.length === 0) {
+                attendanceData.push(["No attendance records found"]);
+            } else {
+                // Add attendance statistics
+                const totalRecords = allAttendanceRecords.length;
+                const presentCount = allAttendanceRecords.filter(r => r.status === 'present').length;
+                const absentCount = allAttendanceRecords.filter(r => r.status === 'absent').length;
+                const halfdayCount = allAttendanceRecords.filter(r => r.status === 'halfday').length;
+                
+                attendanceData.push([]);
+                attendanceData.push(["ATTENDANCE STATISTICS", "", "", "", ""]);
+                attendanceData.push(["Total Records:", totalRecords, "", "", ""]);
+                attendanceData.push(["Present:", presentCount, "", "", ""]);
+                attendanceData.push(["Absent:", absentCount, "", "", ""]);
+                attendanceData.push(["Half Day:", halfdayCount, "", "", ""]);
+            }
+        } else {
+            attendanceData.push(["No attendance data available"]);
+        }
+        
+        const attendanceWs = XLSX.utils.aoa_to_sheet(attendanceData);
+        XLSX.utils.book_append_sheet(wb, attendanceWs, "Attendance");
+        
+        // Generate filename (safe for all OS)
+        const safeProjectName = projectData.projectName ? 
+            projectData.projectName.replace(/[<>:"/\\|?*]/g, '_') : 
+            "Project";
+        const fileName = `${safeProjectName}_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+        
+        // Save Excel file
+        XLSX.writeFile(wb, fileName);
+        
+        // Reset button
+        setTimeout(() => {
+            resetButton(exportBtn, originalHtml);
+            alert('Report exported successfully!');
+        }, 500);
+        
+    } catch (error) {
+        console.error("Error exporting data:", error);
+        alert('Error exporting data: ' + error.message);
+        
+        // Reset button
+        const exportBtn = event.target.closest('.btn');
+        const originalHtml = exportBtn.innerHTML;
+        resetButton(exportBtn, originalHtml);
+    }
+}
+
+// Helper function to calculate total amount
+function calculateTotal(data) {
+    if (!data) return 0;
+    return Object.values(data).reduce((total, item) => total + (parseFloat(item.amount) || 0), 0);
+}
+
+// Helper function to reset button state
+function resetButton(button, originalHtml) {
+    button.innerHTML = originalHtml;
+    button.disabled = false;
+}
+
+// Helper function to format date
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    } catch (error) {
+        return dateString;
+    }
+}
+</script>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

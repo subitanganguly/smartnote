@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Barman Construction - Products</title>
+  <link rel="icon" type="image/png" href="img/tab-logo.png">
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style/style.css">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="js/firebaseconfig.js"></script>
+   <script src="js/all.js"></script>
+</head>
+<body>
+
+<!-- Navbar placeholder -->
+<div id="nav-placeholder"></div>
+
+<!-- Main Content -->
+<div class="content p-2">
+  <!-- Page Header -->
+  <div class="mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h4 class="mb-1">
+          <i class="fas fa-box me-2"></i>Product Management
+        </h4>
+        <p class="text-muted mb-0">Add, edit, and manage your products and services</p>
+      </div>
+      <button class="btn button2" id="addProductBtn">
+          <i class="fas fa-plus me-1"></i><span class="d-none d-lg-inline">Add Product</span>
+        </button>
+    </div>
+  </div>
+
+  <!-- Product List -->
+  <div class="">
+    <div class="card-header ">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+          <i class="fas fa-list me-2"></i>Product List
+        </h5>
+        <div class="d-flex align-items-center gap-2">
+          <!-- Search Box -->
+          <div class="input-group input-group-sm" style="width: 400px;">
+            <span class="input-group-text">
+              <i class="fas fa-search"></i>
+            </span>
+            <input type="text" class="form-control" 
+                   id="productSearch" placeholder="Search products...">
+          </div>
+          <span class="badge bg-primary" id="productCount">0 products</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Products Grid -->
+    <div class="card-body">
+      <div class="row" id="productsGrid">
+        <!-- Products will be loaded here -->
+        <div class="col-12 text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2">Loading products...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Product Modal -->
+<div class="modal fade" id="productFormModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-plus-circle me-2"></i><span id="modalTitle">Add New Product</span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="productForm">
+          <input type="hidden" id="productId">
+          
+          <div class="mb-3">
+            <label for="productName" class="form-label">
+              Product/Service Name <span class="text-danger">*</span>
+            </label>
+            <input type="text" class="form-control" id="productName" 
+                   placeholder="Enter product or service name" required>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="productHSN" class="form-label">
+                HSN/SAC Code
+              </label>
+              <input type="text" class="form-control" id="productHSN" 
+                     placeholder="Enter HSN/SAC code" value="38245090">
+              <div class="form-text">Common code: 38245090</div>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+              <label for="productPrice" class="form-label">
+                Price per Unit (₹) <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">₹</span>
+                <input type="number" class="form-control" id="productPrice" 
+                       step="0.01" min="0" placeholder="0.00" required>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="productUnit" class="form-label">
+              Unit of Measurement
+            </label>
+            <select class="form-select" id="productUnit">
+              <option value="Nos" selected>Nos (Numbers)</option>
+              <option value="Kg">Kg (Kilograms)</option>
+              <option value="Mt">Mt (Meters)</option>
+              <option value="Sq Mt">Sq Mt (Square Meters)</option>
+              <option value="Cu Mt">Cu Mt (Cubic Meters)</option>
+              <option value="Ltr">Ltr (Liters)</option>
+              <option value="Days">Days</option>
+              <option value="Hours">Hours</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          
+          <div class="mb-4">
+            <label for="productDescription" class="form-label">
+              Description (Optional)
+            </label>
+            <textarea class="form-control" id="productDescription" 
+                      rows="3" placeholder="Enter product description..."></textarea>
+          </div>
+          
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-success">
+              <i class="fas fa-save me-1"></i><span id="saveButtonText">Save Product</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete the product <strong id="deleteProductName"></strong>?</p>
+        <div class="alert alert-warning mb-0">
+          <i class="fas fa-info-circle me-1"></i>
+          This action cannot be undone.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Initialize Firebase
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+// Global variables
+let productsData = [];
+let productToDelete = null;
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  // Check authentication
+  firebase.auth().onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = "login.html";
+    } else {
+      loadProducts();
+    }
+  });
+  
+  // Event listeners
+  document.getElementById('addProductBtn').addEventListener('click', function() {
+    resetForm();
+    document.getElementById('modalTitle').textContent = 'Add New Product';
+    document.getElementById('saveButtonText').textContent = 'Save Product';
+    new bootstrap.Modal(document.getElementById('productFormModal')).show();
+  });
+  
+  document.getElementById('productForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    saveProduct();
+  });
+  
+  document.getElementById('productSearch').addEventListener('input', function() {
+    searchProducts(this.value);
+  });
+  
+  document.getElementById('confirmDeleteBtn').addEventListener('click', deleteProduct);
+});
+
+// Load all products from Firebase
+async function loadProducts() {
+  try {
+    const productsRef = firebase.database().ref('products');
+    const snapshot = await productsRef.once('value');
+    
+    productsData = [];
+    
+    if (snapshot.exists()) {
+      snapshot.forEach(childSnapshot => {
+        const product = childSnapshot.val();
+        product.id = childSnapshot.key;
+        productsData.push(product);
+      });
+      
+      // Sort by name
+      productsData.sort((a, b) => a.name.localeCompare(b.name));
+    }
+    
+    renderProductGrid(productsData);
+    
+  } catch (error) {
+    console.error('Error loading products:', error);
+    showToast('Error loading products', 'danger');
+  }
+}
+
+// Render product grid
+function renderProductGrid(products) {
+  const productsGrid = document.getElementById('productsGrid');
+  
+  if (products.length === 0) {
+    productsGrid.innerHTML = `
+      <div class="col-12 text-center py-5">
+        <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+        <h5 class="mb-2">No products found</h5>
+        <p class="text-muted mb-3">Add your first product using the "Add Product" button</p>
+        <button class="btn btn-primary" id="emptyStateAddBtn">
+          <i class="fas fa-plus me-1"></i>Add Product
+        </button>
+      </div>`;
+    
+    document.getElementById('productCount').textContent = '0 products';
+    
+    document.getElementById('emptyStateAddBtn').addEventListener('click', function() {
+      resetForm();
+      new bootstrap.Modal(document.getElementById('productFormModal')).show();
+    });
+    
+    return;
+  }
+  
+  let html = '';
+  
+  products.forEach(product => {
+    const description = product.description || 'No description';
+    const truncatedDesc = description.length > 100 ? description.substring(0, 100) + '...' : description;
+    
+    html += `
+      <div class="col-md-6 col-lg-4 mb-2 mt-2">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h6 class="card-title mb-0">${product.name}</h6>
+              <span class="badge bg-success">₹${formatCurrency(product.price || 0)}</span>
+            </div>
+            
+            <div class="mb-2">
+              <span class="badge bg-primary text-light me-1">HSN: ${product.hsn || 'N/A'}</span>
+              <span class="badge bg-info text-dark">Unit: ${product.unit || 'Nos'}</span>
+            </div>
+            
+            <p class="card-text text-muted small mb-3">${truncatedDesc}</p>
+            
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-primary btn-sm edit-product flex-fill"
+                      data-id="${product.id}">
+                <i class="fas fa-edit"></i> Edit
+              </button>
+              <button class="btn btn-outline-danger btn-sm delete-product flex-fill"
+                      data-id="${product.id}">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  productsGrid.innerHTML = html;
+  document.getElementById('productCount').textContent = `${products.length} products`;
+  
+  // Attach event listeners
+  attachProductActionListeners();
+}
+
+// Search products
+function searchProducts(searchTerm) {
+  if (!searchTerm.trim()) {
+    renderProductGrid(productsData);
+    return;
+  }
+  
+  const term = searchTerm.toLowerCase();
+  const filtered = productsData.filter(product => 
+    product.name.toLowerCase().includes(term) ||
+    (product.description && product.description.toLowerCase().includes(term)) ||
+    (product.hsn && product.hsn.includes(term))
+  );
+  
+  renderProductGrid(filtered);
+}
+
+// Attach event listeners to product action buttons
+function attachProductActionListeners() {
+  document.querySelectorAll('.edit-product').forEach(button => {
+    button.addEventListener('click', function() {
+      const productId = this.getAttribute('data-id');
+      editProduct(productId);
+    });
+  });
+  
+  document.querySelectorAll('.delete-product').forEach(button => {
+    button.addEventListener('click', function() {
+      const productId = this.getAttribute('data-id');
+      confirmDeleteProduct(productId);
+    });
+  });
+}
+
+// Edit product
+function editProduct(productId) {
+  const product = productsData.find(p => p.id === productId);
+  
+  if (!product) {
+    showToast('Product not found', 'danger');
+    return;
+  }
+  
+  // Fill the form with product data
+  document.getElementById('productId').value = product.id;
+  document.getElementById('productName').value = product.name || '';
+  document.getElementById('productHSN').value = product.hsn || '';
+  document.getElementById('productPrice').value = product.price || 0;
+  document.getElementById('productUnit').value = product.unit || 'Nos';
+  document.getElementById('productDescription').value = product.description || '';
+  
+  // Update modal title and button
+  document.getElementById('modalTitle').textContent = 'Edit Product';
+  document.getElementById('saveButtonText').textContent = 'Update Product';
+  
+  // Show modal
+  new bootstrap.Modal(document.getElementById('productFormModal')).show();
+}
+
+// Confirm delete product
+function confirmDeleteProduct(productId) {
+  const product = productsData.find(p => p.id === productId);
+  
+  if (!product) {
+    showToast('Product not found', 'danger');
+    return;
+  }
+  
+  productToDelete = product;
+  document.getElementById('deleteProductName').textContent = product.name;
+  new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+
+// Delete product
+async function deleteProduct() {
+  if (!productToDelete) return;
+  
+  try {
+    const productId = productToDelete.id;
+    const productName = productToDelete.name;
+    
+    // Show loading
+    const deleteBtn = document.getElementById('confirmDeleteBtn');
+    const originalText = deleteBtn.innerHTML;
+    deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Deleting...';
+    deleteBtn.disabled = true;
+    
+    // Delete from Firebase
+    const productRef = firebase.database().ref(`products/${productId}`);
+    await productRef.remove();
+    
+    // Remove from local array
+    productsData = productsData.filter(p => p.id !== productId);
+    
+    // Update UI
+    renderProductGrid(productsData);
+    
+    // Hide modal
+    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+    
+    showToast(`"${productName}" deleted successfully`, 'success');
+    
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    showToast('Error deleting product', 'danger');
+  } finally {
+    // Reset button
+    const deleteBtn = document.getElementById('confirmDeleteBtn');
+    deleteBtn.innerHTML = 'Delete';
+    deleteBtn.disabled = false;
+    productToDelete = null;
+  }
+}
+
+// Reset form
+function resetForm() {
+  document.getElementById('productId').value = '';
+  document.getElementById('productName').value = '';
+  document.getElementById('productHSN').value = '38245090';
+  document.getElementById('productPrice').value = '';
+  document.getElementById('productUnit').value = 'Nos';
+  document.getElementById('productDescription').value = '';
+}
+
+// Save/Update product
+async function saveProduct() {
+  // Get form data
+  const productData = {
+    name: document.getElementById('productName').value.trim(),
+    hsn: document.getElementById('productHSN').value.trim(),
+    price: parseFloat(document.getElementById('productPrice').value),
+    unit: document.getElementById('productUnit').value,
+    description: document.getElementById('productDescription').value.trim()
+  };
+  
+  // Validation
+  if (!productData.name) {
+    showToast('Product name is required', 'warning');
+    return;
+  }
+  
+  if (!productData.price || productData.price <= 0 || isNaN(productData.price)) {
+    showToast('Price must be greater than 0', 'warning');
+    return;
+  }
+  
+  try {
+    // Show loading
+    const saveBtn = document.querySelector('#productForm button[type="submit"]');
+    const originalBtnHTML = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+    saveBtn.disabled = true;
+    
+    const productId = document.getElementById('productId').value;
+    let isUpdate = !!productId;
+    
+    if (isUpdate) {
+      // Update existing product
+      const productRef = firebase.database().ref(`products/${productId}`);
+      await productRef.update(productData);
+      
+      // Update local data
+      const index = productsData.findIndex(p => p.id === productId);
+      if (index !== -1) {
+        productsData[index] = { ...productsData[index], ...productData };
+      }
+      
+      showToast(`"${productData.name}" updated successfully`, 'success');
+    } else {
+      // Create new product
+      const productsRef = firebase.database().ref('products');
+      const newProductRef = productsRef.push();
+      await newProductRef.set(productData);
+      
+      // Add to local data with ID
+      productData.id = newProductRef.key;
+      productsData.push(productData);
+      
+      showToast(`"${productData.name}" added successfully`, 'success');
+    }
+    
+    // Update UI
+    renderProductGrid(productsData);
+    
+    // Hide modal
+    bootstrap.Modal.getInstance(document.getElementById('productFormModal')).hide();
+    
+    // Reset form
+    resetForm();
+    
+  } catch (error) {
+    console.error('Error saving product:', error);
+    showToast('Error saving product', 'danger');
+  } finally {
+    // Reset button
+    const saveBtn = document.querySelector('#productForm button[type="submit"]');
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = originalSaveButtonHTML || 'Save Product';
+    }
+  }
+}
+
+// Helper functions
+function formatCurrency(amount) {
+  return parseFloat(amount).toFixed(2);
+}
+
+function showToast(message, type = 'info') {
+  // Create a simple toast element
+  const toastEl = document.createElement('div');
+  toastEl.className = `toast align-items-center text-bg-${type} border-0 position-fixed top-0 end-0 m-3`;
+  toastEl.style.zIndex = '1060';
+  toastEl.setAttribute('role', 'alert');
+  toastEl.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">${message}</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  `;
+  
+  document.body.appendChild(toastEl);
+  
+  const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+  toast.show();
+  
+  toastEl.addEventListener('hidden.bs.toast', function () {
+    document.body.removeChild(toastEl);
+  });
+}
+</script>
+</body>
+</html>

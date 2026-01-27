@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance - Barman Construction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="style/style.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Saving Indicator -->
+<div id="savingIndicator" class="position-fixed top-0 end-0 m-3 p-3 bg-white shadow rounded" style="display: none; z-index: 1000;">
+    <div class="d-flex align-items-center">
+        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+        <span>Saving attendance...</span>
+    </div>
+</div>
+
+<!-- Saved Indicator -->
+<div id="savedIndicator" class="position-fixed top-0 end-0 m-3 p-3 bg-success text-white shadow rounded" style="display: none; z-index: 1000;">
+    <div class="d-flex align-items-center">
+        <i class="fas fa-check-circle me-2"></i>
+        <span>Attendance saved!</span>
+    </div>
+</div>
+
+<!-- Navbar will load here -->
+<div id="nav-placeholder"></div>
+
+<!-- Main Content -->
+<div class="content p-1">
+    <div class="container-fluid">
+        
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+                <h2 class="mb-1"><span class="d-none d-lg-inline">Daily Attendance</span></h2>
+                <p class="text-muted"><span class="d-none d-lg-inline">Click buttons to mark attendance (auto-saves)</span></p>
+            </div>
+        </div>
+
+<!-- Attendance Stats -->
+<div class="row mb-2 g-1" id="attendanceStats">  <!-- g-1 = small gap -->
+
+  <div class="col-3">
+    <div class="card border-start border-primary border-2 h-100">
+      <div class="card-body p-1 text-center">
+        <small class="d-md-none">Total</small>
+        <h6 class="d-none d-md-block mb-1">Total</h6>
+        <h6 id="totalEmployeesCount" class="mb-0">0</h6>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-3">
+    <div class="card border-start border-success border-2 h-100">
+      <div class="card-body p-1 text-center">
+        <small class="d-md-none">Present</small>
+        <h6 class="d-none d-md-block mb-1">Present</h6>
+        <h6 id="presentCount" class="mb-0">0</h6>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-3">
+    <div class="card border-start border-danger border-2 h-100">
+      <div class="card-body p-1 text-center">
+        <small class="d-md-none">Absent</small>
+        <h6 class="d-none d-md-block mb-1">Absent</h6>
+        <h6 id="absentCount" class="mb-0">0</h6>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-3">
+    <div class="card border-start border-warning border-2 h-100">
+      <div class="card-body p-1 text-center">
+        <small class="d-md-none">Half</small>
+        <h6 class="d-none d-md-block mb-1">Half Day</h6>
+        <h6 id="halfdayCount" class="mb-0">0</h6>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+        <!-- Filters Section -->
+        <div class="fix-card mb-2 p-3">
+            <div class="card-header">
+                <h5 class="mb-0">Filters</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-1 d-none d-sm-inline">
+                        <label for="projectSelect" class="form-label">Project</label>
+                        <select class="form-select" id="projectSelect">
+                            <option value="">Select Project</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-1">
+                        <label for="attendanceDate" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="attendanceDate">
+                    </div>
+                    <div class="col-md-4 mb-1">
+                        <label for="statusFilter" class="form-label">Status Filter</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="present">Present Only</option>
+                            <option value="absent">Absent Only</option>
+                            <option value="halfday">Half Day Only</option>
+                            <option value="notmarked">Not Marked Only</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employees List -->
+        <div class="card-list">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <p class="mb-0"><span class="d-none d-lg-inline">Employees List</span></p>
+                <div>
+                    <button class="btn btn-outline-success btn-sm me-2" onclick="markAll('present')">
+                        <i class="fas fa-check"></i> Mark All Present
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="markAll('absent')">
+                        <i class="fas fa-times"></i> Mark All Absent
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="employeesList">
+                    <div class="text-center py-5">
+                    <section class="loader">
+                    <div class="slider" style="--i:0"></div>
+                    <div class="slider" style="--i:1"></div>
+                    <div class="slider" style="--i:2"></div>
+                    <div class="slider" style="--i:3"></div>
+                    <div class="slider" style="--i:4"></div>
+                </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="js/firebaseconfig.js"></script>
+<script src="js/all.js"></script>
+
+<script>
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    const auth = firebase.auth();
+    const database = firebase.database();
+    let currentUser = null;
+    let currentUserRole = 'user';
+    let allProjects = [];
+    let selectedProjectId = null;
+    let employees = [];
+    let attendanceData = {};
+    let currentDate = new Date().toISOString().split('T')[0];
+    let isSaving = false;
+    let statusFilter = '';
+
+    // Check authentication
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.href = "login.html";
+        } else {
+            currentUser = user;
+            await initializePage();
+        }
+    });
+
+    // Initialize page
+    async function initializePage() {
+        try {
+            // Get user role
+            const userSnapshot = await database.ref(`users/${currentUser.uid}`).once('value');
+            const userData = userSnapshot.val();
+            currentUserRole = userData?.role || 'user';
+
+            // Set default date
+            document.getElementById('attendanceDate').value = currentDate;
+
+            // Clean up old attendance summaries
+            await cleanupOldAttendanceSummaries();
+
+            // Load projects
+            await loadProjects();
+
+            // Check if projectId is passed in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const projectIdFromUrl = urlParams.get('projectId');
+            
+            if (projectIdFromUrl) {
+                selectedProjectId = projectIdFromUrl;
+                document.getElementById('projectSelect').value = projectIdFromUrl;
+                await loadEmployees(projectIdFromUrl);
+            }
+
+            // Setup event listeners
+            setupEventListeners();
+
+        } catch (error) {
+            console.error("Error initializing page:", error);
+            alert("Error loading page: " + error.message);
+        }
+    }
+
+    // Clean up old attendance summaries (keep only current date)
+    async function cleanupOldAttendanceSummaries() {
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const summaryRef = database.ref('attendance_summary');
+            const snapshot = await summaryRef.once('value');
+            
+            if (snapshot.exists()) {
+                const summaries = snapshot.val();
+                const promises = [];
+                
+                Object.keys(summaries).forEach(date => {
+                    if (date !== today) {
+                        promises.push(database.ref(`attendance_summary/${date}`).remove());
+                    }
+                });
+                
+                if (promises.length > 0) {
+                    await Promise.all(promises);
+                    console.log(`Cleaned up ${promises.length} old attendance summaries`);
+                }
+            }
+        } catch (error) {
+            console.error("Error cleaning up attendance summaries:", error);
+        }
+    }
+
+    // Load projects
+    async function loadProjects() {
+        try {
+            const projectSelect = document.getElementById('projectSelect');
+            
+            if (currentUserRole === 'admin') {
+                const snapshot = await database.ref('projects').once('value');
+                const allProjectsData = snapshot.val();
+                
+                if (allProjectsData) {
+                    allProjects = [];
+                    Object.keys(allProjectsData).forEach(projectId => {
+                        allProjects.push({
+                            id: projectId,
+                            name: allProjectsData[projectId].projectName || 'Unnamed Project'
+                        });
+                    });
+                }
+            } else {
+                const userSnapshot = await database.ref(`users/${currentUser.uid}`).once('value');
+                const userData = userSnapshot.val();
+                const userProjects = userData?.projects || {};
+                
+                allProjects = [];
+                const projectIds = Object.keys(userProjects).filter(
+                    projectId => userProjects[projectId] === true
+                );
+                
+                for (const projectId of projectIds) {
+                    const projectSnap = await database.ref(`projects/${projectId}`).once('value');
+                    if (projectSnap.exists()) {
+                        const projectData = projectSnap.val();
+                        allProjects.push({
+                            id: projectId,
+                            name: projectData.projectName || 'Unnamed Project'
+                        });
+                    }
+                }
+            }
+
+            projectSelect.innerHTML = '<option value="">Select Project</option>';
+            allProjects.forEach(project => {
+                const option = document.createElement('option');
+                option.value = project.id;
+                option.textContent = project.name;
+                projectSelect.appendChild(option);
+            });
+
+        } catch (error) {
+            console.error("Error loading projects:", error);
+        }
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+        document.getElementById('projectSelect').addEventListener('change', async function(e) {
+            selectedProjectId = e.target.value;
+            if (selectedProjectId) {
+                await loadEmployees(selectedProjectId);
+            } else {
+                clearEmployeesList();
+            }
+        });
+
+        document.getElementById('attendanceDate').addEventListener('change', async function(e) {
+            currentDate = e.target.value;
+            if (selectedProjectId) {
+                await loadEmployees(selectedProjectId);
+            }
+        });
+
+        document.getElementById('statusFilter').addEventListener('change', function(e) {
+            statusFilter = e.target.value;
+            if (selectedProjectId) {
+                displayEmployees();
+            }
+        });
+    }
+
+    // Load employees for selected project
+    async function loadEmployees(projectId) {
+        try {
+            const employeesList = document.getElementById('employeesList');
+            employeesList.innerHTML = `
+                <div class="text-center py-5">
+                    <section class="loader">
+                    <div class="slider" style="--i:0"></div>
+                    <div class="slider" style="--i:1"></div>
+                    <div class="slider" style="--i:2"></div>
+                    <div class="slider" style="--i:3"></div>
+                    <div class="slider" style="--i:4"></div>
+                    </section>
+                </div>
+            `;
+
+            const snapshot = await database.ref(`employees/${projectId}`).once('value');
+            const projectEmployees = snapshot.val();
+            
+            employees = [];
+            if (projectEmployees) {
+                Object.keys(projectEmployees).forEach(employeeId => {
+                    employees.push({
+                        id: employeeId,
+                        ...projectEmployees[employeeId]
+                    });
+                });
+            }
+
+            await loadExistingAttendance(projectId, currentDate);
+            displayEmployees();
+            updateStats();
+
+        } catch (error) {
+            console.error("Error loading employees:", error);
+            employeesList.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                    <h5 class="text-danger">Error loading employees</h5>
+                    <p class="text-muted">${error.message}</p>
+                </div>
+            `;
+        }
+    }
+
+    // Load existing attendance data
+    async function loadExistingAttendance(projectId, date) {
+        try {
+            const snapshot = await database.ref(`projects/${projectId}/attendance/${date}`).once('value');
+            const existingAttendance = snapshot.val();
+            attendanceData = existingAttendance || {};
+        } catch (error) {
+            console.error("Error loading existing attendance:", error);
+            attendanceData = {};
+        }
+    }
+
+    // Display employees with attendance buttons
+    function displayEmployees() {
+        const employeesList = document.getElementById('employeesList');
+        
+        if (employees.length === 0) {
+            employeesList.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No employees found</h5>
+                    <p class="text-muted">There are no employees assigned to this project</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Filter employees based on status
+        const filteredEmployees = employees.filter(employee => {
+            if (!statusFilter) return true;
+            
+            const employeeStatus = attendanceData[employee.id]?.status || 'notmarked';
+            if (statusFilter === 'notmarked') {
+                return employeeStatus === 'notmarked';
+            }
+            return employeeStatus === statusFilter;
+        });
+
+        if (filteredEmployees.length === 0) {
+            employeesList.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-filter fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No employees match the filter</h5>
+                    <p class="text-muted">Try changing the status filter</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        
+        filteredEmployees.forEach(employee => {
+            const employeeAttendance = attendanceData[employee.id] || {};
+            const currentStatus = employeeAttendance.status || 'notmarked';
+            
+            // Determine button classes
+            const presentClass = currentStatus === 'present' ? 'btn-success' : 'btn-outline-success';
+            const absentClass = currentStatus === 'absent' ? 'btn-danger' : 'btn-outline-danger';
+            const halfdayClass = currentStatus === 'halfday' ? 'btn-warning' : 'btn-outline-warning';
+
+            html += `
+                <div class="card mb-2 mt-2">
+
+  <!-- Card Header -->
+  <div class="card-header py-2">
+    <h6 class="text-success fw-bold">
+      <i class="bi bi-person-circle me-1"></i>${escapeHtml(employee.employeeName || 'Unnamed')}
+    </h6>
+  </div>
+
+  <!-- Card Body -->
+  <div class="card-body py-2">
+    <div class="row align-items-center">
+
+      <!-- Employee Info -->
+      <div class="col-md-4 mb-2 mb-md-0">
+        <div class="d-flex gap-2">
+          <span class="badge bg-secondary">
+            <i class="fas fa-briefcase me-1"></i>
+            ${escapeHtml(employee.designation || 'N/A')}
+          </span>
+          <span class="badge bg-info">
+            ${getTypeText(employee.employeeType)}
+          </span>
+        </div>
+
+        ${employeeAttendance.remarks ? `
+          <p class="mb-0 mt-1">
+            <small class="text-muted">
+              Remarks: ${escapeHtml(employeeAttendance.remarks)}
+            </small>
+          </p>
+        ` : ''}
+
+        ${employeeAttendance.markedAt ? `
+          <p class="mb-0">
+            <small class="text-muted">
+              Marked: ${formatTime(employeeAttendance.markedAt)}
+            </small>
+          </p>
+        ` : ''}
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="col-md-8 text-md-end">
+        <div class="d-flex justify-content-md-end gap-2 flex-wrap">
+
+            <button type="button"
+            class="btn ${presentClass} btn-sm rounded-pill px-3"
+            onclick="markAttendance('${employee.id}', 'present')"
+            ${isSaving ? 'disabled' : ''}>
+            <i class="fas fa-check me-0"></i> Present
+            </button>
+
+            <button type="button"
+            class="btn ${absentClass} btn-sm rounded-pill px-3"
+            onclick="markAttendance('${employee.id}', 'absent')"
+            ${isSaving ? 'disabled' : ''}>
+            <i class="fas fa-times me-1"></i> Absent
+            </button>
+
+            <button type="button"
+            class="btn ${halfdayClass} btn-sm rounded-pill px-3"
+            onclick="markAttendance('${employee.id}', 'halfday')"
+            ${isSaving ? 'disabled' : ''}>
+            <i class="fas fa-adjust me-1"></i> Half
+            </button>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Card Footer -->
+  <div class="card-footer py-1">
+    <small class="text-muted">
+      Status:
+      <span class="badge bg-${getStatusColor(currentStatus)}">
+        ${getStatusText(currentStatus)}
+      </span>
+    </small>
+  </div>
+
+</div>
+
+            `;
+        });
+
+        employeesList.innerHTML = html;
+    }
+
+    // Mark all employees with a status
+    async function markAll(status) {
+        if (!selectedProjectId) {
+            alert('Please select a project first');
+            return;
+        }
+
+        if (!confirm(`Are you sure you want to mark ALL employees as ${status}?`)) {
+            return;
+        }
+
+        try {
+            showSavingIndicator();
+            
+            for (const employee of employees) {
+                const attendanceRecord = {
+                    status: status
+                    // remarks: status === 'present' ? '' : 'Marked all as ' + status,
+                    //employeeName: employee.employeeName || 'Unknown'
+                    // designation: employee.designation || '',
+                    // employeeType: employee.employeeType || '',
+                    // markedBy: currentUser.uid,
+                    // markedAt: new Date().toISOString()
+                };
+
+                attendanceData[employee.id] = attendanceRecord;
+                
+                await database.ref(`projects/${selectedProjectId}/attendance/${currentDate}/${employee.id}`).set(attendanceRecord);
+            }
+
+            await updateAttendanceSummary();
+            displayEmployees();
+            updateStats();
+            hideSavingIndicator();
+            
+            showNotification(`All employees marked as ${status}`, 'success');
+            
+        } catch (error) {
+            console.error("Error marking all employees:", error);
+            hideSavingIndicator();
+            alert(`Error: ${error.message}`);
+        }
+    }
+
+
+    // Mark attendance for an employee
+async function markAttendance(employeeId, status) {
+    if (isSaving) {
+        alert('Please wait while previous attendance is being saved...');
+        return;
+    }
+
+    try {
+        showSavingIndicator();
+
+        const attendanceRecord = {
+            status: status
+        };
+
+        // Save only status
+        await database
+            .ref(`projects/${selectedProjectId}/attendance/${currentDate}/${employeeId}`)
+            .set(attendanceRecord);
+
+        attendanceData[employeeId] = attendanceRecord;
+
+        await updateAttendanceSummary();
+
+        displayEmployees();
+        updateStats();
+        hideSavingIndicator();
+
+        showNotification(`Attendance marked as ${status}`, 'success');
+
+    } catch (error) {
+        console.error("Error saving attendance:", error);
+        hideSavingIndicator();
+        alert(`Error saving attendance: ${error.message}`);
+    }
+}
+
+
+    // // Mark attendance for an employee
+    // async function markAttendance(employeeId, status) {
+    //     if (isSaving) {
+    //         alert('Please wait while previous attendance is being saved...');
+    //         return;
+    //     }
+
+    //     try {
+    //         showSavingIndicator();
+
+    //         // const employee = employees.find(e => e.id === employeeId);
+    //         // let remarks = '';
+            
+    //         // if (status === 'absent' || status === 'halfday') {
+    //         //     remarks = prompt(`Enter remarks for ${employee?.employeeName || 'employee'} (${status === 'absent' ? 'Absent' : 'Half Day'}):`, '');
+    //         //     if (remarks === null) {
+    //         //         hideSavingIndicator();
+    //         //         return;
+    //         //     }
+    //         // }
+
+    //         const attendanceRecord = {
+    //             status: status,
+    //             // remarks: remarks.trim(),
+    //             // employeeName: employee?.employeeName || 'Unknown',
+    //             // designation: employee?.designation || '',
+    //             // employeeType: employee?.employeeType || '',
+    //             // markedBy: currentUser.uid,
+    //             // markedAt: new Date().toISOString()
+    //         };
+
+    //         attendanceData[employeeId] = attendanceRecord;
+    //         await database.ref(`projects/${selectedProjectId}/attendance/${currentDate}/${employeeId}`).set(attendanceRecord);
+    //         await updateAttendanceSummary();
+
+    //         displayEmployees();
+    //         updateStats();
+    //         hideSavingIndicator();
+
+    //         showNotification(`${employee?.employeeName || 'Employee'} marked as ${status}`, 'success');
+
+    //     } catch (error) {
+    //         console.error("Error saving attendance:", error);
+    //         hideSavingIndicator();
+    //         alert(`Error saving attendance: ${error.message}`);
+    //     }
+    // }
+
+    // Update attendance summary (store only current date)
+    async function updateAttendanceSummary() {
+        try {
+            const presentCount = Object.values(attendanceData).filter(a => a.status === 'present').length;
+            const absentCount = Object.values(attendanceData).filter(a => a.status === 'absent').length;
+            const halfdayCount = Object.values(attendanceData).filter(a => a.status === 'halfday').length;
+            const notMarkedCount = employees.length - (presentCount + absentCount + halfdayCount);
+
+            const summaryData = {
+                totalEmployees: employees.length,
+                present: presentCount,
+                absent: absentCount,
+                halfday: halfdayCount,
+                notMarked: notMarkedCount,
+                markedBy: currentUser.uid,
+                markedAt: new Date().toISOString(),
+                projectName: allProjects.find(p => p.id === selectedProjectId)?.name || 'Unknown Project',
+                projectId: selectedProjectId,
+                date: currentDate
+            };
+
+            // Store only for current date
+            await database.ref(`attendance_summary/${currentDate}/${selectedProjectId}`).set(summaryData);
+
+        } catch (error) {
+            console.error("Error updating attendance summary:", error);
+        }
+    }
+
+    // Update statistics
+    function updateStats() {
+        const present = Object.values(attendanceData).filter(a => a.status === 'present').length;
+        const absent = Object.values(attendanceData).filter(a => a.status === 'absent').length;
+        const halfday = Object.values(attendanceData).filter(a => a.status === 'halfday').length;
+
+        document.getElementById('totalEmployeesCount').textContent = employees.length;
+        document.getElementById('presentCount').textContent = present;
+        document.getElementById('absentCount').textContent = absent;
+        document.getElementById('halfdayCount').textContent = halfday;
+    }
+
+    // Clear employees list
+    function clearEmployeesList() {
+        const employeesList = document.getElementById('employeesList');
+        employeesList.innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No project selected</h5>
+                <p class="text-muted">Please select a project to view employees</p>
+            </div>
+        `;
+        
+        ['totalEmployeesCount', 'presentCount', 'absentCount', 'halfdayCount'].forEach(id => {
+            document.getElementById(id).textContent = '0';
+        });
+        
+        employees = [];
+        attendanceData = {};
+    }
+
+    // Show saving indicator
+    function showSavingIndicator() {
+        document.getElementById('savingIndicator').style.display = 'block';
+        isSaving = true;
+        displayEmployees();
+    }
+
+    // Hide saving indicator
+    function hideSavingIndicator() {
+        document.getElementById('savingIndicator').style.display = 'none';
+        isSaving = false;
+        
+        document.getElementById('savedIndicator').style.display = 'block';
+        setTimeout(() => {
+            document.getElementById('savedIndicator').style.display = 'none';
+        }, 2000);
+        
+        displayEmployees();
+    }
+
+    // Helper functions
+    function getTypeText(type) {
+        const types = {
+            daily: 'Daily',
+            monthly: 'Monthly',
+            contract: 'Contract'
+        };
+        return types[type] || type || 'N/A';
+    }
+
+    function getStatusText(status) {
+        const statuses = {
+            present: 'Present',
+            absent: 'Absent',
+            halfday: 'Half Day',
+            notmarked: 'Not Marked'
+        };
+        return statuses[status] || status;
+    }
+
+    function getStatusColor(status) {
+        const colors = {
+            present: 'success',
+            absent: 'danger',
+            halfday: 'warning',
+            notmarked: 'secondary'
+        };
+        return colors[status] || 'secondary';
+    }
+
+    function formatCurrency(amount) {
+        return parseFloat(amount).toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function formatTime(dateString) {
+        if (!dateString) return '';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleTimeString('en-IN', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            return '';
+        }
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Show notification
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+        notification.innerHTML = `
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            ${message}
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 3000);
+    }
+</script>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

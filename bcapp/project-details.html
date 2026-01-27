@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Details - Barman Construction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link href="style/style.css" rel="stylesheet">
+    <!-- Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Mobile & small tablets */
+@media (max-width: 576px) {
+
+  #quickStats h6 {
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+
+  #quickStats h4 {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  #quickStats .card-body {
+    padding: 10px;
+  }
+
+  #quickStats .bg-primary,
+  #quickStats .bg-success,
+  #quickStats .bg-danger,
+  #quickStats .bg-warning {
+    padding: 8px !important;
+  }
+
+  #quickStats i {
+    font-size: 18px; /* icon size */
+  }
+}
+
+    </style>
+</head>
+<body>
+
+<!-- Navbar will load here -->
+<div id="nav-placeholder"></div>
+
+<!-- Main Content -->
+<div class="content p-1">
+    <div class="container-fluid">
+        
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="mb-1" id="projectTitle">Loading Project...</h2>
+                <p class="text-muted" id="projectSubtitle">Project Details & Reports</p>
+            </div>
+            <div>
+                <button class="btn btn-outline-secondary btn-sm me-2" onclick="refreshPage()">
+                    <i class="fas fa-sync-alt me-1"></i>Refresh
+                </button>
+                <button class="btn btn-outline-primary btn-sm" onclick="window.history.back()">
+                    <i class="fas fa-arrow-left me-1"></i>Back
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Stats Row -->
+        <div class="row mb-4 g-3" id="quickStats">
+
+    <div class="col-lg-3 col-md-6 col-6">
+        <div class="card border-start border-primary border-3 h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Total Employees</h6>
+                        <h4 class="mb-0" id="totalEmployees">0</h4>
+                    </div>
+                    <div class="bg-primary p-3 rounded">
+                        <i class="fas fa-users fa-2x text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 col-6">
+        <div class="card border-start border-success border-3 h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Total Earnings</h6>
+                        <h4 class="mb-0" id="totalEarnings">₹ 0</h4>
+                    </div>
+                    <div class="bg-success p-3 rounded">
+                        <i class="fas fa-money-bill-wave fa-2x text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 col-6">
+        <div class="card border-start border-danger border-3 h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Total Expenses</h6>
+                        <h4 class="mb-0" id="totalExpenses">₹ 0</h4>
+                    </div>
+                    <div class="bg-danger p-3 rounded">
+                        <i class="fas fa-receipt fa-2x text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 col-6">
+        <div class="card border-start border-warning border-3 h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Net Profit</h6>
+                        <h4 class="mb-0" id="netProfit">₹ 0</h4>
+                    </div>
+                    <div class="bg-warning p-3 rounded">
+                        <i class="fas fa-chart-line fa-2x text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+        <!-- Filters Section -->
+      <!-- Filters Section -->
+<div class="fix-card mb-2 p-3">
+    <div class="card-body">
+        <h5 class="card-title mb-3">Date Range Filters</h5>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label for="dateFrom" class="form-label">Date From</label>
+                <input type="date" class="form-control" id="dateFrom">
+            </div>
+            
+            <div class="col-md-3">
+                <label for="dateTo" class="form-label">Date To</label>
+                <input type="date" class="form-control" id="dateTo">
+            </div>
+            
+            <div class="col-md-6 d-flex align-items-end">
+                <button class="btn btn-primary me-2" onclick="applyDateFilter()" id="applyFilterBtn">
+                    <i class="fas fa-filter me-1"></i>Apply Filter
+                </button>
+                <button class="btn btn-outline-secondary me-2" onclick="resetDateFilter()" id="resetFilterBtn">
+                    <i class="fas fa-redo me-1"></i>Reset
+                </button>
+                <button class="btn btn-outline-success" onclick="exportAllData()" id="exportAllBtn">
+                    <i class="fas fa-file-excel me-1"></i>Export All
+                </button>
+            </div>
+        </div>
+    </div>
+</div>  
+
+        <!-- Charts Section -->
+        <div class="row mb-2">
+            <div class="col-md-6">
+                <div class="fix-card p-3 h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">Earnings vs Expenses</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="earningsExpensesChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="fix-card p-3 h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">Expense Categories</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="expenseCategoriesChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Report -->
+        <div class="fix-card p-3 mb-2">
+            <!-- In Attendance Report section -->
+<div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Attendance Report</h5>
+    <div>
+        <button class="btn btn-outline-primary btn-sm me-2" onclick="markAttendance()">
+            <i class="fas fa-clipboard-check me-1"></i>Mark Attendance
+        </button>
+        <button class="btn btn-outline-success btn-sm" onclick="exportAttendance()">
+            <i class="fas fa-file-excel me-1"></i>Export
+        </button>
+    </div>
+</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Present</th>
+                                <th>Absent</th>
+                                <th>Half Day</th>
+                                <th>Not Marked</th>
+                                <th>Total</th>
+                                <th>Attendance %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2 mb-0">Loading attendance data...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Earnings Report -->
+        <div class="fix-card p-3 mb-2">
+            <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Earnings Report</h5>
+    <div>
+        <button class="btn btn-outline-primary btn-sm me-2" onclick="addEarning()">
+            <i class="fas fa-plus me-1"></i>Add Earning
+        </button>
+        <button class="btn btn-outline-success btn-sm" onclick="exportEarnings()">
+            <i class="fas fa-file-excel me-1"></i>Export
+        </button>
+    </div>
+</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Invoice No</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="earningsTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2 mb-0">Loading earnings data...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expenses Report -->
+        <div class="fix-card p-3 mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Expenses Report</h5>
+    <div>
+        <button class="btn btn-outline-primary btn-sm me-2" onclick="addExpense()">
+            <i class="fas fa-plus me-1"></i>Add Expense
+        </button>
+        <button class="btn btn-outline-success btn-sm" onclick="exportExpenses()">
+            <i class="fas fa-file-excel me-1"></i>Export
+        </button>
+    </div>
+</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Receipt No</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expensesTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2 mb-0">Loading expenses data...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employees List -->
+        <div class="fix-card p-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Employees List</h5>
+    <div>
+        <button class="btn btn-outline-primary btn-sm me-2" onclick="addEmployee()">
+            <i class="fas fa-plus me-1"></i>Add Employee
+        </button>
+        <button class="btn btn-outline-success btn-sm" onclick="exportEmployees()">
+            <i class="fas fa-file-excel me-1"></i>Export
+        </button>
+    </div>
+</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Designation</th>
+                                <th>Type</th>
+                                <th>Contact</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeesTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2 mb-0">Loading employees data...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="js/firebaseconfig.js"></script>
+<script src="js/all.js"></script>
+
+<script>
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    const auth = firebase.auth();
+    const database = firebase.database();
+    let currentUser = null;
+    let currentUserRole = 'user';
+    let currentProjectId = null;
+    let currentProjectData = null;
+    let earningsChart = null;
+    let expenseCategoriesChart = null;
+    
+    // Date filter variables
+    let dateFilter = {
+        from: null,
+        to: null
+    };
+
+    // Check authentication
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.href = "login.html";
+        } else {
+            currentUser = user;
+            await initializePage();
+        }
+    });
+
+    // Initialize page
+    async function initializePage() {
+        try {
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            currentProjectId = urlParams.get('id');
+            
+            if (!currentProjectId) {
+                showNotification('Project ID is missing', 'danger');
+                window.history.back();
+                return;
+            }
+
+            // Get user role
+            const userSnapshot = await database.ref(`users/${currentUser.uid}`).once('value');
+            const userData = userSnapshot.val();
+            currentUserRole = userData?.role || 'user';
+
+            // Check if user has access to this project
+            if (currentUserRole !== 'admin' && 
+                (!userData.projects || userData.projects[currentProjectId] !== true)) {
+                showNotification('You do not have access to this project', 'danger');
+                window.history.back();
+                return;
+            }
+
+            // Load project data
+            await loadProjectData();
+            
+            // Set default date range (last 30 days)
+            const today = new Date();
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(today.getDate() - 30);
+            
+            document.getElementById('dateFrom').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('dateTo').value = today.toISOString().split('T')[0];
+            
+            dateFilter.from = thirtyDaysAgo.toISOString().split('T')[0];
+            dateFilter.to = today.toISOString().split('T')[0];
+            
+            // Load all data
+            await loadAllData();
+            
+            // Setup event listeners
+            setupEventListeners();
+
+        } catch (error) {
+            console.error("Error initializing page:", error);
+            showNotification('Error loading page: ' + error.message, 'danger');
+        }
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+        // Date filter change events
+        document.getElementById('dateFrom').addEventListener('change', function() {
+            dateFilter.from = this.value;
+        });
+        
+        document.getElementById('dateTo').addEventListener('change', function() {
+            dateFilter.to = this.value;
+        });
+        
+        // Enter key for date filters
+        ['dateFrom', 'dateTo'].forEach(id => {
+            document.getElementById(id).addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    applyDateFilter();
+                }
+            });
+        });
+    }
+
+    // Load project data
+    async function loadProjectData() {
+        try {
+            const snapshot = await database.ref(`projects/${currentProjectId}`).once('value');
+            currentProjectData = snapshot.val();
+            
+            if (!currentProjectData) {
+                showNotification('Project not found', 'danger');
+                window.history.back();
+                return;
+            }
+            
+            // Update page title
+            document.getElementById('projectTitle').textContent = currentProjectData.projectName || 'Unnamed Project';
+            document.getElementById('projectSubtitle').innerHTML = `
+                Project ID: ${currentProjectId.substring(0, 8)}... | 
+                Created: ${formatDate(currentProjectData.createdAt || '')}
+            `;
+            
+        } catch (error) {
+            console.error("Error loading project data:", error);
+            throw error;
+        }
+    }
+
+    // Load all data for the project
+    async function loadAllData() {
+        try {
+            // Load employees
+            await loadEmployees();
+            
+            // Load attendance data
+            await loadAttendanceReport();
+            
+            // Load earnings
+            await loadEarningsReport();
+            
+            // Load expenses
+            await loadExpensesReport();
+            
+            // Update quick stats
+            updateQuickStats();
+            
+            // Initialize charts
+            initializeCharts();
+            
+        } catch (error) {
+            console.error("Error loading all data:", error);
+            showNotification('Error loading project data: ' + error.message, 'warning');
+        }
+    }
+
+    // Load employees
+    async function loadEmployees() {
+        try {
+            const snapshot = await database.ref(`employees/${currentProjectId}`).once('value');
+            const employeesData = snapshot.val();
+            
+            const tableBody = document.getElementById('employeesTableBody');
+            
+            if (!employeesData || Object.keys(employeesData).length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <i class="fas fa-users fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">No employees found in this project</p>
+                            <button class="btn btn-primary btn-sm" onclick="addEmployee()">
+                                <i class="fas fa-plus me-1"></i>Add Employee
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            let index = 1;
+            
+            Object.keys(employeesData).forEach(employeeId => {
+                const employee = employeesData[employeeId];
+                html += `
+                    <tr>
+                        <td>${index++}</td>
+                        <td>${escapeHtml(employee.employeeName || 'N/A')}</td>
+                        <td>${escapeHtml(employee.designation || 'N/A')}</td>
+                        <td><span class="badge bg-${getEmployeeTypeColor(employee.employeeType)}">${getEmployeeTypeText(employee.employeeType)}</span></td>
+                        <td>${escapeHtml(employee.contactNo || 'N/A')}</td>
+                        <td><span class="badge bg-success">Active</span></td>
+                    </tr>
+                `;
+            });
+            
+            tableBody.innerHTML = html;
+            
+        } catch (error) {
+            console.error("Error loading employees:", error);
+            document.getElementById('employeesTableBody').innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Error loading employees
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    // Load attendance report
+    async function loadAttendanceReport() {
+        try {
+            const tableBody = document.getElementById('attendanceTableBody');
+            
+            // Get all attendance dates for this project
+            const attendanceSnapshot = await database.ref(`projects/${currentProjectId}/attendance`).once('value');
+            const attendanceData = attendanceSnapshot.val();
+            
+            // Get total employees count
+            const employeesSnapshot = await database.ref(`employees/${currentProjectId}`).once('value');
+            const employeesData = employeesSnapshot.val();
+            const totalEmployees = employeesData ? Object.keys(employeesData).length : 0;
+            
+            if (!attendanceData || Object.keys(attendanceData).length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <i class="fas fa-clipboard-check fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">No attendance data found</p>
+                            <button class="btn btn-primary btn-sm" onclick="markAttendance()">
+                                <i class="fas fa-clipboard-check me-1"></i>Mark Attendance
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            let allAttendanceData = [];
+            
+            // Process each date's attendance
+            Object.keys(attendanceData).forEach(date => {
+                // Apply date filter
+                if (dateFilter.from && date < dateFilter.from) return;
+                if (dateFilter.to && date > dateFilter.to) return;
+                
+                const dayAttendance = attendanceData[date];
+                let presentCount = 0;
+                let absentCount = 0;
+                let halfdayCount = 0;
+                
+                Object.values(dayAttendance).forEach(record => {
+                    if (record.status === 'present') presentCount++;
+                    else if (record.status === 'absent') absentCount++;
+                    else if (record.status === 'halfday') halfdayCount++;
+                });
+                
+                const markedCount = presentCount + absentCount + halfdayCount;
+                const notMarkedCount = totalEmployees - markedCount;
+                const attendancePercentage = totalEmployees > 0 ? Math.round((markedCount / totalEmployees) * 100) : 0;
+                
+                allAttendanceData.push({
+                    date,
+                    presentCount,
+                    absentCount,
+                    halfdayCount,
+                    notMarkedCount,
+                    attendancePercentage
+                });
+            });
+            
+            // Sort by date (newest first)
+            allAttendanceData.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Display data
+            allAttendanceData.forEach(data => {
+                const formattedDate = new Date(data.date).toLocaleDateString('en-IN');
+                
+                html += `
+                    <tr>
+                        <td>${formattedDate}</td>
+                        <td><span class="badge bg-success">${data.presentCount}</span></td>
+                        <td><span class="badge bg-danger">${data.absentCount}</span></td>
+                        <td><span class="badge bg-warning">${data.halfdayCount}</span></td>
+                        <td><span class="badge bg-secondary">${data.notMarkedCount}</span></td>
+                        <td>${totalEmployees}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                    <div class="progress-bar ${getAttendancePercentageColor(data.attendancePercentage)}" 
+                                         style="width: ${data.attendancePercentage}%">
+                                    </div>
+                                </div>
+                                <span>${data.attendancePercentage}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableBody.innerHTML = html;
+            
+        } catch (error) {
+            console.error("Error loading attendance report:", error);
+            document.getElementById('attendanceTableBody').innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Error loading attendance data
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    // Load earnings report
+    async function loadEarningsReport() {
+        try {
+            const tableBody = document.getElementById('earningsTableBody');
+            
+            const snapshot = await database.ref(`projects/${currentProjectId}/earnings`).once('value');
+            const earningsData = snapshot.val();
+            
+            if (!earningsData || Object.keys(earningsData).length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <i class="fas fa-money-bill-wave fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">No earnings data found</p>
+                            <button class="btn btn-primary btn-sm" onclick="addEarning()">
+                                <i class="fas fa-plus me-1"></i>Add Earning
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            let totalEarnings = 0;
+            let earningsByCategory = {};
+            let earningsByDate = {};
+            
+            Object.keys(earningsData).forEach(earningId => {
+                const earning = earningsData[earningId];
+                
+                // Apply date filter
+                if (dateFilter.from && earning.date < dateFilter.from) return;
+                if (dateFilter.to && earning.date > dateFilter.to) return;
+                
+                const amount = parseFloat(earning.amount) || 0;
+                totalEarnings += amount;
+                
+                // Group by category for chart
+                if (!earningsByCategory[earning.category]) {
+                    earningsByCategory[earning.category] = 0;
+                }
+                earningsByCategory[earning.category] += amount;
+                
+                // Group by date for chart
+                if (!earningsByDate[earning.date]) {
+                    earningsByDate[earning.date] = 0;
+                }
+                earningsByDate[earning.date] += amount;
+                
+                const formattedDate = new Date(earning.date).toLocaleDateString('en-IN');
+                
+                html += `
+                    <tr>
+                        <td>${formattedDate}</td>
+                        <td>${escapeHtml(earning.title || 'N/A')}</td>
+                        <td><span class="badge bg-${getEarningCategoryColor(earning.category)}">${getEarningCategoryText(earning.category)}</span></td>
+                        <td class="text-success fw-bold">₹ ${formatCurrency(amount)}</td>
+                        <td>${escapeHtml(earning.invoice || 'N/A')}</td>
+                        <td>${escapeHtml(earning.remarks || '')}</td>
+                    </tr>
+                `;
+            });
+            
+            tableBody.innerHTML = html;
+            
+            // Update global data for charts
+            window.projectEarnings = {
+                total: totalEarnings,
+                byCategory: earningsByCategory,
+                byDate: earningsByDate
+            };
+            
+        } catch (error) {
+            console.error("Error loading earnings report:", error);
+            document.getElementById('earningsTableBody').innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Error loading earnings data
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    // Load expenses report
+    async function loadExpensesReport() {
+        try {
+            const tableBody = document.getElementById('expensesTableBody');
+            
+            const snapshot = await database.ref(`projects/${currentProjectId}/expenses`).once('value');
+            const expensesData = snapshot.val();
+            
+            if (!expensesData || Object.keys(expensesData).length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <i class="fas fa-receipt fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">No expenses data found</p>
+                            <button class="btn btn-primary btn-sm" onclick="addExpense()">
+                                <i class="fas fa-plus me-1"></i>Add Expense
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            let totalExpenses = 0;
+            let expensesByCategory = {};
+            let expensesByDate = {};
+            
+            Object.keys(expensesData).forEach(expenseId => {
+                const expense = expensesData[expenseId];
+                
+                // Apply date filter
+                if (dateFilter.from && expense.date < dateFilter.from) return;
+                if (dateFilter.to && expense.date > dateFilter.to) return;
+                
+                const amount = parseFloat(expense.amount) || 0;
+                totalExpenses += amount;
+                
+                // Group by category for chart
+                if (!expensesByCategory[expense.category]) {
+                    expensesByCategory[expense.category] = 0;
+                }
+                expensesByCategory[expense.category] += amount;
+                
+                // Group by date for chart
+                if (!expensesByDate[expense.date]) {
+                    expensesByDate[expense.date] = 0;
+                }
+                expensesByDate[expense.date] += amount;
+                
+                const formattedDate = new Date(expense.date).toLocaleDateString('en-IN');
+                
+                html += `
+                    <tr>
+                        <td>${formattedDate}</td>
+                        <td>${escapeHtml(expense.title || 'N/A')}</td>
+                        <td><span class="badge bg-${getExpenseCategoryColor(expense.category)}">${getExpenseCategoryText(expense.category)}</span></td>
+                        <td class="text-danger fw-bold">₹ ${formatCurrency(amount)}</td>
+                        <td>${escapeHtml(expense.receiptNo || 'N/A')}</td>
+                        <td>${escapeHtml(expense.remarks || '')}</td>
+                    </tr>
+                `;
+            });
+            
+            tableBody.innerHTML = html;
+            
+            // Update global data for charts
+            window.projectExpenses = {
+                total: totalExpenses,
+                byCategory: expensesByCategory,
+                byDate: expensesByDate
+            };
+            
+        } catch (error) {
+            console.error("Error loading expenses report:", error);
+            document.getElementById('expensesTableBody').innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Error loading expenses data
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    // Update quick stats
+    async function updateQuickStats() {
+        try {
+            // Get employees count
+            const employeesSnapshot = await database.ref(`employees/${currentProjectId}`).once('value');
+            const employeesData = employeesSnapshot.val();
+            const totalEmployees = employeesData ? Object.keys(employeesData).length : 0;
+            
+            document.getElementById('totalEmployees').textContent = totalEmployees;
+            
+            // Calculate totals from loaded data
+            const totalEarnings = window.projectEarnings?.total || 0;
+            const totalExpenses = window.projectExpenses?.total || 0;
+            const netProfit = totalEarnings - totalExpenses;
+            
+            document.getElementById('totalEarnings').textContent = '₹ ' + formatCurrency(totalEarnings);
+            document.getElementById('totalExpenses').textContent = '₹ ' + formatCurrency(totalExpenses);
+            document.getElementById('netProfit').textContent = '₹ ' + formatCurrency(netProfit);
+            
+            // Color code net profit
+            const profitElement = document.getElementById('netProfit');
+            if (netProfit > 0) {
+                profitElement.className = 'mb-0 text-success fw-bold';
+            } else if (netProfit < 0) {
+                profitElement.className = 'mb-0 text-danger fw-bold';
+            } else {
+                profitElement.className = 'mb-0 text-warning fw-bold';
+            }
+            
+        } catch (error) {
+            console.error("Error updating quick stats:", error);
+        }
+    }
+
+    // Initialize charts
+    function initializeCharts() {
+        // Earnings vs Expenses Chart (Bar Chart)
+        const earningsExpensesCtx = document.getElementById('earningsExpensesChart').getContext('2d');
+        
+        // Prepare data for bar chart
+        const dates = [...new Set([
+            ...Object.keys(window.projectEarnings?.byDate || {}),
+            ...Object.keys(window.projectExpenses?.byDate || {})
+        ])].sort();
+        
+        const earningsData = dates.map(date => window.projectEarnings?.byDate[date] || 0);
+        const expensesData = dates.map(date => window.projectExpenses?.byDate[date] || 0);
+        
+        if (earningsChart) {
+            earningsChart.destroy();
+        }
+        
+        earningsChart = new Chart(earningsExpensesCtx, {
+            type: 'bar',
+            data: {
+                labels: dates.map(date => new Date(date).toLocaleDateString('en-IN', { 
+                    month: 'short', 
+                    day: 'numeric' 
+                })),
+                datasets: [
+                    {
+                        label: 'Earnings',
+                        data: earningsData,
+                        backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                        borderColor: 'rgba(40, 167, 69, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Expenses',
+                        data: expensesData,
+                        backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                        borderColor: 'rgba(220, 53, 69, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '₹ ' + value.toLocaleString('en-IN');
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += '₹ ' + context.parsed.y.toLocaleString('en-IN');
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Expense Categories Chart (Doughnut Chart)
+        const expenseCategoriesCtx = document.getElementById('expenseCategoriesChart').getContext('2d');
+        
+        const expenseCategories = Object.keys(window.projectExpenses?.byCategory || {});
+        const expenseAmounts = expenseCategories.map(category => window.projectExpenses.byCategory[category]);
+        
+        // Colors for categories
+        const categoryColors = expenseCategories.map(category => getExpenseCategoryColor(category, true));
+        
+        if (expenseCategoriesChart) {
+            expenseCategoriesChart.destroy();
+        }
+        
+        expenseCategoriesChart = new Chart(expenseCategoriesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: expenseCategories.map(category => getExpenseCategoryText(category)),
+                datasets: [{
+                    data: expenseAmounts,
+                    backgroundColor: categoryColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ₹ ${value.toLocaleString('en-IN')} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Apply date filter
+    async function applyDateFilter() {
+        dateFilter.from = document.getElementById('dateFrom').value;
+        dateFilter.to = document.getElementById('dateTo').value;
+        
+        if (dateFilter.from && dateFilter.to && dateFilter.from > dateFilter.to) {
+            showNotification('"Date From" cannot be later than "Date To"', 'warning');
+            return;
+        }
+        
+        // Reload data with filters
+        await loadAllData();
+        showNotification('Filter applied successfully', 'success');
+    }
+
+    // Reset date filter
+    function resetDateFilter() {
+        const today = new Date();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        
+        document.getElementById('dateFrom').value = thirtyDaysAgo.toISOString().split('T')[0];
+        document.getElementById('dateTo').value = today.toISOString().split('T')[0];
+        
+        dateFilter.from = thirtyDaysAgo.toISOString().split('T')[0];
+        dateFilter.to = today.toISOString().split('T')[0];
+        
+        // Reload data
+        loadAllData();
+        showNotification('Filter reset to last 30 days', 'info');
+    }
+
+    // Navigation functions
+    function markAttendance() {
+        window.location.href = `attendance.html?projectId=${currentProjectId}`;
+    }
+
+    function addEarning() {
+        window.location.href = `earnings.html`;
+    }
+
+    function addExpense() {
+        window.location.href = `expense.html`;
+    }
+
+    function addEmployee() {
+        window.location.href = `add-employee.html?projectId=${currentProjectId}`;
+    }
+
+    // Export functions
+    function exportAllData() {
+        // This would export all data (attendance, earnings, expenses) in one file
+        showNotification('Export feature coming soon!', 'info');
+    }
+
+    function exportAttendance() {
+        // Export attendance data
+        showNotification('Attendance export coming soon!', 'info');
+    }
+
+    function exportEarnings() {
+        // Export earnings data
+        showNotification('Earnings export coming soon!', 'info');
+    }
+
+    function exportExpenses() {
+        // Export expenses data
+        showNotification('Expenses export coming soon!', 'info');
+    }
+
+    function exportEmployees() {
+        // Export employees data
+        showNotification('Employees export coming soon!', 'info');
+    }
+
+    function refreshPage() {
+        loadAllData();
+        showNotification('Page refreshed', 'info');
+    }
+
+    // Helper functions
+    function getEmployeeTypeText(type) {
+        const types = {
+            daily: 'Daily',
+            monthly: 'Monthly',
+            contract: 'Contract',
+            weekly: 'Weekly'
+        };
+        return types[type] || type || 'N/A';
+    }
+
+    function getEmployeeTypeColor(type) {
+        const colors = {
+            daily: 'primary',
+            monthly: 'success',
+            contract: 'info',
+            weekly: 'warning'
+        };
+        return colors[type] || 'secondary';
+    }
+
+    function getEarningCategoryText(category) {
+        const categories = {
+            project_payment: 'Project Payment',
+            advance: 'Advance',
+            milestone: 'Milestone',
+            other: 'Other'
+        };
+        return categories[category] || category || 'Other';
+    }
+
+    function getEarningCategoryColor(category) {
+        const colors = {
+            project_payment: 'primary',
+            advance: 'success',
+            milestone: 'info',
+            other: 'warning'
+        };
+        return colors[category] || 'secondary';
+    }
+
+    function getExpenseCategoryText(category) {
+        const categories = {
+            material: 'Material',
+            labor: 'Labor',
+            equipment: 'Equipment',
+            transport: 'Transport',
+            utility: 'Utility',
+            maintenance: 'Maintenance',
+            office: 'Office',
+            other: 'Other'
+        };
+        return categories[category] || category || 'Other';
+    }
+
+    function getExpenseCategoryColor(category, forChart = false) {
+        if (forChart) {
+            const chartColors = {
+                material: 'rgba(0, 123, 255, 0.7)',
+                labor: 'rgba(40, 167, 69, 0.7)',
+                equipment: 'rgba(23, 162, 184, 0.7)',
+                transport: 'rgba(255, 193, 7, 0.7)',
+                utility: 'rgba(220, 53, 69, 0.7)',
+                maintenance: 'rgba(108, 117, 125, 0.7)',
+                office: 'rgba(52, 58, 64, 0.7)',
+                other: 'rgba(253, 126, 20, 0.7)'
+            };
+            return chartColors[category] || 'rgba(108, 117, 125, 0.7)';
+        } else {
+            const colors = {
+                material: 'primary',
+                labor: 'success',
+                equipment: 'info',
+                transport: 'warning',
+                utility: 'danger',
+                maintenance: 'secondary',
+                office: 'dark',
+                other: 'light text-dark'
+            };
+            return colors[category] || 'secondary';
+        }
+    }
+
+    function getAttendancePercentageColor(percentage) {
+        if (percentage >= 90) return 'bg-success';
+        if (percentage >= 70) return 'bg-primary';
+        if (percentage >= 50) return 'bg-warning';
+        return 'bg-danger';
+    }
+
+    function formatCurrency(amount) {
+        return parseFloat(amount).toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return 'Unknown';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-IN', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        } catch (error) {
+            return 'Invalid date';
+        }
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Show notification
+    function showNotification(message, type) {
+        // Remove existing notifications
+        document.querySelectorAll('.alert-notification').forEach(el => el.remove());
+        
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed alert-notification`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+        notification.innerHTML = `
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            ${message}
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 3000);
+    }
+</script>
+<script>
+    async function exportAllData() {
+        try {
+            showNotification('Preparing export...', 'info');
+            
+            // Create combined CSV
+            let csvContent = "Barman Construction - Project Report\n";
+            csvContent += `Project: ${escapeHtml(currentProjectData.projectName || 'Unnamed Project')}\n`;
+            csvContent += `Report Date: ${new Date().toLocaleDateString('en-IN')}\n`;
+            csvContent += `Date Range: ${dateFilter.from || 'All'} to ${dateFilter.to || 'All'}\n\n`;
+            
+            // 1. Quick Stats
+            csvContent += "QUICK STATISTICS\n";
+            csvContent += "Metric,Value\n";
+            csvContent += `Total Employees,${document.getElementById('totalEmployees').textContent}\n`;
+            csvContent += `Total Earnings,${document.getElementById('totalEarnings').textContent}\n`;
+            csvContent += `Total Expenses,${document.getElementById('totalExpenses').textContent}\n`;
+            csvContent += `Net Profit,${document.getElementById('netProfit').textContent}\n\n`;
+            
+            // 2. Attendance Report
+            csvContent += "ATTENDANCE REPORT\n";
+            csvContent += "Date,Present,Absent,Half Day,Not Marked,Total Employees,Attendance %\n";
+            
+            // Get attendance data again for export
+            const attendanceSnapshot = await database.ref(`projects/${currentProjectId}/attendance`).once('value');
+            const attendanceData = attendanceSnapshot.val();
+            const employeesSnapshot = await database.ref(`employees/${currentProjectId}`).once('value');
+            const employeesData = employeesSnapshot.val();
+            const totalEmployees = employeesData ? Object.keys(employeesData).length : 0;
+            
+            if (attendanceData) {
+                const dates = Object.keys(attendanceData).sort();
+                dates.forEach(date => {
+                    if (dateFilter.from && date < dateFilter.from) return;
+                    if (dateFilter.to && date > dateFilter.to) return;
+                    
+                    const dayAttendance = attendanceData[date];
+                    let presentCount = 0;
+                    let absentCount = 0;
+                    let halfdayCount = 0;
+                    
+                    Object.values(dayAttendance).forEach(record => {
+                        if (record.status === 'present') presentCount++;
+                        else if (record.status === 'absent') absentCount++;
+                        else if (record.status === 'halfday') halfdayCount++;
+                    });
+                    
+                    const markedCount = presentCount + absentCount + halfdayCount;
+                    const notMarkedCount = totalEmployees - markedCount;
+                    const attendancePercentage = totalEmployees > 0 ? Math.round((markedCount / totalEmployees) * 100) : 0;
+                    
+                    csvContent += `${new Date(date).toLocaleDateString('en-IN')},${presentCount},${absentCount},${halfdayCount},${notMarkedCount},${totalEmployees},${attendancePercentage}%\n`;
+                });
+            }
+            csvContent += "\n";
+            
+            // 3. Earnings Report
+            csvContent += "EARNINGS REPORT\n";
+            csvContent += "Date,Title,Category,Amount,Invoice No,Remarks\n";
+            
+            const earningsSnapshot = await database.ref(`projects/${currentProjectId}/earnings`).once('value');
+            const earningsData = earningsSnapshot.val();
+            
+            if (earningsData) {
+                const earnings = Object.values(earningsData);
+                earnings.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                earnings.forEach(earning => {
+                    if (dateFilter.from && earning.date < dateFilter.from) return;
+                    if (dateFilter.to && earning.date > dateFilter.to) return;
+                    
+                    const formattedDate = new Date(earning.date).toLocaleDateString('en-IN');
+                    csvContent += `${formattedDate},"${earning.title.replace(/"/g, '""')}","${getEarningCategoryText(earning.category)}","₹ ${formatCurrency(earning.amount)}","${earning.invoice || ''}","${(earning.remarks || '').replace(/"/g, '""')}"\n`;
+                });
+            }
+            csvContent += "\n";
+            
+            // 4. Expenses Report
+            csvContent += "EXPENSES REPORT\n";
+            csvContent += "Date,Title,Category,Amount,Receipt No,Remarks\n";
+            
+            const expensesSnapshot = await database.ref(`projects/${currentProjectId}/expenses`).once('value');
+            const expensesData = expensesSnapshot.val();
+            
+            if (expensesData) {
+                const expenses = Object.values(expensesData);
+                expenses.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                expenses.forEach(expense => {
+                    if (dateFilter.from && expense.date < dateFilter.from) return;
+                    if (dateFilter.to && expense.date > dateFilter.to) return;
+                    
+                    const formattedDate = new Date(expense.date).toLocaleDateString('en-IN');
+                    csvContent += `${formattedDate},"${expense.title.replace(/"/g, '""')}","${getExpenseCategoryText(expense.category)}","₹ ${formatCurrency(expense.amount)}","${expense.receiptNo || ''}","${(expense.remarks || '').replace(/"/g, '""')}"\n`;
+                });
+            }
+            csvContent += "\n";
+            
+            // 5. Employees List
+            csvContent += "EMPLOYEES LIST\n";
+            csvContent += "S.No,Name,Designation,Type,Contact No\n";
+            
+            if (employeesData) {
+                let index = 1;
+                Object.values(employeesData).forEach(employee => {
+                    csvContent += `${index},"${employee.employeeName.replace(/"/g, '""')}","${employee.designation.replace(/"/g, '""')}","${getEmployeeTypeText(employee.employeeType)}","${employee.contactNo || ''}"\n`;
+                    index++;
+                });
+            }
+            
+            // Create and download CSV file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const fileName = `project_report_${currentProjectData.projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.csv`;
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', fileName);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Export completed successfully!', 'success');
+            
+        } catch (error) {
+            console.error("Error exporting data:", error);
+            showNotification('Error exporting data: ' + error.message, 'danger');
+        }
+    }
+
+    async function exportAttendance() {
+        try {
+            showNotification('Preparing attendance export...', 'info');
+            
+            let csvContent = "Barman Construction - Attendance Report\n";
+            csvContent += `Project: ${escapeHtml(currentProjectData.projectName || 'Unnamed Project')}\n`;
+            csvContent += `Report Date: ${new Date().toLocaleDateString('en-IN')}\n`;
+            csvContent += `Date Range: ${dateFilter.from || 'All'} to ${dateFilter.to || 'All'}\n\n`;
+            csvContent += "Date,Present,Absent,Half Day,Not Marked,Total Employees,Attendance %\n";
+            
+            const attendanceSnapshot = await database.ref(`projects/${currentProjectId}/attendance`).once('value');
+            const attendanceData = attendanceSnapshot.val();
+            const employeesSnapshot = await database.ref(`employees/${currentProjectId}`).once('value');
+            const employeesData = employeesSnapshot.val();
+            const totalEmployees = employeesData ? Object.keys(employeesData).length : 0;
+            
+            if (attendanceData) {
+                const dates = Object.keys(attendanceData).sort();
+                dates.forEach(date => {
+                    if (dateFilter.from && date < dateFilter.from) return;
+                    if (dateFilter.to && date > dateFilter.to) return;
+                    
+                    const dayAttendance = attendanceData[date];
+                    let presentCount = 0;
+                    let absentCount = 0;
+                    let halfdayCount = 0;
+                    
+                    Object.values(dayAttendance).forEach(record => {
+                        if (record.status === 'present') presentCount++;
+                        else if (record.status === 'absent') absentCount++;
+                        else if (record.status === 'halfday') halfdayCount++;
+                    });
+                    
+                    const markedCount = presentCount + absentCount + halfdayCount;
+                    const notMarkedCount = totalEmployees - markedCount;
+                    const attendancePercentage = totalEmployees > 0 ? Math.round((markedCount / totalEmployees) * 100) : 0;
+                    
+                    csvContent += `${new Date(date).toLocaleDateString('en-IN')},${presentCount},${absentCount},${halfdayCount},${notMarkedCount},${totalEmployees},${attendancePercentage}%\n`;
+                });
+            }
+            
+            // Create and download CSV file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const fileName = `attendance_report_${currentProjectData.projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.csv`;
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', fileName);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Attendance export completed!', 'success');
+            
+        } catch (error) {
+            console.error("Error exporting attendance:", error);
+            showNotification('Error exporting attendance: ' + error.message, 'danger');
+        }
+    }
+
+    async function exportEarnings() {
+        try {
+            showNotification('Preparing earnings export...', 'info');
+            
+            let csvContent = "Barman Construction - Earnings Report\n";
+            csvContent += `Project: ${escapeHtml(currentProjectData.projectName || 'Unnamed Project')}\n`;
+            csvContent += `Report Date: ${new Date().toLocaleDateString('en-IN')}\n`;
+            csvContent += `Date Range: ${dateFilter.from || 'All'} to ${dateFilter.to || 'All'}\n\n`;
+            csvContent += "Date,Title,Category,Amount,Invoice No,Remarks\n";
+            
+            const earningsSnapshot = await database.ref(`projects/${currentProjectId}/earnings`).once('value');
+            const earningsData = earningsSnapshot.val();
+            
+            if (earningsData) {
+                const earnings = Object.values(earningsData);
+                earnings.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                earnings.forEach(earning => {
+                    if (dateFilter.from && earning.date < dateFilter.from) return;
+                    if (dateFilter.to && earning.date > dateFilter.to) return;
+                    
+                    const formattedDate = new Date(earning.date).toLocaleDateString('en-IN');
+                    csvContent += `${formattedDate},"${earning.title.replace(/"/g, '""')}","${getEarningCategoryText(earning.category)}","₹ ${formatCurrency(earning.amount)}","${earning.invoice || ''}","${(earning.remarks || '').replace(/"/g, '""')}"\n`;
+                });
+            }
+            
+            // Create and download CSV file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const fileName = `earnings_report_${currentProjectData.projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.csv`;
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', fileName);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Earnings export completed!', 'success');
+            
+        } catch (error) {
+            console.error("Error exporting earnings:", error);
+            showNotification('Error exporting earnings: ' + error.message, 'danger');
+        }
+    }
+
+    async function exportExpenses() {
+        try {
+            showNotification('Preparing expenses export...', 'info');
+            
+            let csvContent = "Barman Construction - Expenses Report\n";
+            csvContent += `Project: ${escapeHtml(currentProjectData.projectName || 'Unnamed Project')}\n`;
+            csvContent += `Report Date: ${new Date().toLocaleDateString('en-IN')}\n`;
+            csvContent += `Date Range: ${dateFilter.from || 'All'} to ${dateFilter.to || 'All'}\n\n`;
+            csvContent += "Date,Title,Category,Amount,Receipt No,Remarks\n";
+            
+            const expensesSnapshot = await database.ref(`projects/${currentProjectId}/expenses`).once('value');
+            const expensesData = expensesSnapshot.val();
+            
+            if (expensesData) {
+                const expenses = Object.values(expensesData);
+                expenses.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                expenses.forEach(expense => {
+                    if (dateFilter.from && expense.date < dateFilter.from) return;
+                    if (dateFilter.to && expense.date > dateFilter.to) return;
+                    
+                    const formattedDate = new Date(expense.date).toLocaleDateString('en-IN');
+                    csvContent += `${formattedDate},"${expense.title.replace(/"/g, '""')}","${getExpenseCategoryText(expense.category)}","₹ ${formatCurrency(expense.amount)}","${expense.receiptNo || ''}","${(expense.remarks || '').replace(/"/g, '""')}"\n`;
+                });
+            }
+            
+            // Create and download CSV file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const fileName = `expenses_report_${currentProjectData.projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.csv`;
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', fileName);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Expenses export completed!', 'success');
+            
+        } catch (error) {
+            console.error("Error exporting expenses:", error);
+            showNotification('Error exporting expenses: ' + error.message, 'danger');
+        }
+    }
+
+    async function exportEmployees() {
+        try {
+            showNotification('Preparing employees export...', 'info');
+            
+            let csvContent = "Barman Construction - Employees List\n";
+            csvContent += `Project: ${escapeHtml(currentProjectData.projectName || 'Unnamed Project')}\n`;
+            csvContent += `Report Date: ${new Date().toLocaleDateString('en-IN')}\n\n`;
+            csvContent += "S.No,Name,Designation,Type,Contact No\n";
+            
+            const employeesSnapshot = await database.ref(`employees/${currentProjectId}`).once('value');
+            const employeesData = employeesSnapshot.val();
+            
+            if (employeesData) {
+                let index = 1;
+                Object.values(employeesData).forEach(employee => {
+                    csvContent += `${index},"${employee.employeeName.replace(/"/g, '""')}","${employee.designation.replace(/"/g, '""')}","${getEmployeeTypeText(employee.employeeType)}","${employee.contactNo || ''}"\n`;
+                    index++;
+                });
+            }
+            
+            // Create and download CSV file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const fileName = `employees_list_${currentProjectData.projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.csv`;
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', fileName);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Employees export completed!', 'success');
+            
+        } catch (error) {
+            console.error("Error exporting employees:", error);
+            showNotification('Error exporting employees: ' + error.message, 'danger');
+        }
+    }
+
+    // Apply date filter with spinner
+    async function applyDateFilter() {
+        dateFilter.from = document.getElementById('dateFrom').value;
+        dateFilter.to = document.getElementById('dateTo').value;
+        
+        if (dateFilter.from && dateFilter.to && dateFilter.from > dateFilter.to) {
+            showNotification('"Date From" cannot be later than "Date To"', 'warning');
+            return;
+        }
+        
+        // Show spinner on Apply Filter button
+        const applyBtn = document.getElementById('applyFilterBtn');
+        const originalText = applyBtn.innerHTML;
+        applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Applying...';
+        applyBtn.disabled = true;
+        
+        try {
+            // Reload data with filters
+            await loadAllData();
+            showNotification('Filter applied successfully', 'success');
+        } catch (error) {
+            console.error("Error applying filter:", error);
+            showNotification('Error applying filter: ' + error.message, 'danger');
+        } finally {
+            // Restore button
+            applyBtn.innerHTML = originalText;
+            applyBtn.disabled = false;
+        }
+    }
+
+    // Reset date filter with spinner
+    async function resetDateFilter() {
+        // Show spinner on Reset button
+        const resetBtn = document.getElementById('resetFilterBtn');
+        const originalText = resetBtn.innerHTML;
+        resetBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Resetting...';
+        resetBtn.disabled = true;
+        
+        try {
+            const today = new Date();
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(today.getDate() - 30);
+            
+            document.getElementById('dateFrom').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('dateTo').value = today.toISOString().split('T')[0];
+            
+            dateFilter.from = thirtyDaysAgo.toISOString().split('T')[0];
+            dateFilter.to = today.toISOString().split('T')[0];
+            
+            // Reload data
+            await loadAllData();
+            showNotification('Filter reset to last 30 days', 'info');
+        } catch (error) {
+            console.error("Error resetting filter:", error);
+            showNotification('Error resetting filter: ' + error.message, 'danger');
+        } finally {
+            // Restore button
+            resetBtn.innerHTML = originalText;
+            resetBtn.disabled = false;
+        }
+    }
+
+    // Update HTML for Apply Filter button with spinner
+    // Change this in your HTML for the filter section:
+</script>
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

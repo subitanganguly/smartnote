@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earnings - Barman Construction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="style/style.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Navbar placeholder -->
+<div id="nav-placeholder"></div>
+
+<!-- Add Earning Modal -->
+<div class="modal fade" id="addEarningModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Earning</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="earningForm">
+                    <div class="mb-3">
+                        <label for="earningTitle" class="form-label">Earning Title *</label>
+                        <input type="text" class="form-control" id="earningTitle" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="earningAmount" class="form-label">Amount *</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" class="form-control" id="earningAmount" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="earningDate" class="form-label">Date *</label>
+                        <input type="date" class="form-control" id="earningDate" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="earningRemarks" class="form-label">Remarks</label>
+                        <textarea class="form-control" id="earningRemarks" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="earningProject" class="form-label">Project *</label>
+                        <select class="form-select" id="earningProject" required>
+                            <option value="">Select Project</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveEarning()">Save Earning</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="content p-1">
+    <div class="container-fluid">
+        
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-2 mt-2">
+            <div>
+               <h4 class="text-nowrap top-h">
+        <span class="d-none d-lg-inline"><i class="fas fa-coins "></i>  Project Earnings</span>
+        </h4>
+               
+            </div>
+            <button class="btn button2" data-bs-toggle="modal" data-bs-target="#addEarningModal">
+                <i class="fas fa-plus"></i><span class="d-none d-lg-inline"> Add Earning </span>
+            </button>
+        </div>
+
+        <!-- Stats Cards -->
+       <div class="row mb-4 g-2">
+
+    <div class="col-4">
+        <div class="card border-start border-primary border-3 h-100">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1 small">Total Earnings</h6>
+                        <h6 class="mb-0 fw-semibold" id="totalEarnings">₹ 0</h6>
+                    </div>
+                    <div class="bg-primary px-2 py-1 rounded">
+                        <i class="fas fa-money-bill-wave fa-sm text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-4">
+        <div class="card border-start border-success border-3 h-100">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1 small">This Month</h6>
+                        <h6 class="mb-0 fw-semibold" id="monthlyEarnings">₹ 0</h6>
+                    </div>
+                    <div class="bg-success px-2 py-1 rounded">
+                        <i class="fas fa-calendar-alt fa-sm text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-4">
+        <div class="card border-start border-info border-3 h-100">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1 small">Today</h6>
+                        <h6 class="mb-0 fw-semibold" id="todayEarnings">₹ 0</h6>
+                    </div>
+                    <div class="bg-info px-2 py-1 rounded">
+                        <i class="fas fa-coins fa-sm text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+        <!-- Filters Section -->
+        <div class="fix-card mb-2 p-2">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Filters</h5>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="filterProject" class="form-label">Project</label>
+                        <select class="form-select" id="filterProject">
+                            <option value="">All Projects</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="filterCategory" class="form-label">Category</label>
+                        <select class="form-select" id="filterCategory">
+                            <option value="">All Categories</option>
+                            <option value="project_payment">Project Payment</option>
+                            <option value="advance">Advance Payment</option>
+                            <option value="milestone">Milestone Payment</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="filterDateFrom" class="form-label">Date From</label>
+                        <input type="date" class="form-control" id="filterDateFrom">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="filterDateTo" class="form-label">Date To</label>
+                        <input type="date" class="form-control" id="filterDateTo">
+                    </div>
+                    
+                    <div class="col-md-12 d-flex align-items-end">
+                        <button class="btn btn-primary me-2" onclick="applyFilters()">
+                            <i class="fas fa-filter me-1"></i>Apply Filters
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="resetFilters()">
+                            <i class="fas fa-redo me-1"></i>Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Earnings List -->
+        <div class="">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Earnings List</h5>
+                <div>
+                    <button class="btn btn-outline-success btn-sm me-2" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel me-1"></i>Export
+                    </button>
+                    <button class="btn btn-outline-info btn-sm" onclick="refreshEarnings()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="earningsList">
+                    <div class="text-center py-5">
+                        <section class="loader">
+                        <div class="slider" style="--i:0"></div>
+                        <div class="slider" style="--i:1"></div>
+                        <div class="slider" style="--i:2"></div>
+                        <div class="slider" style="--i:3"></div>
+                        <div class="slider" style="--i:4"></div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="js/firebaseconfig.js"></script>
+<script src="js/all.js"></script>
+
+<script>
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    const auth = firebase.auth();
+    const database = firebase.database();
+    let currentUser = null;
+    let currentUserRole = 'user';
+    let allProjects = [];
+    let earnings = [];
+    let filteredEarnings = [];
+    let currentFilters = {};
+
+    // Check authentication
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.href = "login.html";
+        } else {
+            currentUser = user;
+            await initializePage();
+        }
+    });
+
+    // Initialize page
+    async function initializePage() {
+        try {
+            // Get user role
+            const userSnapshot = await database.ref(`users/${currentUser.uid}`).once('value');
+            const userData = userSnapshot.val();
+            currentUserRole = userData?.role || 'user';
+
+            // Load projects
+            await loadProjects();
+            
+            // Set default date in form
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('earningDate').value = today;
+            
+            // Load earnings
+            await loadEarnings();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Update stats
+            updateStats();
+
+        } catch (error) {
+            console.error("Error initializing page:", error);
+            showNotification('Error loading page: ' + error.message, 'danger');
+        }
+    }
+
+    // Load projects
+    async function loadProjects() {
+        try {
+            const earningProject = document.getElementById('earningProject');
+            const filterProject = document.getElementById('filterProject');
+            
+            if (currentUserRole === 'admin') {
+                const snapshot = await database.ref('projects').once('value');
+                const allProjectsData = snapshot.val();
+                
+                if (allProjectsData) {
+                    allProjects = [];
+                    Object.keys(allProjectsData).forEach(projectId => {
+                        allProjects.push({
+                            id: projectId,
+                            name: allProjectsData[projectId].projectName || 'Unnamed Project'
+                        });
+                    });
+                }
+            } else {
+                const userSnapshot = await database.ref(`users/${currentUser.uid}`).once('value');
+                const userData = userSnapshot.val();
+                const userProjects = userData?.projects || {};
+                
+                allProjects = [];
+                const projectIds = Object.keys(userProjects).filter(
+                    projectId => userProjects[projectId] === true
+                );
+                
+                for (const projectId of projectIds) {
+                    const projectSnap = await database.ref(`projects/${projectId}`).once('value');
+                    if (projectSnap.exists()) {
+                        const projectData = projectSnap.val();
+                        allProjects.push({
+                            id: projectId,
+                            name: projectData.projectName || 'Unnamed Project'
+                        });
+                    }
+                }
+            }
+
+            // Populate both select elements
+            earningProject.innerHTML = '<option value="">Select Project</option>';
+            filterProject.innerHTML = '<option value="">All Projects</option>';
+            
+            allProjects.forEach(project => {
+                // For earning form
+                const option1 = document.createElement('option');
+                option1.value = project.id;
+                option1.textContent = project.name;
+                earningProject.appendChild(option1);
+                
+                // For filter
+                const option2 = document.createElement('option');
+                option2.value = project.id;
+                option2.textContent = project.name;
+                filterProject.appendChild(option2);
+            });
+
+        } catch (error) {
+            console.error("Error loading projects:", error);
+            showNotification('Error loading projects: ' + error.message, 'warning');
+        }
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+        // Form submission
+        document.getElementById('addEarningModal').addEventListener('shown.bs.modal', function () {
+            document.getElementById('earningTitle').focus();
+        });
+
+        document.getElementById('addEarningModal').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('earningForm').reset();
+            document.getElementById('earningDate').value = new Date().toISOString().split('T')[0];
+        });
+
+        // Filter change events
+        ['filterProject', 'filterCategory', 'filterDateFrom', 'filterDateTo'].forEach(id => {
+            document.getElementById(id).addEventListener('change', function() {
+                applyFilters();
+            });
+        });
+    }
+
+    // Load earnings from projects structure
+    async function loadEarnings() {
+        try {
+            const earningsList = document.getElementById('earningsList');
+            earningsList.innerHTML = `
+                <div class="text-center py-5">
+                    <section class="loader">
+                    <div class="slider" style="--i:0"></div>
+                    <div class="slider" style="--i:1"></div>
+                    <div class="slider" style="--i:2"></div>
+                    <div class="slider" style="--i:3"></div>
+                    <div class="slider" style="--i:4"></div>
+                    </section>
+                </div>
+            `;
+
+            earnings = [];
+            
+            // Load earnings from each project's earnings node
+            for (const project of allProjects) {
+                try {
+                    const snapshot = await database.ref(`projects/${project.id}/earnings`).once('value');
+                    const projectEarnings = snapshot.val();
+                    
+                    if (projectEarnings) {
+                        for (const earningId in projectEarnings) {
+                            const earning = projectEarnings[earningId];
+                            earning.id = earningId;
+                            earning.projectId = project.id;
+                            earning.projectName = project.name;
+                            earnings.push(earning);
+                        }
+                    }
+                } catch (error) {
+                    console.warn(`Error loading earnings for project ${project.id}:`, error);
+                }
+            }
+            
+            // Sort by date (newest first)
+            earnings.sort((a, b) => new Date(b.date) - new Date(a.date));
+            filteredEarnings = [...earnings];
+
+            displayEarnings();
+            updateStats();
+
+        } catch (error) {
+            console.error("Error loading earnings:", error);
+            document.getElementById('earningsList').innerHTML = `
+                <div class="text-center py-4 text-danger">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                    <h5>Error loading earnings</h5>
+                    <p class="text-muted">${error.message}</p>
+                    <button class="btn btn-primary mt-2" onclick="loadEarnings()">
+                        <i class="fas fa-redo me-1"></i>Retry
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    // Display earnings in cards
+    function displayEarnings() {
+        const earningsList = document.getElementById('earningsList');
+        
+        if (filteredEarnings.length === 0) {
+            earningsList.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-money-bill-wave fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No earnings found</h5>
+                    <p class="text-muted">Add your first earning using the "Add Earning" button</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        
+        filteredEarnings.forEach(earning => {
+            const date = new Date(earning.date).toLocaleDateString('en-IN');
+            
+            html += `
+                <div class="card col-md-4 col-lg-3 mb-2 mt-2">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="card-title mb-1"><i class="fas fa-coins "></i> ${escapeHtml(earning.title)}</h5>
+                                <h6 class="text-success mb-2">₹ ${formatCurrency(earning.amount)}</h6>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-0">
+                            <div class="col-md-12">
+                                <p class="mb-1"><i class="fas fa-calendar text-muted me-2"></i>Date: ${date}</p>
+                                <p class="mb-1"><i class="fas fa-project-diagram text-muted me-2"></i>Project: ${escapeHtml(earning.projectName || 'N/A')}</p>
+        
+                            </div>
+                     
+                        </div>
+                        
+                        ${earning.remarks ? `
+                        <div class="mb-1">
+                            <p class="mb-0"><strong>Remarks:</strong> ${escapeHtml(earning.remarks)}</p>
+                        </div>
+                        ` : ''}
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <button class="btn btn-sm btn-outline-primary" onclick="editEarning('${earning.projectId}', '${earning.id}')">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteEarning('${earning.projectId}', '${earning.id}')">
+                                <i class="fas fa-trash me-1"></i>Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        earningsList.innerHTML = html;
+    }
+
+    // Save earning
+    async function saveEarning() {
+        try {
+            const form = document.getElementById('earningForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const earningData = {
+                title: document.getElementById('earningTitle').value.trim(),
+                amount: parseFloat(document.getElementById('earningAmount').value),
+                date: document.getElementById('earningDate').value,
+                remarks: document.getElementById('earningRemarks').value.trim()
+            };
+
+            const projectId = document.getElementById('earningProject').value;
+            
+            // Validate project selection
+            if (!projectId) {
+                showNotification('Please select a project', 'warning');
+                return;
+            }
+
+            // Check if user has access to this project
+            const hasAccess = await checkProjectAccess(projectId);
+            if (!hasAccess) {
+                showNotification('You do not have access to this project', 'danger');
+                return;
+            }
+
+            // Save to Firebase under projects/{projectId}/earnings
+            const newEarningRef = database.ref(`projects/${projectId}/earnings`).push();
+            await newEarningRef.set(earningData);
+
+            // Close modal and reset form
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addEarningModal'));
+            modal.hide();
+
+            // Refresh earnings list
+            await loadEarnings();
+            
+            // Show success message
+            showNotification('Earning added successfully!', 'success');
+
+        } catch (error) {
+            console.error("Error saving earning:", error);
+            showNotification('Error saving earning: ' + error.message, 'danger');
+        }
+    }
+
+    // Check if user has access to project
+    async function checkProjectAccess(projectId) {
+        try {
+            if (currentUserRole === 'admin') return true;
+            
+            const userSnapshot = await database.ref(`users/${currentUser.uid}/projects/${projectId}`).once('value');
+            return userSnapshot.val() === true;
+        } catch (error) {
+            console.error("Error checking project access:", error);
+            return false;
+        }
+    }
+
+    // Edit earning
+    async function editEarning(projectId, earningId) {
+        try {
+            const snapshot = await database.ref(`projects/${projectId}/earnings/${earningId}`).once('value');
+            const earning = snapshot.val();
+            
+            if (!earning) {
+                showNotification('Earning not found', 'warning');
+                return;
+            }
+
+            // Populate form
+            document.getElementById('earningTitle').value = earning.title;
+            document.getElementById('earningAmount').value = earning.amount;
+            document.getElementById('earningDate').value = earning.date;
+            document.getElementById('earningRemarks').value = earning.remarks || '';
+            document.getElementById('earningProject').value = projectId;
+
+            // Change modal title and save button
+            document.querySelector('#addEarningModal .modal-title').textContent = 'Edit Earning';
+            const saveBtn = document.querySelector('#addEarningModal .btn-primary');
+            saveBtn.textContent = 'Update Earning';
+            saveBtn.onclick = function() { updateEarning(projectId, earningId); };
+
+            // Disable project selection for editing
+            document.getElementById('earningProject').disabled = true;
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('addEarningModal'));
+            modal.show();
+
+        } catch (error) {
+            console.error("Error editing earning:", error);
+            showNotification('Error loading earning for editing', 'danger');
+        }
+    }
+
+    // Update earning
+    async function updateEarning(projectId, earningId) {
+        try {
+            const form = document.getElementById('earningForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const earningData = {
+                title: document.getElementById('earningTitle').value.trim(),
+                amount: parseFloat(document.getElementById('earningAmount').value),
+                date: document.getElementById('earningDate').value,
+                remarks: document.getElementById('earningRemarks').value.trim()
+            };
+
+            // Update in Firebase
+            await database.ref(`projects/${projectId}/earnings/${earningId}`).update(earningData);
+
+            // Close modal and reset form
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addEarningModal'));
+            modal.hide();
+            form.reset();
+            document.getElementById('earningDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('earningProject').disabled = false;
+
+            // Reset modal title and button
+            document.querySelector('#addEarningModal .modal-title').textContent = 'Add New Earning';
+            const saveBtn = document.querySelector('#addEarningModal .btn-primary');
+            saveBtn.textContent = 'Save Earning';
+            saveBtn.onclick = function() { saveEarning(); };
+
+            // Refresh earnings list
+            await loadEarnings();
+            
+            // Show success message
+            showNotification('Earning updated successfully!', 'success');
+
+        } catch (error) {
+            console.error("Error updating earning:", error);
+            showNotification('Error updating earning: ' + error.message, 'danger');
+        }
+    }
+
+    // Delete earning
+    async function deleteEarning(projectId, earningId) {
+        try {
+            if (!confirm('Are you sure you want to delete this earning? This action cannot be undone.')) {
+                return;
+            }
+
+            // Delete from Firebase
+            await database.ref(`projects/${projectId}/earnings/${earningId}`).remove();
+
+            // Refresh earnings list
+            await loadEarnings();
+            
+            // Show success message
+            showNotification('Earning deleted successfully!', 'success');
+
+        } catch (error) {
+            console.error("Error deleting earning:", error);
+            showNotification('Error deleting earning: ' + error.message, 'danger');
+        }
+    }
+
+    // Apply filters
+    function applyFilters() {
+        const projectFilter = document.getElementById('filterProject').value;
+        const categoryFilter = document.getElementById('filterCategory').value;
+        const dateFrom = document.getElementById('filterDateFrom').value;
+        const dateTo = document.getElementById('filterDateTo').value;
+
+        currentFilters = {
+            projectId: projectFilter,
+            category: categoryFilter,
+            dateFrom: dateFrom,
+            dateTo: dateTo
+        };
+
+        filteredEarnings = earnings.filter(earning => {
+            // Project filter
+            if (projectFilter && earning.projectId !== projectFilter) return false;
+            
+            // Category filter
+            if (categoryFilter && earning.category !== categoryFilter) return false;
+            
+            // Date range filter
+            if (dateFrom && new Date(earning.date) < new Date(dateFrom)) return false;
+            if (dateTo && new Date(earning.date) > new Date(dateTo)) return false;
+            
+            return true;
+        });
+
+        displayEarnings();
+        updateStats();
+    }
+
+    // Reset filters
+    function resetFilters() {
+        document.getElementById('filterProject').value = '';
+        document.getElementById('filterCategory').value = '';
+        document.getElementById('filterDateFrom').value = '';
+        document.getElementById('filterDateTo').value = '';
+        
+        currentFilters = {};
+        filteredEarnings = [...earnings];
+        
+        displayEarnings();
+        updateStats();
+    }
+
+    // Update statistics
+    function updateStats() {
+        const today = new Date().toISOString().split('T')[0];
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        
+        let total = 0;
+        let todayTotal = 0;
+        let monthTotal = 0;
+        
+        filteredEarnings.forEach(earning => {
+            const amount = parseFloat(earning.amount) || 0;
+            total += amount;
+            
+            // Today's earnings
+            if (earning.date === today) {
+                todayTotal += amount;
+            }
+            
+            // Current month earnings
+            const earningDate = new Date(earning.date);
+            if (earningDate.getMonth() === currentMonth && earningDate.getFullYear() === currentYear) {
+                monthTotal += amount;
+            }
+        });
+        
+        document.getElementById('totalEarnings').textContent = '₹ ' + formatCurrency(total);
+        document.getElementById('todayEarnings').textContent = '₹ ' + formatCurrency(todayTotal);
+        document.getElementById('monthlyEarnings').textContent = '₹ ' + formatCurrency(monthTotal);
+    }
+
+    // Export to Excel
+    function exportToExcel() {
+        if (filteredEarnings.length === 0) {
+            showNotification('No earnings to export', 'warning');
+            return;
+        }
+        
+        // Create CSV content
+        let csv = 'Date,Title,Project,Category,Amount,Invoice No,Remarks\n';
+        
+        filteredEarnings.forEach(earning => {
+            const date = new Date(earning.date).toLocaleDateString('en-IN');
+            
+            csv += `"${date}",`;
+            csv += `"${earning.title.replace(/"/g, '""')}",`;
+            csv += `"${(earning.projectName || '').replace(/"/g, '""')}",`;
+            csv += `"${getCategoryText(earning.category)}",`;
+            csv += `"${formatCurrency(earning.amount)}",`;
+            csv += `"${earning.invoice || ''}",`;
+            csv += `"${(earning.remarks || '').replace(/"/g, '""')}"\n`;
+        });
+        
+        // Create download link
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `earnings_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showNotification('Export started successfully', 'success');
+    }
+
+    // Refresh earnings
+    async function refreshEarnings() {
+        await loadEarnings();
+        showNotification('Earnings list refreshed', 'info');
+    }
+
+    function formatCurrency(amount) {
+        return parseFloat(amount).toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Show notification
+    function showNotification(message, type) {
+        // Remove existing notifications
+        document.querySelectorAll('.alert-notification').forEach(el => el.remove());
+        
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed alert-notification`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+        notification.innerHTML = `
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            ${message}
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 3000);
+    }
+</script>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

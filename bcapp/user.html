@@ -1,0 +1,914 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Barman Construction</title>
+  <link rel="icon" type="image/png" href="img/tab-logo.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="style/style.css">
+  <script src="js/all.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="js/firebaseconfig.js"></script>
+  <style>
+
+    .card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border-radius: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15), inset 0 0 20px 10px rgba(0, 0, 0, 0.171);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15), inset 0 0 10px 10px rgba(0, 0, 0, 0.171);
+}
+
+.card-header, .card-footer {
+  border: none;
+}
+    @media (max-width: 768px) {
+      .user-card {
+        height: 140px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .user-card {
+        height: 130px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- Navbar will load here -->
+<div id="nav-placeholder"></div>
+
+<!-- Main Content -->
+<div class="content p-1">
+
+ <div class="d-flex justify-content-between align-items-center mb-2 p-2">
+    <h4 class="text-nowrap top-h">
+        <span class="d-none d-lg-inline"> Users Management</span>
+        </h4>
+    <button class="btn button2" data-bs-toggle="modal" data-bs-target="#createUserModal">
+       ➕</i> <span class="d-none d-lg-inline"> Create User</span>
+      <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+    </button>
+  </div>
+
+
+
+  <!-- Search and Filter Section -->
+<div class=" mb-2 bg-light p-2">
+  <div class="card-body">
+    <div class="row align-items-center">
+      <!-- User Count -->
+      <div class="col-md-3 mb-3 mb-md-0">
+        <div class="d-flex align-items-center">
+          <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+            <i class="bi bi-people-fill fs-4"></i>
+          </div>
+          <div>
+            <h5 class="mb-0" id="totalUsers">0</h5>
+            <small class="text-muted">Total Users</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Input -->
+      <div class="col-md-5 mb-3 mb-md-0">
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0">
+            <i class="bi bi-search text-muted"></i>
+          </span>
+          <input 
+            type="text" 
+            id="searchInput" 
+            class="form-control border-start-0" 
+            placeholder="Search by name or email..."
+            onkeyup="filterUsers()"
+          >
+        </div>
+      </div>
+
+      <!-- Filter Dropdowns -->
+      <div class="col-md-4">
+        <div class="row g-2">
+          <div class="col-6">
+            <select id="roleFilter" class="form-select form-select-sm" onchange="filterUsers()">
+              <option value="all">All Roles</option>
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <select id="statusFilter" class="form-select form-select-sm" onchange="filterUsers()">
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div class="row" id="userList">
+    <!-- User cards will appear here -->
+    <div class="col-12">
+      <div class="d-flex justify-content-center align-items-center min-vh-50">
+        <section class="loader">
+          <div class="slider" style="--i:0"></div>
+          <div class="slider" style="--i:1"></div>
+          <div class="slider" style="--i:2"></div>
+          <div class="slider" style="--i:3"></div>
+          <div class="slider" style="--i:4"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create User Modal -->
+  <div class="modal fade" id="createUserModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Create New User</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="text" id="name" class="form-control mb-2" placeholder="Full Name">
+          <input type="email" id="email" class="form-control mb-2" placeholder="Email">
+          <input type="password" id="password" class="form-control mb-2" placeholder="Password">
+
+          <select id="role" class="form-control mb-3">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+
+          <div class="fix-card border p-3" id="projectsCheckboxes">
+            <label class="form-label bg-danger text-light p-1 rounded fw-bold">Assign Projects:</label>
+            <div id="projectList" class="form-group">
+              <!-- Project checkboxes will load here dynamically -->
+              <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                <span class="visually-hidden">Loading projects...</span>
+              </div>
+              <small class="text-muted">Loading projects...</small>
+            </div>
+          </div>
+          
+        </div>
+        <div class="fix-card border m-3 p-3">
+          <label class="form-label bg-danger text-light p-1 rounded fw-bold">User Access:</label>
+
+          <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="billAccess">
+          <label class="form-check-label" for="billAccess">
+            User Can Access Generate Invoice
+          </label>
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="ProductAccess">
+          <label class="form-check-label" for="ProductAccess">
+            User Can Access Product Management
+          </label>
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="MeasurementSheetAccess">
+          <label class="form-check-label" for="MeasurementSheetAccess">
+            User Can Access Measurement Sheet
+          </label>
+        </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+  <button class="btn btn-success" onclick="createUser()" id="createUserBtn">
+    <span class="btn-text">Create</span>
+    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+  </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit User Modal -->
+  <div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit User</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" id="editUserId">
+          <input type="text" id="editName" class="form-control mb-2" placeholder="Full Name">
+          <input type="email" id="editEmail" class="form-control mb-2" placeholder="Email">
+
+          <select id="editRole" class="form-control mb-2">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+
+          <select id="editStatus" class="form-control mb-3">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+
+          <div class="fix-card p-3 " id="editProjectsCheckboxes">
+            <label class="form-label bg-danger text-light p-1 rounded fw-bold">Assign Projects:</label>
+            <div id="editProjectList" class="form-group">
+              <!-- Project checkboxes will load here dynamically -->
+              <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                <span class="visually-hidden">Loading projects...</span>
+              </div>
+              <small class="text-muted">Loading projects...</small>
+            </div>
+          </div>
+
+        </div>
+        <div class="fix-card border p-3 m-3">
+          <label class="form-label bg-danger text-light p-1 rounded fw-bold">User Access:</label>
+
+          <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="editBillAccess">
+          <label class="form-check-label" for="billAccess">
+            Generate Invoice
+          </label>
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="editProductAccess">
+          <label class="form-check-label" for="ProductAccess">
+            User Can Access Product Management
+          </label>
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="editMeasurementSheetAccess">
+          <label class="form-check-label" for="MeasurementSheetAccess">
+            User Can Access Measurement Sheet
+          </label>
+        </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+           <button class="btn btn-primary" onclick="updateUser()" id="updateUserBtn">
+    <span class="btn-text">Update</span>
+    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+  </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Create Project Modal -->
+  <div class="modal fade" id="createProjectModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Create Project</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <input
+            type="text"
+            id="projectName"
+            class="form-control"
+            placeholder="Enter project name"
+          />
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-primary" onclick="saveProject()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+
+  firebase.auth().onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = "login.html";
+    }
+  });
+</script>
+
+<script>
+  const projectListDiv = document.getElementById("projectList");
+  const editProjectListDiv = document.getElementById("editProjectList");
+
+  // Load all projects dynamically for create modal
+  firebase.database().ref("projects").on("value", snapshot => {
+    projectListDiv.innerHTML = ""; // clear old list
+    editProjectListDiv.innerHTML = ""; // clear edit modal list
+
+    if (!snapshot.exists()) {
+      projectListDiv.innerHTML = "<small class='text-muted'>No projects available</small>";
+      editProjectListDiv.innerHTML = "<small class='text-muted'>No projects available</small>";
+      return;
+    }
+
+    snapshot.forEach(child => {
+      const project = child.val();
+      const projectId = child.key;
+
+      // For create modal
+      const checkbox = document.createElement("div");
+      checkbox.className = "form-check mb-1";
+      checkbox.innerHTML = `
+        <input class="form-check-input" type="checkbox" value="${projectId}" id="project_${projectId}">
+        <label class="form-check-label" for="project_${projectId}">
+          ${project.projectName || projectId}
+        </label>
+      `;
+      projectListDiv.appendChild(checkbox);
+
+      // For edit modal
+      const editCheckbox = document.createElement("div");
+      editCheckbox.className = "form-check mb-1";
+      editCheckbox.innerHTML = `
+        <input class="form-check-input" type="checkbox" value="${projectId}" id="editProject_${projectId}">
+        <label class="form-check-label" for="editProject_${projectId}">
+          ${project.projectName || projectId}
+        </label>
+      `;
+      editProjectListDiv.appendChild(editCheckbox);
+    });
+  });
+</script>
+
+<script>
+  function getInitials(name) {
+    if (!name) return '?';
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  }
+
+</script>
+
+<script>
+function createUser() {
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const role = document.getElementById("role").value;
+  const createBtn = document.getElementById("createUserBtn");
+  const btnText = createBtn.querySelector(".btn-text");
+  const spinner = createBtn.querySelector(".spinner-border");
+  
+  if (!name || !email || !password) {
+    alert("All fields are required");
+    return;
+  }
+
+  // Get assigned projects
+  const assignedProjects = {};
+  projectListDiv.querySelectorAll("input[type=checkbox]").forEach(cb => {
+    assignedProjects[cb.value] = cb.checked;
+  });
+
+  const adminEmail = localStorage.getItem("adminEmail");
+  const adminPassword = localStorage.getItem("adminPassword");
+
+  // Show spinner using Bootstrap classes only
+  createBtn.disabled = true;
+  btnText.classList.add("d-none");
+  spinner.classList.remove("d-none");
+
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(userCredential => {
+      const uid = userCredential.user.uid;
+      return firebase.database().ref("users/" + uid).set({
+        name,
+        email,
+        role,
+        status: "active",
+        createdAt: new Date().toISOString(),
+        projects: assignedProjects
+      });
+    })
+    .then(() => {
+      const modalEl = document.getElementById("createUserModal");
+      const modalInstance = bootstrap.Modal.getInstance(modalEl);
+      if (modalInstance) modalInstance.hide();
+
+      document.getElementById("name").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("password").value = "";
+      document.getElementById("role").value = "user";
+      projectListDiv.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = false);
+
+      return firebase.auth().signInWithEmailAndPassword(adminEmail, adminPassword);
+    })
+    .then(() => {
+      alert("User created successfully");
+    })
+    .catch(err => {
+      alert(err.message);
+    })
+    .finally(() => {
+      // Hide spinner using Bootstrap classes only
+      createBtn.disabled = false;
+      btnText.classList.remove("d-none");
+      spinner.classList.add("d-none");
+    });
+}
+
+function openEditModal(userId, userData) {
+  document.getElementById("editUserId").value = userId;
+  document.getElementById("editName").value = userData.name || "";
+  document.getElementById("editEmail").value = userData.email || "";
+  document.getElementById("editRole").value = userData.role || "user";
+  document.getElementById("editStatus").value = userData.status || "active";
+  document.getElementById("editBillAccess").checked = userData["user-access"]?.bill === true; 
+  document.getElementById("editProductAccess").checked = userData["user-access"]?.products === true;
+  document.getElementById("editMeasurementSheetAccess").checked = userData["user-access"]?.measurementSheet === true;
+
+  editProjectListDiv.querySelectorAll("input[type=checkbox]").forEach(cb => {
+    cb.checked = false;
+  });
+
+  if (userData.projects) {
+    Object.keys(userData.projects).forEach(projectId => {
+      if (userData.projects[projectId] === true) {
+        const checkbox = document.getElementById(`editProject_${projectId}`);
+        if (checkbox) {
+          checkbox.checked = true;
+        }
+      }
+    });
+  }
+
+  const editModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+  editModal.show();
+}
+
+
+function updateUser() {
+  const userId = document.getElementById("editUserId").value;
+  const name = document.getElementById("editName").value.trim();
+  const email = document.getElementById("editEmail").value.trim();
+  const role = document.getElementById("editRole").value;
+  const status = document.getElementById("editStatus").value;
+  const updateBtn = document.getElementById("updateUserBtn");
+  const billAccess = document.getElementById("editBillAccess").checked;
+  const ProductAccess = document.getElementById("editProductAccess").checked;
+  const MeasurementSheetAccess = document.getElementById("editMeasurementSheetAccess").checked;
+  const btnText = updateBtn.querySelector(".btn-text");
+  const spinner = updateBtn.querySelector(".spinner-border");
+
+  if (!name || !email) {
+    alert("Name and email are required");
+    return;
+  }
+
+  const assignedProjects = {};
+  editProjectListDiv.querySelectorAll("input[type=checkbox]").forEach(cb => {
+    assignedProjects[cb.value] = cb.checked;
+  });
+
+  // Show spinner using Bootstrap classes only
+  updateBtn.disabled = true;
+  btnText.classList.add("d-none");
+  spinner.classList.remove("d-none");
+
+  firebase.database().ref("users/" + userId).update({
+  name,
+  email,
+  role,
+  status,
+  updatedAt: new Date().toISOString(),
+  projects: assignedProjects,
+  "user-access": {
+    bill: billAccess,
+    products: ProductAccess,
+    measurementSheet: MeasurementSheetAccess
+  }
+})
+
+  .then(() => {
+    const editModalEl = document.getElementById("editUserModal");
+    const editModalInstance = bootstrap.Modal.getInstance(editModalEl);
+    if (editModalInstance) editModalInstance.hide();
+    alert("User updated successfully");
+  })
+  .catch(err => alert("Error updating user: " + err.message))
+  .finally(() => {
+    // Hide spinner using Bootstrap classes only
+    updateBtn.disabled = false;
+    btnText.classList.remove("d-none");
+    spinner.classList.add("d-none");
+  });
+}
+
+function deleteUser(userId, userName, userEmail) {
+  if (!confirm(`Are you sure you want to delete user "${userName}"?`)) {
+    return;
+  }
+
+  const adminEmail = localStorage.getItem("adminEmail");
+  const adminPassword = localStorage.getItem("adminPassword");
+
+  firebase.database().ref("users/" + userId).remove()
+    .then(() => {
+      return firebase.auth().signInWithEmailAndPassword(adminEmail, adminPassword);
+    })
+    .then(() => {
+      alert(`User "${userName}" deleted successfully.`);
+    })
+    .catch(err => {
+      alert("Error deleting user: " + err.message);
+    });
+}
+</script>
+
+<script>
+  const projectMap = {};
+
+  firebase.database().ref("projects").on("value", snapshot => {
+    snapshot.forEach(child => {
+      projectMap[child.key] = child.val().projectName || child.key;
+    });
+  });
+</script>
+
+<script>
+  const userList = document.getElementById("userList");
+  let initialLoad = true;
+
+  firebase.database().ref("users").on("value", (snapshot) => {
+    if (initialLoad) {
+      userList.innerHTML = "";
+      initialLoad = false;
+    }
+
+    if (!snapshot.exists()) {
+      userList.innerHTML = `
+        <div class="col-12 text-center text-muted py-5">
+          <i class="bi bi-people display-4 d-block mb-3"></i>
+          <h5>No users found</h5>
+          <p class="text-muted">Click "Create User" to add your first user</p>
+        </div>`;
+      return;
+    }
+
+    let usersHTML = '';
+    snapshot.forEach(child => {
+      const userId = child.key;
+      const user = child.val();
+      const initials = getInitials(user.name);
+      const roleBadgeClass = user.role === 'admin' ? 'bg-danger' : 'bg-secondary';
+      const statusBadgeClass = user.status === 'active' ? 'bg-success' : 'bg-warning text-dark';
+
+      usersHTML += `
+        <div class="col-lg-4 col-md-6 mb-3">
+          <div class="card user-card h-100">
+            <div class="position-absolute top-0 end-0 m-2">
+              <button class="action-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-three-dots-vertical"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                  <a class="dropdown-item" href="#" onclick="openEditModal('${userId}', ${JSON.stringify(user).replace(/"/g, '&quot;')})">
+                    <i class="bi bi-pencil me-2"></i>Edit
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item text-danger" href="#" onclick="deleteUser('${userId}', '${(user.name || "User").replace(/'/g, "\\'")}', '${user.email || ""}')">
+                    <i class="bi bi-trash me-2"></i>Delete
+                  </a>
+                </li>
+              </ul>
+            </div>
+            
+            <div class="card-body d-flex align-items-center">
+              <div class="flex-grow-1">
+                <div class="d-flex align-items-center mb-1">
+                  <i class="bi bi-person-fill me-2 text-primary"></i>
+                  <h6 class="mb-0 fw-bold text-primary">${user.name || "No Name"}</h6>
+                </div>
+                <div class="user-email-badge d-inline-flex align-items-center mb-2">
+                  <i class="bi bi-envelope me-1"></i>
+                  <small>${user.email || "-"}</small>
+                </div>
+                <div class="d-flex align-items-center">
+                  <span class="badge ${roleBadgeClass} me-2">
+                    <i class="bi bi-person-fill me-1"></i>${user.role || 'user'}
+                  </span>
+                  <span class="badge ${statusBadgeClass}">
+                    ${user.status || 'active'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+    
+    userList.innerHTML = usersHTML;
+  }, (error) => {
+    userList.innerHTML = `
+      <div class="col-12 text-center text-danger py-5">
+        <i class="bi bi-exclamation-triangle display-4 d-block mb-3"></i>
+        <h5>Error loading users</h5>
+        <p class="text-muted">${error.message}</p>
+        <button class="btn btn-outline-primary" onclick="window.location.reload()">
+          <i class="bi bi-arrow-clockwise me-2"></i>Retry
+        </button>
+      </div>
+    `;
+  });
+</script>
+<script>
+// Global variables to store all users and filtered users
+let allUsers = [];
+let filteredUsers = [];
+
+// Function to update total user count
+function updateUserCount() {
+  const totalUsers = Object.keys(allUsers).length;
+  const filteredCount = filteredUsers.length;
+  
+  document.getElementById('totalUsers').textContent = totalUsers;
+  
+  // Update search results count if there's a filter
+  if (totalUsers !== filteredCount) {
+    document.getElementById('totalUsers').textContent = `${filteredCount} of ${totalUsers}`;
+  }
+}
+
+// Function to filter users based on search and filters
+function filterUsers() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  const roleFilter = document.getElementById('roleFilter').value;
+  const statusFilter = document.getElementById('statusFilter').value;
+  
+  const filtered = Object.keys(allUsers).filter(userId => {
+    const user = allUsers[userId];
+    let matches = true;
+    
+    // Search filter
+    if (searchTerm) {
+      const nameMatch = user.name?.toLowerCase().includes(searchTerm);
+      const emailMatch = user.email?.toLowerCase().includes(searchTerm);
+      if (!nameMatch && !emailMatch) {
+        matches = false;
+      }
+    }
+    
+    // Role filter
+    if (roleFilter !== 'all' && user.role !== roleFilter) {
+      matches = false;
+    }
+    
+    // Status filter
+    if (statusFilter !== 'all' && user.status !== statusFilter) {
+      matches = false;
+    }
+    
+    return matches;
+  });
+  
+  filteredUsers = filtered;
+  displayUsers(filtered);
+  updateUserCount();
+}
+
+// Function to display users
+function displayUsers(userIds) {
+  const userList = document.getElementById("userList");
+  
+  if (userIds.length === 0) {
+    userList.innerHTML = `
+      <div class="col-12 text-center py-5">
+        <i class="bi bi-people display-4 text-muted d-block mb-3"></i>
+        <h5 class="text-muted">No users found</h5>
+        <p class="text-muted">Try adjusting your search or filters</p>
+        <button class="btn btn-outline-primary btn-sm" onclick="clearFilters()">
+          <i class="bi bi-x-circle me-1"></i>Clear Filters
+        </button>
+      </div>
+    `;
+    return;
+  }
+  
+  let usersHTML = '';
+  userIds.forEach(userId => {
+    const user = allUsers[userId];
+    const initials = getInitials(user.name);
+    const roleBadgeClass = user.role === 'admin' ? 'bg-danger' : 'bg-secondary';
+    const statusBadgeClass = user.status === 'active' ? 'bg-success' : 'bg-warning text-dark';
+
+    usersHTML += `
+      <div class="col-lg-4 col-md-6 mb-3">
+        <div class="card user-card h-100">
+          <div class="position-absolute top-0 end-0 m-2">
+            <button class="btn btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li>
+                <a class="dropdown-item" href="#" onclick="openEditModal('${userId}', ${JSON.stringify(user).replace(/"/g, '&quot;')})">
+                  <i class="bi bi-pencil me-2"></i>Edit
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item text-danger" href="#" onclick="deleteUser('${userId}', '${(user.name || "User").replace(/'/g, "\\'")}', '${user.email || ""}')">
+                  <i class="bi bi-trash me-2"></i>Delete
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center mb-1">
+                <i class="bi bi-person-fill me-2 text-primary"></i>
+                <h6 class="mb-0 fw-bold text-primary">${user.name || "No Name"}</h6>
+              </div>
+          </div>
+          <div class="card-body d-flex align-items-center">
+            <div class="flex-grow-1">
+              
+              <div class="user-email-badge d-inline-flex align-items-center mb-2">
+                <i class="bi bi-envelope me-1"></i>
+                <small>${user.email || "-"}</small>
+              </div>
+              
+            </div>
+          </div>
+          <div class="card-footer d-flex justify-content-between"> 
+               <div class="d-flex align-items-center">
+                <span class="badge ${roleBadgeClass} me-2">
+                  <i class="bi bi-person-fill me-1"></i>${user.role || 'user'}
+                </span>
+                <span class="badge ${statusBadgeClass}">
+                  ${user.status || 'active'}
+                </span>
+              </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  userList.innerHTML = usersHTML;
+}
+
+// Function to clear all filters
+function clearFilters() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('roleFilter').value = 'all';
+  document.getElementById('statusFilter').value = 'all';
+  filteredUsers = Object.keys(allUsers);
+  displayUsers(filteredUsers);
+  updateUserCount();
+}
+
+// Update the Firebase listener to use the new functions
+firebase.database().ref("users").on("value", (snapshot) => {
+  if (!snapshot.exists()) {
+    allUsers = {};
+    filteredUsers = [];
+    displayUsers([]);
+    updateUserCount();
+    return;
+  }
+
+  allUsers = snapshot.val();
+  filteredUsers = Object.keys(allUsers);
+  displayUsers(filteredUsers);
+  updateUserCount();
+}, (error) => {
+  const userList = document.getElementById("userList");
+  userList.innerHTML = `
+    <div class="col-12 text-center text-danger py-5">
+      <i class="bi bi-exclamation-triangle display-4 d-block mb-3"></i>
+      <h5>Error loading users</h5>
+      <p class="text-muted">${error.message}</p>
+      <button class="btn btn-outline-primary" onclick="window.location.reload()">
+        <i class="bi bi-arrow-clockwise me-2"></i>Retry
+      </button>
+    </div>
+  `;
+});
+
+// Update createUser function to refresh the list
+function createUser() {
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const role = document.getElementById("role").value;
+  const createBtn = document.getElementById("createUserBtn");
+  const btnText = createBtn.querySelector(".btn-text");
+  const spinner = createBtn.querySelector(".spinner-border");
+  const billAccess = document.getElementById("billAccess").checked;
+  const ProductAccess = document.getElementById("ProductAccess").checked;
+  const MeasurementSheetAccess = document.getElementById("MeasurementSheetAccess").checked;
+
+  
+  if (!name || !email || !password) {
+    alert("All fields are required");
+    return;
+  }
+
+  const assignedProjects = {};
+  projectListDiv.querySelectorAll("input[type=checkbox]").forEach(cb => {
+    assignedProjects[cb.value] = cb.checked;
+  });
+
+  const adminEmail = localStorage.getItem("adminEmail");
+  const adminPassword = localStorage.getItem("adminPassword");
+
+  createBtn.disabled = true;
+  btnText.classList.add("d-none");
+  spinner.classList.remove("d-none");
+
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(userCredential => {
+      const uid = userCredential.user.uid;
+      return firebase.database().ref("users/" + uid).set({
+        name,
+        email,
+        role,
+        status: "active",
+        createdAt: new Date().toISOString(),
+        projects: assignedProjects,
+        "user-access": {
+          bill: billAccess,
+          products: ProductAccess,
+          measurementSheet: MeasurementSheetAccess
+        }
+      });
+    })
+    .then(() => {
+      const modalEl = document.getElementById("createUserModal");
+      const modalInstance = bootstrap.Modal.getInstance(modalEl);
+      if (modalInstance) modalInstance.hide();
+
+      document.getElementById("name").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("password").value = "";
+      document.getElementById("role").value = "user";
+      projectListDiv.querySelectorAll("input[type=checkbox]").forEach(cb => cb.checked = false);
+
+      return firebase.auth().signInWithEmailAndPassword(adminEmail, adminPassword);
+    })
+    .then(() => {
+      alert("User created successfully");
+      // Clear filters to show the new user
+      clearFilters();
+    })
+    .catch(err => {
+      alert(err.message);
+    })
+    .finally(() => {
+      createBtn.disabled = false;
+      btnText.classList.remove("d-none");
+      spinner.classList.add("d-none");
+    });
+}
+
+// Update deleteUser function to refresh the list
+function deleteUser(userId, userName, userEmail) {
+  if (!confirm(`Are you sure you want to delete user "${userName}"?`)) {
+    return;
+  }
+
+  const adminEmail = localStorage.getItem("adminEmail");
+  const adminPassword = localStorage.getItem("adminPassword");
+
+  firebase.database().ref("users/" + userId).remove()
+    .then(() => {
+      return firebase.auth().signInWithEmailAndPassword(adminEmail, adminPassword);
+    })
+    .then(() => {
+      alert(`User "${userName}" deleted successfully.`);
+    })
+    .catch(err => {
+      alert("Error deleting user: " + err.message);
+    });
+}
+</script>
+<!-- Bootstrap JS Bundle --> 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

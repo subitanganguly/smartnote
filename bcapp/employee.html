@@ -1,0 +1,1095 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Barman Construction - Employees</title>
+  <link rel="icon" type="image/png" href="img/tab-logo.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="style/style.css" rel="stylesheet">
+  <style>
+  </style>
+</head>
+<body>
+
+<!-- Navbar will load here -->
+<div id="nav-placeholder"></div>
+
+<!-- Main Content -->
+<div class="content p-1">
+  <div class="container-fluid">
+    
+    <!-- Page Header -->
+     <div class="d-flex justify-content-between align-items-center mb-2 p-2">
+    <h4 class="text-nowrap top-h">
+        <span class="d-none d-md-inline"> Employee Management</span>
+        </h4>
+    <button class="btn button2" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+        <i class="fas fa-user-plus"></i> <span class="d-none d-lg-inline">Add Employee</span>
+      </button>
+  </div>
+
+    <!-- Stats Cards -->
+   <div class="row mb-2 g-2">
+  <div class="col-4 col-md-4">
+    <div class="rounded bg-primary text-white h-100">
+      <div class="card-body p-2 text-center">
+        <small class="card-title d-block">Employees</small>
+        <h6 class="fw-bold mb-0" id="totalEmployees">0</h6>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-4 col-md-4">
+    <div class="rounded bg-success text-white h-100">
+      <div class="card-body p-2 text-center">
+        <small class="card-title d-block">Daily</small>
+        <h6 class="fw-bold mb-0" id="dailyWorkers">0</h6>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-4 col-md-4">
+    <div class="rounded bg-info text-white h-100">
+      <div class="card-body p-2 text-center">
+        <small class="card-title d-block">Monthly</small>
+        <h6 class="fw-bold mb-0" id="monthlyStaff">0</h6>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    <!-- Employee List -->
+
+     
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-search"></i></span>
+              <input type="text" class="form-control" id="searchEmployee" placeholder="Search employees by name...">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-filter"></i></span>
+              <select class="form-select" id="filterProject">
+                <option value="">All Projects</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div id="employeesList" class="row">
+          <!-- Employees will be loaded here -->
+          <div class="col-12 text-center py-5">
+            <section class="loader">
+            <div class="slider" style="--i:0"></div>
+            <div class="slider" style="--i:1"></div>
+            <div class="slider" style="--i:2"></div>
+            <div class="slider" style="--i:3"></div>
+            <div class="slider" style="--i:4"></div>
+          </section>
+          </div>
+        </div>
+      </div>
+
+
+  </div>
+</div>
+
+<!-- Add Employee Modal -->
+<div class="modal fade" id="addEmployeeModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add New Employee</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="employeeForm">
+          <div class="row">
+            <!-- Employee Name -->
+            <div class="col-md-6 mb-3">
+              <label for="employeeName" class="form-label required">Employee Name</label>
+              <input type="text" class="form-control" id="employeeName" placeholder="Enter full name" required>
+            </div>
+
+            <!-- Employee Type -->
+            <div class="col-md-6 mb-3">
+              <label for="employeeType" class="form-label required">Employee Type</label>
+              <select class="form-select" id="employeeType" required>
+                <option value="">Select Type</option>
+                <option value="daily">Daily Worker</option>
+                <option value="monthly">Monthly Staff</option>
+              </select>
+            </div>
+
+            <!-- Designation -->
+            <div class="col-md-6 mb-3">
+              <label for="designation" class="form-label required">Designation</label>
+              <input type="text" class="form-control" id="designation" placeholder="e.g., Mason, Supervisor, Labor" required>
+            </div>
+
+            <!-- Salary Amount -->
+            <div class="col-md-6 mb-3">
+              <label for="salaryAmount" class="form-label required">Salary Amount (₹)</label>
+              <div class="input-group">
+                <span class="input-group-text">₹</span>
+                <input type="number" class="form-control" id="salaryAmount" placeholder="0.00" min="0" step="0.01" required>
+              </div>
+            </div>
+
+            <!-- Project Assignment - Checkboxes -->
+            <div class="col-md-12 mb-3">
+              <label class="form-label required">Assign to Projects</label>
+              <div class="form-text mb-2">Select the projects this employee will work on (can select multiple)</div>
+              <div class="card">
+                <div class="card-body p-3">
+                  <div class="row" id="projectCheckboxes">
+                    <!-- Project checkboxes will be loaded here -->
+                    <div class="col-12 text-center">
+                      <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="visually-hidden">Loading projects...</span>
+                      </div>
+                      <span class="ms-2 text-muted">Loading projects...</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-text mt-1">
+                <i class="fas fa-info-circle"></i> Employee can be assigned to multiple projects
+              </div>
+            </div>
+
+            <!-- Remarks -->
+            <div class="col-12 mb-3">
+              <label for="remarks" class="form-label">Remarks</label>
+              <textarea class="form-control" id="remarks" rows="3" placeholder="Any additional notes or remarks..."></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveEmployeeBtn" onclick="saveEmployee()">
+          <i class="fas fa-save"></i> Save Employee
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Employee Modal -->
+<div class="modal fade" id="editEmployeeModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Employee</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editEmployeeForm">
+          <input type="hidden" id="editEmployeeId">
+          <div class="row">
+            <!-- Employee Name -->
+            <div class="col-md-6 mb-3">
+              <label for="editEmployeeName" class="form-label required">Employee Name</label>
+              <input type="text" class="form-control" id="editEmployeeName" placeholder="Enter full name" required>
+            </div>
+
+            <!-- Employee Type -->
+            <div class="col-md-6 mb-3">
+              <label for="editEmployeeType" class="form-label required">Employee Type</label>
+              <select class="form-select" id="editEmployeeType" required>
+                <option value="">Select Type</option>
+                <option value="daily">Daily Worker</option>
+                <option value="monthly">Monthly Staff</option>
+              </select>
+            </div>
+
+            <!-- Designation -->
+            <div class="col-md-6 mb-3">
+              <label for="editDesignation" class="form-label required">Designation</label>
+              <input type="text" class="form-control" id="editDesignation" placeholder="e.g., Mason, Supervisor, Labor" required>
+            </div>
+
+            <!-- Salary Amount -->
+            <div class="col-md-6 mb-3">
+              <label for="editSalaryAmount" class="form-label required">Salary Amount (₹)</label>
+              <div class="input-group">
+                <span class="input-group-text">₹</span>
+                <input type="number" class="form-control" id="editSalaryAmount" placeholder="0.00" min="0" step="0.01" required>
+              </div>
+            </div>
+
+            <!-- Project Assignment - Checkboxes -->
+            <div class="col-md-12 mb-3">
+              <label class="form-label required">Assign to Projects</label>
+              <div class="form-text mb-2">Select the projects this employee will work on (can select multiple)</div>
+              <div class="card">
+                <div class="card-body p-3">
+                  <div class="row" id="editProjectCheckboxes">
+                    <!-- Project checkboxes will be loaded here -->
+                  </div>
+                </div>
+              </div>
+              <div class="form-text mt-1">
+                <i class="fas fa-info-circle"></i> Employee can be assigned to multiple projects
+              </div>
+            </div>
+
+            <!-- Remarks -->
+            <div class="col-12 mb-3">
+              <label for="editRemarks" class="form-label">Remarks</label>
+              <textarea class="form-control" id="editRemarks" rows="3" placeholder="Any additional notes or remarks..."></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="updateEmployeeBtn" onclick="updateEmployee()">
+          <i class="fas fa-sync-alt"></i> Update Employee
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View Employee Modal -->
+<div class="modal fade" id="viewEmployeeModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Employee Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="viewEmployeeDetails">
+        <!-- Employee details will be loaded here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="js/firebaseconfig.js"></script>
+<script src="js/all.js"></script>
+
+<script>
+  // Initialize Firebase
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+
+  const auth = firebase.auth();
+  const database = firebase.database();
+  let currentUser = null;
+  let currentUserRole = 'user';
+  let currentUserProjects = [];
+  let allProjects = [];
+  let currentEditingEmployeeId = null;
+  let currentEditingEmployeeProjects = [];
+  let allEmployees = [];
+
+  // Check authentication
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+    } else {
+      currentUser = user;
+      await initializePage();
+    }
+  });
+
+  // Initialize page
+  async function initializePage() {
+    try {
+      // Get current user data
+      const userSnapshot = await database.ref(`users/${currentUser.uid}`).once('value');
+      const userData = userSnapshot.val();
+      
+      if (!userData) {
+        console.error("User data not found");
+        return;
+      }
+      
+      currentUserRole = userData.role || 'user';
+      currentUserProjects = userData.projects || {};
+      
+      // Load projects based on user role
+      await loadProjects();
+      
+      // Load existing employees
+      loadEmployees();
+      
+    } catch (error) {
+      console.error("Error initializing page:", error);
+      alert("Error loading page: " + error.message);
+    }
+  }
+
+  // Load projects for dropdown and checkboxes
+  async function loadProjects() {
+    try {
+      let projects = [];
+      
+      if (currentUserRole === 'admin') {
+        // Admin can see all projects
+        const snapshot = await database.ref('projects').once('value');
+        const allProjectsData = snapshot.val();
+        
+        if (allProjectsData) {
+          Object.keys(allProjectsData).forEach(projectId => {
+            projects.push({
+              id: projectId,
+              name: allProjectsData[projectId].projectName || 'Unnamed Project'
+            });
+          });
+        }
+      } else {
+        // User can only see assigned projects
+        const projectIds = Object.keys(currentUserProjects).filter(
+          projectId => currentUserProjects[projectId] === true
+        );
+        
+        for (const projectId of projectIds) {
+          const projectSnap = await database.ref(`projects/${projectId}`).once('value');
+          if (projectSnap.exists()) {
+            const projectData = projectSnap.val();
+            projects.push({
+              id: projectId,
+              name: projectData.projectName || 'Unnamed Project'
+            });
+          }
+        }
+      }
+      
+      allProjects = projects;
+      
+      // Populate project checkboxes in add form
+      populateProjectCheckboxes();
+      
+      // Also populate project filter dropdown
+      const filterProject = document.getElementById('filterProject');
+      while (filterProject.options.length > 1) filterProject.remove(1);
+      
+      projects.forEach(project => {
+        const option = document.createElement('option');
+        option.value = project.id;
+        option.textContent = project.name;
+        filterProject.appendChild(option);
+      });
+      
+    } catch (error) {
+      console.error("Error loading projects:", error);
+      document.getElementById('projectCheckboxes').innerHTML = `
+        <div class="col-12 text-center">
+          <p class="text-danger mb-0">Error loading projects</p>
+          <small class="text-muted">${error.message}</small>
+        </div>
+      `;
+    }
+  }
+
+  // Populate project checkboxes
+  function populateProjectCheckboxes() {
+    const projectCheckboxesContainer = document.getElementById('projectCheckboxes');
+    projectCheckboxesContainer.innerHTML = '';
+    
+    if (allProjects.length === 0) {
+      projectCheckboxesContainer.innerHTML = `
+        <div class="col-12 text-center">
+          <p class="text-muted mb-0">No projects available</p>
+          <small class="text-muted">Create projects first to assign employees</small>
+        </div>
+      `;
+    } else {
+      allProjects.forEach((project, index) => {
+        const colDiv = document.createElement('div');
+        colDiv.className = 'col-md-6 mb-2';
+        
+        colDiv.innerHTML = `
+          <div class="form-check">
+            <input class="form-check-input project-checkbox" type="checkbox" value="${project.id}" id="project-${project.id}">
+            <label class="form-check-label" for="project-${project.id}">
+              ${escapeHtml(project.name)}
+            </label>
+          </div>
+        `;
+        
+        projectCheckboxesContainer.appendChild(colDiv);
+      });
+    }
+  }
+
+  // Load employees
+  async function loadEmployees() {
+    try {
+      const employeesList = document.getElementById('employeesList');
+      employeesList.innerHTML = `
+        <div class="col-12 text-center py-5">
+          <section class="loader">
+      <div class="slider" style="--i:0"></div>
+      <div class="slider" style="--i:1"></div>
+      <div class="slider" style="--i:2"></div>
+      <div class="slider" style="--i:3"></div>
+      <div class="slider" style="--i:4"></div>
+    </section>
+        </div>
+      `;
+      
+      allEmployees = []; // Reset all employees
+      
+      // Load employees from all accessible projects
+      for (const project of allProjects) {
+        const employeesSnapshot = await database.ref(`employees/${project.id}`).once('value');
+        const projectEmployees = employeesSnapshot.val();
+        
+        if (projectEmployees) {
+          Object.keys(projectEmployees).forEach(employeeId => {
+            // Check if employee already exists in allEmployees (for multi-project employees)
+            const existingEmployee = allEmployees.find(e => e.id === employeeId);
+            
+            if (existingEmployee) {
+              // Add this project to the existing employee's projects array
+              if (!existingEmployee.projects) {
+                existingEmployee.projects = [];
+              }
+              existingEmployee.projects.push({
+                id: project.id,
+                name: project.name
+              });
+            } else {
+              // Create new employee entry
+              allEmployees.push({
+                id: employeeId,
+                projects: [{
+                  id: project.id,
+                  name: project.name
+                }],
+                ...projectEmployees[employeeId]
+              });
+            }
+          });
+        }
+      }
+      
+      // Display all employees initially
+      displayEmployees(allEmployees);
+      updateStats(allEmployees);
+      
+      // Setup filter event listener
+      setupFilterEvents();
+      
+    } catch (error) {
+      console.error("Error loading employees:", error);
+      document.getElementById('employeesList').innerHTML = `
+        <div class="col-12 text-center py-5">
+          <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+          <h5 class="text-danger">Error loading employees</h5>
+          <p class="text-muted">${error.message}</p>
+        </div>
+      `;
+    }
+  }
+
+  // Setup filter events
+  function setupFilterEvents() {
+    // Search functionality
+    document.getElementById('searchEmployee').addEventListener('input', function(e) {
+      filterEmployees();
+    });
+    
+    // Project filter functionality
+    document.getElementById('filterProject').addEventListener('change', function(e) {
+      filterEmployees();
+    });
+  }
+
+  // Filter employees based on search and project filter
+  function filterEmployees() {
+    const searchTerm = document.getElementById('searchEmployee').value.toLowerCase();
+    const selectedProject = document.getElementById('filterProject').value;
+    
+    let filteredEmployees = allEmployees;
+    
+    // Apply project filter
+    if (selectedProject) {
+      filteredEmployees = filteredEmployees.filter(employee => 
+        employee.projects && employee.projects.some(p => p.id === selectedProject)
+      );
+    }
+    
+    // Apply search filter
+    if (searchTerm) {
+      filteredEmployees = filteredEmployees.filter(employee => 
+        employee.employeeName && employee.employeeName.toLowerCase().includes(searchTerm) ||
+        employee.designation && employee.designation.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    // Display filtered employees
+    displayEmployees(filteredEmployees);
+    updateStats(filteredEmployees);
+  }
+
+  // Display employees with 3-dot action menu in top-right
+  function displayEmployees(employees) {
+    const employeesList = document.getElementById('employeesList');
+    
+    if (employees.length === 0) {
+      employeesList.innerHTML = `
+        <div class="col-12 text-center py-5">
+          <i class="fas fa-users fa-3x text-muted mb-3"></i>
+          <h5 class="text-muted">No employees found</h5>
+          <p class="text-muted">${document.getElementById('searchEmployee').value || document.getElementById('filterProject').value ? 'Try changing your search criteria' : 'Add your first employee to get started'}</p>
+          ${!document.getElementById('searchEmployee').value && !document.getElementById('filterProject').value ? 
+            `<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+              <i class="fas fa-user-plus"></i> Add Employee
+            </button>` : ''
+          }
+        </div>
+      `;
+      return;
+    }
+    
+    // Sort employees by name
+    employees.sort((a, b) => (a.employeeName || '').localeCompare(b.employeeName || ''));
+    
+    let html = '';
+    
+    employees.forEach(employee => {
+      const typeBadge = getTypeBadge(employee.employeeType || 'daily');
+      const projectCount = employee.projects ? employee.projects.length : 0;
+      const projectsText = projectCount === 1 ? '1 project' : `${projectCount} projects`;
+      
+      html += `
+        <div class="col-md-4 col-lg-3 mb-2">
+  <div class="card  h-100 ">
+
+    <!-- CARD HEADER -->
+    <div class="card-header  d-flex justify-content-between align-items-start">
+      <div>
+        <h6 class="card-title text-success fw-bold">
+          <i class="bi bi-person-circle"></i>
+          ${escapeHtml(employee.employeeName || 'Unnamed')}
+          ${typeBadge}
+        </h6>
+      </div>
+
+      <!-- 3-dot menu -->
+      <div class="dropdown d-none">
+        <button class="btn btn-sm btn-outline-secondary border-0"
+                type="button"
+                data-bs-toggle="dropdown">
+          <i class="fas fa-ellipsis-v"></i>
+        </button>
+
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <button class="dropdown-item" onclick="viewEmployee('${employee.id}')">
+              <i class="fas fa-eye me-2"></i> Preview
+            </button>
+          </li>
+          <li>
+            <button class="dropdown-item" onclick="editEmployee('${employee.id}')">
+              <i class="fas fa-edit me-2"></i> Edit
+            </button>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <button class="dropdown-item text-danger"
+                    onclick="deleteEmployee('${employee.id}', '${escapeHtml(employee.employeeName || 'Employee')}')">
+              <i class="fas fa-trash me-2"></i> Delete
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- CARD BODY -->
+    <div class="card-body py-1">
+      <div>
+        <small class="text-muted me-4">
+          <i class="fas fa-briefcase me-1"></i>
+          ${escapeHtml(employee.designation || 'N/A')}
+        </small>
+
+        <small class="text-muted ">
+          <i class="fas fa-project-diagram me-1"></i>
+          ${projectsText}
+        </small>
+      </div>
+
+      <div>
+        
+      </div>
+    </div>
+
+    <!-- CARD FOOTER -->
+    <div class="card-footer d-flex justify-content-between">
+      <div>
+      <button class="btn btn-sm btn-outline-primary"
+              onclick="viewEmployee('${employee.id}')">
+        <i class="fas fa-eye me-1"></i> View
+      </button>
+
+      <button class="btn btn-sm btn-outline-secondary"
+              onclick="editEmployee('${employee.id}')">
+        <i class="fas fa-edit me-1"></i> Edit
+      </button>
+      </div>
+      <button class="btn btn-sm btn-outline-danger"
+              onclick="deleteEmployee('${employee.id}', '${escapeHtml(employee.employeeName || 'Employee')}')">
+              <i class="fas fa-trash me-2"></i> Delete
+      </button>
+      
+    </div>
+
+
+  </div>
+</div>
+
+      `;
+    });
+    
+    employeesList.innerHTML = html;
+  }
+
+  // View employee details in modal
+  async function viewEmployee(employeeId) {
+    try {
+      // Since employee can be in multiple projects, we need to find all occurrences
+      const employeeData = allEmployees.find(e => e.id === employeeId);
+      
+      if (!employeeData) {
+        alert('Employee not found');
+        return;
+      }
+      
+      const typeBadge = getTypeBadge(employeeData.employeeType || 'daily');
+      
+      // Format projects list
+      let projectsHtml = '';
+      if (employeeData.projects && employeeData.projects.length > 0) {
+        employeeData.projects.forEach(project => {
+          projectsHtml += `
+            <span class="badge bg-light text-dark me-1 mb-1">
+              <i class="fas fa-building me-1"></i> ${escapeHtml(project.name)}
+            </span>
+          `;
+        });
+      } else {
+        projectsHtml = '<span class="text-muted">Not assigned to any project</span>';
+      }
+      
+      const detailsHtml = `
+        <div class="employee-details">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <h4 class="mb-1">${escapeHtml(employeeData.employeeName || 'Unnamed')}</h4>
+              <p class="text-muted mb-0">${escapeHtml(employeeData.designation || 'N/A')}</p>
+            </div>
+            ${typeBadge}
+          </div>
+          
+          <hr>
+          
+          <div class="mb-3">
+            <strong>Assigned Projects:</strong>
+            <div class="mt-1">
+              ${projectsHtml}
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6 mb-2">
+              <strong>Salary:</strong>
+              <p class="mb-0">₹${formatCurrency(employeeData.salaryAmount || 0)}</p>
+            </div>
+
+          </div>
+          
+          ${employeeData.remarks ? `
+            <div class="mb-2">
+              <strong>Remarks:</strong>
+              <p class="mb-0">${escapeHtml(employeeData.remarks)}</p>
+            </div>
+          ` : ''}
+          
+        </div>
+      `;
+      
+      document.getElementById('viewEmployeeDetails').innerHTML = detailsHtml;
+      
+      // Show the view modal
+      const viewModal = new bootstrap.Modal(document.getElementById('viewEmployeeModal'));
+      viewModal.show();
+      
+    } catch (error) {
+      console.error("Error viewing employee:", error);
+      alert('Error loading employee details');
+    }
+  }
+
+  // Edit employee - load data into edit modal
+  async function editEmployee(employeeId) {
+    try {
+      currentEditingEmployeeId = employeeId;
+      
+      // Find employee data
+      const employeeData = allEmployees.find(e => e.id === employeeId);
+      
+      if (!employeeData) {
+        alert('Employee not found');
+        return;
+      }
+      
+      // Store current projects for this employee
+      currentEditingEmployeeProjects = employeeData.projects || [];
+      
+      // Populate edit form fields
+      document.getElementById('editEmployeeId').value = employeeId;
+      document.getElementById('editEmployeeName').value = employeeData.employeeName || '';
+      document.getElementById('editEmployeeType').value = employeeData.employeeType || '';
+      document.getElementById('editDesignation').value = employeeData.designation || '';
+      document.getElementById('editSalaryAmount').value = employeeData.salaryAmount || 0;
+      document.getElementById('editRemarks').value = employeeData.remarks || '';
+      
+      // Populate project checkboxes in edit form
+      const editProjectCheckboxesContainer = document.getElementById('editProjectCheckboxes');
+      editProjectCheckboxesContainer.innerHTML = '';
+      
+      if (allProjects.length === 0) {
+        editProjectCheckboxesContainer.innerHTML = `
+          <div class="col-12 text-center">
+            <p class="text-muted mb-0">No projects available</p>
+          </div>
+        `;
+      } else {
+        allProjects.forEach(project => {
+          const isChecked = currentEditingEmployeeProjects.some(p => p.id === project.id);
+          
+          const colDiv = document.createElement('div');
+          colDiv.className = 'col-md-6 mb-2';
+          
+          colDiv.innerHTML = `
+            <div class="form-check">
+              <input class="form-check-input edit-project-checkbox" type="checkbox" 
+                     value="${project.id}" id="edit-project-${project.id}" ${isChecked ? 'checked' : ''}>
+              <label class="form-check-label" for="edit-project-${project.id}">
+                ${escapeHtml(project.name)}
+              </label>
+            </div>
+          `;
+          
+          editProjectCheckboxesContainer.appendChild(colDiv);
+        });
+      }
+      
+      // Show edit modal
+      const editModal = new bootstrap.Modal(document.getElementById('editEmployeeModal'));
+      editModal.show();
+      
+    } catch (error) {
+      console.error("Error loading employee for edit:", error);
+      alert('Error loading employee data for editing');
+    }
+  }
+
+  // Show saving spinner
+  function showSaveSpinner(buttonId) {
+    const button = document.getElementById(buttonId);
+    if (button) {
+      button.innerHTML = 
+      '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
+      button.disabled = true;
+    }
+  }
+
+  // Hide saving spinner and reset button
+  function hideSaveSpinner(buttonId, originalText, originalIcon = 'fas fa-save') {
+    const button = document.getElementById(buttonId);
+    if (button) {
+      button.innerHTML = `<i class="${originalIcon} me-2"></i>${originalText}`;
+      button.disabled = false;
+    }
+  }
+
+  // Update employee
+  async function updateEmployee() {
+    try {
+      const form = document.getElementById('editEmployeeForm');
+      
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      
+      // Show spinner on update button
+      showSaveSpinner('updateEmployeeBtn');
+      
+      // Get selected projects from edit form
+      const selectedProjectCheckboxes = document.querySelectorAll('.edit-project-checkbox:checked');
+      if (selectedProjectCheckboxes.length === 0) {
+        alert('Please select at least one project to assign the employee to');
+        hideSaveSpinner('updateEmployeeBtn', 'Update Employee', 'fas fa-sync-alt');
+        return;
+      }
+      
+      const selectedProjectIds = Array.from(selectedProjectCheckboxes).map(cb => cb.value);
+      
+      const employeeData = {
+        employeeName: document.getElementById('editEmployeeName').value.trim(),
+        employeeType: document.getElementById('editEmployeeType').value,
+        designation: document.getElementById('editDesignation').value.trim(),
+        salaryAmount: parseFloat(document.getElementById('editSalaryAmount').value),
+        remarks: document.getElementById('editRemarks').value.trim(),
+        updatedAt: new Date().toISOString(),
+        updatedBy: currentUser.uid
+      };
+      
+      // Validate salary
+      if (isNaN(employeeData.salaryAmount) || employeeData.salaryAmount < 0) {
+        alert('Please enter a valid salary amount');
+        hideSaveSpinner('updateEmployeeBtn', 'Update Employee', 'fas fa-sync-alt');
+        return;
+      }
+      
+      
+      const employeeId = currentEditingEmployeeId;
+      
+      // Get previous projects
+      const previousProjectIds = currentEditingEmployeeProjects.map(p => p.id);
+      
+      // Find projects to add employee to (new selections)
+      const projectsToAdd = selectedProjectIds.filter(projectId => 
+        !previousProjectIds.includes(projectId)
+      );
+      
+      // Find projects to remove employee from (deselected)
+      const projectsToRemove = previousProjectIds.filter(projectId => 
+        !selectedProjectIds.includes(projectId)
+      );
+      
+      // Update employee in existing projects
+      const updatePromises = previousProjectIds
+        .filter(projectId => selectedProjectIds.includes(projectId))
+        .map(projectId => {
+          return database.ref(`employees/${projectId}/${employeeId}`).update(employeeData);
+        });
+      
+      // Add employee to new projects
+      const addPromises = projectsToAdd.map(projectId => {
+        return database.ref(`employees/${projectId}/${employeeId}`).set({
+          ...employeeData,
+        });
+      });
+      
+      // Remove employee from deselected projects
+      const removePromises = projectsToRemove.map(projectId => {
+        return database.ref(`employees/${projectId}/${employeeId}`).remove();
+      });
+      
+      // Execute all operations
+      await Promise.all([...updatePromises, ...addPromises, ...removePromises]);
+      
+      // Show success message
+      let message = 'Employee updated successfully!';
+      if (projectsToAdd.length > 0) message += ` Added to ${projectsToAdd.length} new project(s).`;
+      if (projectsToRemove.length > 0) message += ` Removed from ${projectsToRemove.length} project(s).`;
+      
+      alert(message);
+      
+      // Hide spinner
+      hideSaveSpinner('updateEmployeeBtn', 'Update Employee', 'fas fa-sync-alt');
+      
+      // Close edit modal
+      const modal = bootstrap.Modal.getInstance(document.getElementById('editEmployeeModal'));
+      modal.hide();
+      
+      // Reload employees
+      loadEmployees();
+      
+    } catch (error) {
+      console.error("Error updating employee:", error);
+      alert('Error updating employee: ' + error.message);
+      hideSaveSpinner('updateEmployeeBtn', 'Update Employee', 'fas fa-sync-alt');
+    }
+  }
+
+  // Update statistics based on filtered employees
+  function updateStats(employees) {
+    const total = employees.length;
+    const daily = employees.filter(e => e.employeeType === 'daily').length;
+    const monthly = employees.filter(e => e.employeeType === 'monthly').length;
+    
+    document.getElementById('totalEmployees').textContent = total;
+    document.getElementById('dailyWorkers').textContent = daily;
+    document.getElementById('monthlyStaff').textContent = monthly;
+  }
+
+  // Save new employee (to multiple projects)
+  async function saveEmployee() {
+    try {
+      const form = document.getElementById('employeeForm');
+      
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      
+      // Show spinner on save button
+      showSaveSpinner('saveEmployeeBtn');
+      
+      // Get selected projects
+      const selectedProjectCheckboxes = document.querySelectorAll('.project-checkbox:checked');
+      if (selectedProjectCheckboxes.length === 0) {
+        alert('Please select at least one project to assign the employee to');
+        hideSaveSpinner('saveEmployeeBtn', 'Save Employee');
+        return;
+      }
+      
+      const selectedProjectIds = Array.from(selectedProjectCheckboxes).map(cb => cb.value);
+      
+      const employeeData = {
+        employeeName: document.getElementById('employeeName').value.trim(),
+        employeeType: document.getElementById('employeeType').value,
+        designation: document.getElementById('designation').value.trim(),
+        salaryAmount: parseFloat(document.getElementById('salaryAmount').value),
+        remarks: document.getElementById('remarks').value.trim(),
+      };
+      
+      // Validate salary
+      if (isNaN(employeeData.salaryAmount) || employeeData.salaryAmount < 0) {
+        alert('Please enter a valid salary amount');
+        hideSaveSpinner('saveEmployeeBtn', 'Save Employee');
+        return;
+      }
+      
+      
+      // Generate a unique employee ID for tracking across projects
+      const employeeId = database.ref().push().key;
+      
+      // Save employee to each selected project
+      const savePromises = selectedProjectIds.map(projectId => {
+        return database.ref(`employees/${projectId}/${employeeId}`).set(employeeData);
+      });
+      
+      await Promise.all(savePromises);
+      
+      // Show success message
+      alert(`Employee added successfully to ${selectedProjectIds.length} project(s)!`);
+      
+      // Hide spinner
+      hideSaveSpinner('saveEmployeeBtn', 'Save Employee');
+      
+      // Close modal and reset form
+      const modal = bootstrap.Modal.getInstance(document.getElementById('addEmployeeModal'));
+      modal.hide();
+      form.reset();
+      
+      // Uncheck all checkboxes
+      document.querySelectorAll('.project-checkbox').forEach(cb => cb.checked = false);
+      
+      
+      // Reload employees
+      loadEmployees();
+      
+    } catch (error) {
+      console.error("Error saving employee:", error);
+      alert('Error saving employee: ' + error.message);
+      hideSaveSpinner('saveEmployeeBtn', 'Save Employee');
+    }
+  }
+
+  // Delete employee (from all projects)
+  async function deleteEmployee(employeeId, employeeName) {
+    if (!confirm(`Are you sure you want to delete employee "${employeeName}" from all projects?\nThis action cannot be undone.`)) {
+      return;
+    }
+    
+    try {
+      // Find all projects this employee is assigned to
+      const employeeData = allEmployees.find(e => e.id === employeeId);
+      
+      if (!employeeData || !employeeData.projects) {
+        alert('Employee not found');
+        return;
+      }
+      
+      // Delete from all projects
+      const deletePromises = employeeData.projects.map(project => {
+        return database.ref(`employees/${project.id}/${employeeId}`).remove();
+      });
+      
+      await Promise.all(deletePromises);
+      
+      alert('Employee deleted successfully from all projects!');
+      loadEmployees();
+      
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+      alert('Error deleting employee: ' + error.message);
+    }
+  }
+
+  // Helper functions
+  function getTypeBadge(type) {
+    const badges = {
+      daily: '<span class="badge bg-info"><small>Daily Worker</small></span>',
+      monthly: '<span class="badge bg-primary"><small>Monthly Staff</small></span>',
+      contract: '<span class="badge bg-warning"><small>Contract Basis</small></span>'
+    };
+    return badges[type] || '<span class="badge bg-secondary">Unknown</span>';
+  }
+
+  function formatCurrency(amount) {
+    return parseFloat(amount).toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-IN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return 'Invalid date';
+    }
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Reset modal buttons when modal is hidden
+  document.getElementById('addEmployeeModal').addEventListener('hidden.bs.modal', function () {
+    hideSaveSpinner('saveEmployeeBtn', 'Save Employee');
+  });
+
+  document.getElementById('editEmployeeModal').addEventListener('hidden.bs.modal', function () {
+    hideSaveSpinner('updateEmployeeBtn', 'Update Employee', 'fas fa-sync-alt');
+  });
+</script>
+
+<!-- Bootstrap JS Bundle --> 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

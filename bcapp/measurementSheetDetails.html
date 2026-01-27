@@ -1,0 +1,1421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Measurement Sheet Details</title>
+
+<link rel="icon" type="image/png" href="img/tab-logo.png">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style/style.css">
+
+<style>
+  .table thead th {
+    background: #00162c;
+    color: #ffffff;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+  .tr, td{
+    font-size: 13px;
+  }
+  .tota-row {
+    background: #f3cd4f;
+     font-size: 10px;
+
+  }
+
+#grandTotal {
+  font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #198754; /* Bootstrap success green */
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  flex-wrap: wrap;
+}
+
+/* Separator style */
+#grandTotal span {
+  color: #525252; /* soft gray */
+  font-weight: 500;
+}
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sort-icon {
+  font-size: 15px;
+  margin-left: 2px;
+  opacity: 0.7;
+}
+
+.sortable.active .sort-icon {
+  opacity: 1;
+}
+
+@media print {
+
+  /* Hide UI elements */
+  .btn, .foradmin, #nav-placeholder, .filter {
+    display: none !important;
+  }
+
+  /* Reset page & body height */
+  html, body {
+    height: auto !important;
+    min-height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Remove Bootstrap card effects */
+  .card {
+    box-shadow: none !important;
+    border: none !important;
+    page-break-inside: avoid;
+    background-color: rgb(235, 235, 235) !important;
+    border: 1px solid black;
+    /* 🔥 Force print colors */
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  }
+
+  /* Table should not split rows */
+  table {
+    page-break-inside: auto;
+    width: 100%;
+  }
+
+  .sort-icon {
+    display: none;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  /* Remove forced min-heights */
+  .content {
+    min-height: auto !important;
+  }
+
+  .table thead th {
+  background-color: rgb(212, 212, 212) !important;
+
+  /* 🔥 Force print colors */
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+#grandTotal {
+    color: #000 !important;
+  }
+
+  /* Hide FIRST & LAST column (Print only) */
+  table th:first-child,
+  table td:first-child,
+  table th:last-child,
+  table td:last-child {
+    display: none !important;
+  }
+}
+
+
+  /* =========================
+   MOBILE TABLE OPTIMIZATION
+========================= */
+@media (max-width: 576px) {
+
+  /* Table text size */
+  .table {
+    font-size: 9px;
+  }
+
+  /* Header text */
+  .table thead th {
+    font-size: 9px;
+    padding: 4px 2px;
+  }
+
+  /* Body cells */
+  .table tbody td,
+  .table tfoot td {
+    padding: 2px 2px;
+    vertical-align: middle;
+  }
+
+  /* Buttons inside table */
+  .table .btn {
+    padding: 2px 4px;
+    font-size: 8px;
+  }
+
+  /* Icons */
+  .table i {
+    font-size: 8px;
+  }
+
+  /* Checkbox */
+  .row-check,
+  #selectAll {
+    transform: scale(0.8);
+  }
+
+  /* Grand total area */
+  #grandTotal div {
+    font-size: 8px;
+    line-height: 1.2;
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- Navbar -->
+<div id="nav-placeholder"></div>
+
+<div class="content p-3">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 id="sheetTitle">
+    <i class="bi bi-clipboard-data"></i>
+    Measurement Sheet
+    </h5>
+
+
+    <div>
+      <button class="btn btn-sm btn-secondary me-2" onclick="printSheet()">
+        <i class="bi bi-printer"></i> Print / PDF
+      </button>
+       
+    </div>
+  </div>
+
+<!-- FILTERS -->
+<div class="fix-card filter shadow-sm p-3 mb-2">
+  <div class="card-body py-2">
+    <div class="row g-2">
+
+      <div class="col-md-4" id="filterUnderWrap" style="display:none;">
+        <select id="filterUnder" class="form-select form-select-sm">
+          <option value="">All Under</option>
+        </select>
+      </div>
+
+      <div class="col-md-4" id="filterForItemWrap" style="display:none;">
+        <select id="filterForItem" class="form-select form-select-sm">
+          <option value="">All For Item</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <select id="filterItem" class="form-select form-select-sm">
+          <option value="">All Items</option>
+        </select>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+        <!-- GRAND TOTAL TOP -->
+<div class="fix-card p-3 shadow-sm mb-3">
+  <div class="card-body py-2">
+    <h6 class="mb-1 text-light bg-secondary rounded p-1">
+      <i class="bi bi-calculator"></i> Grand Total
+    </h6>
+    <div id="grandTotal" class="fw-bold"></div>
+  </div>
+</div>
+
+      <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#addItemModal">
+        <i class="bi bi-plus-circle"></i> Add Item
+      </button>
+       <button class="btn btn-sm btn-warning me-1"
+        onclick="openAssignModal()">
+        <i class="bi bi-arrow-repeat"></i> Assign
+      </button>
+      <button class="btn btn-sm btn-success me-1" onclick="copySelectedItems()">
+      <i class="bi bi-copy"></i> Copy
+      </button> 
+      <button class="btn btn-sm btn-danger me-1" onclick="deleteSelectedItems()">
+        <i class="bi bi-trash"></i> Delete
+      </button>
+      <button
+      id="clearSortBtn"
+      class="btn btn-sm btn-outline-secondary d-none"
+      onclick="clearSort()">
+      <i class="bi bi-x-circle"></i> Clear Sort
+    </button>
+
+
+
+  <!-- Table -->
+  <div class="table-responsive mt-1">
+    <table class="table table-bordered text-center align-middle mb-0">
+      <thead id="measurementHead">
+        <tr>
+            <th>Under</th>
+            <th>For Item</th>
+            <th>Item</th>
+            <th>Nos</th>
+            <th>L</th>
+            <th>W</th>
+            <th>T</th>
+            <th>Unit</th>
+            <th>Total</th>
+            <th>Action</th>
+        </tr>
+
+      </thead>
+
+      <tbody id="measurementBody">
+        <tr>
+          <td colspan="10" class="text-muted py-4 text-center">
+            Loading measurement items...
+          </td>
+        </tr>
+      </tbody>
+
+      <tfoot id="measurementFoot">
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<!-- Add Item Modal -->
+<div class="modal fade" id="addItemModal" tabindex="-1">
+<div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal-content">
+
+<div class="modal-header">
+  <h5 class="modal-title">Add Measurement Item</h5>
+  <button class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+  <div class="row g-2">
+
+    <!-- UNDER -->
+<div class="col-md-6 d-none" id="underSelectWrap">
+  <select id="underSelect" class="form-select">
+    <option value="">Select Under</option>
+  </select>
+</div>
+
+<!-- FOR ITEM -->
+<div class="col-md-6 d-none" id="forItemSelectWrap">
+  <select id="forItemSelect" class="form-select">
+    <option value="">Select For Item</option>
+  </select>
+</div>
+
+<!-- ITEM DESCRIPTION -->
+<div class="col-12">
+  <input type="text" id="itemName" class="form-control" placeholder="Item Description">
+  <div id="itemSuggestBox" class="position-relative"></div>
+</div>
+
+
+    <div class="col"><input type="number" id="nos" class="form-control" oninput="calculateTotal()" placeholder="Nos"></div>
+    <div class="col"><input type="number" id="length" class="form-control" oninput="calculateTotal()" placeholder="L"></div>
+    <div class="col"><input type="number" id="width" class="form-control" oninput="calculateTotal()" placeholder="W"></div>
+    <div class="col"><input type="number" id="thickness" class="form-control" oninput="calculateTotal()" placeholder="T"></div>
+
+    <div class="col-3">
+      <select id="unit" class="form-select" onchange="calculateTotal()">
+        <option value="Cu.m">Cubic Meter (Cu.m)</option>
+        <option value="C.ft">Cubic Feet (C.ft)</option>
+        <option value="Sq.m">Square Meter (Sq.m)</option>
+        <option value="Sq.ft">Square Feet (Sq.ft)</option>
+        <option value="Rmt">Running Meter (Rmt)</option>
+        <option value="Nos">Numbers (Nos)</option>
+        <option value="Kg">Kilogram (Kg)</option>
+        <option value="Ton">Metric Tonne (Ton)</option>
+    </select>
+
+    </div>
+
+    <div class="col">
+      <input type="number" id="total" class="form-control"
+       placeholder="Total" oninput="this.value=this.value" />
+    </div>
+
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+  <button class="btn btn-primary" onclick="saveItem()">Save</button>
+</div>
+
+</div>
+</div>
+</div>
+
+<div class="modal fade" id="assignModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Assign Under / For Item</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row g-2">
+
+          <div class="col-12 d-none" id="assignUnderWrap">
+            <select id="assignUnder" class="form-select">
+              <option value="">Select Under</option>
+            </select>
+          </div>
+
+          <div class="col-12 d-none" id="assignForItemWrap">
+            <select id="assignForItem" class="form-select">
+              <option value="">Select For Item</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" onclick="assignSelected()">
+          Assign
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script src="js/firebaseconfig.js"></script>
+<script src="js/all.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+let HAS_UNDER = false;
+let HAS_FOR_ITEM = false;
+let ALL_ITEMS = []; // cache all rows
+let EDIT_ITEM_ID = null;
+let COPY_MODE = false;
+let DELETE_MODE = false; 
+
+
+const itemName = document.getElementById("itemName");
+const nos = document.getElementById("nos");
+const length = document.getElementById("length");
+const width = document.getElementById("width");
+const thickness = document.getElementById("thickness");
+const unit = document.getElementById("unit");
+const totalInput = document.getElementById("total");
+const addItemModalEl = document.getElementById("addItemModal");
+
+const filterUnder = document.getElementById("filterUnder");
+const filterForItem = document.getElementById("filterForItem");
+const filterItem = document.getElementById("filterItem");
+
+const filterUnderWrap = document.getElementById("filterUnderWrap");
+const filterForItemWrap = document.getElementById("filterForItemWrap");
+
+
+
+/* =========================
+   Firebase Init
+========================= */
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
+
+/* =========================
+   Get Sheet ID
+========================= */
+const sheetId = new URLSearchParams(window.location.search).get("id");
+if (!sheetId) {
+  alert("Invalid Measurement Sheet");
+  window.location.href = "measurementSheet.html";
+}
+
+/* =========================
+   Get Sheet ID END
+========================= */
+
+
+const underSelect = document.getElementById("underSelect");
+const forItemSelect = document.getElementById("forItemSelect");
+const underWrap = document.getElementById("underSelectWrap");
+const forItemWrap = document.getElementById("forItemSelectWrap");
+
+async function loadUnderAndForItem() {
+
+  const snap = await db.ref(`measurementSheet/${sheetId}`).once("value");
+  const sheet = snap.val();
+  if (!sheet) return;
+
+  // ---------- UNDER ----------
+  if (Array.isArray(sheet.under) && sheet.under.length) {
+    HAS_UNDER = true;
+    underSelectWrap.classList.remove("d-none");
+    underSelect.innerHTML = `<option value="">Select Under</option>`;
+    sheet.under.forEach(u => {
+      underSelect.innerHTML += `<option value="${u}">${u}</option>`;
+    });
+  }
+
+  // ---------- FOR ITEM ----------
+  if (Array.isArray(sheet.forItem) && sheet.forItem.length) {
+    HAS_FOR_ITEM = true;
+    forItemSelectWrap.classList.remove("d-none");
+    forItemSelect.innerHTML = `<option value="">Select For Item</option>`;
+    sheet.forItem.forEach(i => {
+      forItemSelect.innerHTML += `<option value="${i}">${i}</option>`;
+    });
+  }
+
+  if (HAS_UNDER) {
+  filterUnderWrap.style.display = "block";
+  filterUnder.innerHTML = `<option value="">All Under</option>`;
+  sheet.under.forEach(u => {
+    filterUnder.innerHTML += `<option value="${u}">${u}</option>`;
+  });
+}
+
+if (HAS_FOR_ITEM) {
+  filterForItemWrap.style.display = "block";
+  filterForItem.innerHTML = `<option value="">All For Item</option>`;
+  sheet.forItem.forEach(i => {
+    filterForItem.innerHTML += `<option value="${i}">${i}</option>`;
+  });
+}
+
+}
+
+
+
+
+/* =========================
+   Auto Calculation
+========================= */
+["nos","length","width","thickness"].forEach(id => {
+  document.getElementById(id).addEventListener("input", calculateTotal);
+});
+
+function calculateTotal() {
+  const nos = parseFloat(document.getElementById('nos').value) || 0;
+  const L = parseFloat(document.getElementById('length').value) || 0;
+  const W = parseFloat(document.getElementById('width').value) || 0;
+  const T = parseFloat(document.getElementById('thickness').value) || 0;
+  const unit = document.getElementById('unit').value;
+
+  let total = "";
+
+  switch (unit) {
+    case 'Cu.m':
+      total = nos * L * W * T;
+      document.getElementById('total').readOnly = true;
+      break;
+
+    case 'C.ft':
+      total = nos * L * W * T;
+      document.getElementById('total').readOnly = true;
+      break;  
+
+    case 'Sq.m':
+      total = nos * L * W;
+      document.getElementById('total').readOnly = true;
+      break;
+
+    case 'Sq.ft':           
+      total = nos * L * W;
+      break;
+
+
+    case 'Rmt':
+      total = nos * L;
+      document.getElementById('total').readOnly = true;
+      break;
+
+    case 'Nos':
+      total = nos;
+      document.getElementById('total').readOnly = true;
+      break;
+
+    case 'Kg':
+    case 'Ton':
+      // 👇 MANUAL ENTRY ENABLE
+      document.getElementById('total').readOnly = false;
+      return; // 🚨 stop auto calculation
+  }
+
+  document.getElementById('total').value = total.toFixed(3);
+}
+
+/* =========================
+   Enabled Disabled Input Filled
+========================= */
+function setFieldState(input, enabled) {
+  input.disabled = !enabled;
+
+  input.classList.remove(
+    "bg-danger-subtle",
+    "border-danger",
+    "bg-success-subtle",
+    "border-success"
+  );
+
+  if (enabled) {
+    input.classList.add("bg-success-subtle", "border-success");
+  } else {
+    input.classList.add("bg-danger-subtle", "border-danger");
+  }
+}
+
+function applyUnitUI() {
+  // Default: all enabled
+  setFieldState(length, true);
+  setFieldState(width, true);
+  setFieldState(thickness, true);
+
+  if (['Sq.m', 'Sq.ft', 'Rmt'].includes(unit.value)) {
+    setFieldState(thickness, false);
+  }
+
+  if (unit.value === "Kg" || unit.value === "Ton") {
+    setFieldState(length, false);
+    setFieldState(width, false);
+    setFieldState(thickness, false);
+  }
+}
+
+unit.addEventListener("change", () => {
+
+  // Default: all enabled
+  setFieldState(length, true);
+  setFieldState(width, true);
+  setFieldState(thickness, true);
+
+  // Sq.m, Sq.ft, Rmt → no thickness
+  if (['Sq.m', 'Sq.ft', 'Rmt'].includes(unit.value)) {
+    setFieldState(thickness, false);
+  }
+
+  // Kg, Ton → manual total only
+  if (unit.value === "Kg" || unit.value === "Ton") {
+    setFieldState(length, false);
+    setFieldState(width, false);
+    setFieldState(thickness, false);
+  }
+});
+
+addItemModalEl.addEventListener("shown.bs.modal", () => {
+  applyUnitUI(); // 🔥 force initial state
+});
+
+/* =========================
+   Save Item
+========================= */
+
+async function saveItem() {
+  if (!itemName.value.trim()) {
+    alert("Item name required");
+    return;
+  }
+
+  const data = {
+    item: itemName.value.trim(),
+    nos: parseFloat(nos.value) || 0,
+    l: parseFloat(length.value) || 0,
+    w: parseFloat(width.value) || 0,
+    t: parseFloat(thickness.value) || 0,
+    unit: unit.value,
+    total: parseFloat(totalInput.value) || 0,
+    updatedAt: firebase.database.ServerValue.TIMESTAMP
+  };
+
+  if (HAS_UNDER) data.under = underSelect.value || "";
+  if (HAS_FOR_ITEM) data.forItem = forItemSelect.value || "";
+
+  if (EDIT_ITEM_ID) {
+    // 🔁 UPDATE
+    await db.ref(`measurementSheet/${sheetId}/items/${EDIT_ITEM_ID}`).update(data);
+  } else {
+    // ➕ ADD NEW
+    data.createdAt = firebase.database.ServerValue.TIMESTAMP;
+    await db.ref(`measurementSheet/${sheetId}/items`).push(data);
+  }
+
+  EDIT_ITEM_ID = null;
+  bootstrap.Modal.getInstance(addItemModalEl).hide();
+  clearForm();
+  loadItems();
+}
+
+
+/* =========================
+   BUILD HEADER DYNAMICALLY
+========================= */
+
+function buildTableHeader() {
+  const head = document.getElementById("measurementHead");
+
+  let html = "<tr>";
+
+  // ✅ Checkbox column
+  html += `<th><input type="checkbox" id="selectAll"></th>`;
+
+  /* Under */
+  if (HAS_UNDER) {
+    html += `<th class="sortable" data-type="text">
+              Under <span class="sort-icon">⇅</span>
+            </th>`;
+  }
+
+  /* For Item */
+  if (HAS_FOR_ITEM) {
+    html += `<th class="sortable" data-type="text">
+              For Item <span class="sort-icon">⇅</span>
+            </th>`;
+  }
+
+  html += `
+    <th class="sortable" data-type="text">
+      Item <span class="sort-icon">⇅</span>
+    </th>
+
+    <th class="sortable" data-type="number">
+      Nos <span class="sort-icon">⇅</span>
+    </th>
+
+    <th class="sortable" data-type="number">
+      L <span class="sort-icon">⇅</span>
+    </th>
+
+    <th class="sortable" data-type="number">
+      W <span class="sort-icon">⇅</span>
+    </th>
+
+    <th class="sortable" data-type="number">
+      T <span class="sort-icon">⇅</span>
+    </th>
+
+    <th class="sortable" data-type="text">
+      Unit <span class="sort-icon">⇅</span>
+    </th>
+
+    <th class="sortable" data-type="number">
+      Total <span class="sort-icon">⇅</span>
+    </th>
+    <th>Action</th>
+  </tr>`;
+
+  head.innerHTML = html;
+
+  // Select all
+  document.getElementById("selectAll").addEventListener("change", e => {
+    document.querySelectorAll(".row-check").forEach(cb => {
+      cb.checked = e.target.checked;
+    });
+  });
+}
+
+/* =========================
+   Load Items
+========================= */
+const UNIT_LABELS = {
+  "Cu.m": "Cubic Meter",
+  "C.ft": "Cubic Feet",
+  "Sq.m": "Square Meter",
+  "Sq.ft": "Square Feet",
+  "Rmt": "Running Meter",
+  "Nos": "Numbers",
+  "Kg": "Kilogram",
+  "Ton": "Metric Tonne"
+};
+
+
+async function loadItems() {
+  const body = document.getElementById("measurementBody");
+  const grandTotalCell = document.getElementById("grandTotal");
+
+  body.innerHTML = "";
+  grandTotalCell.innerHTML = "";
+
+  const snapshot = await db
+    .ref(`measurementSheet/${sheetId}/items`)
+    .once("value");
+
+  // ---------- NO DATA ----------
+  if (!snapshot.exists()) {
+    const baseCols = 8;
+    const extraCols = (HAS_UNDER ? 1 : 0) + (HAS_FOR_ITEM ? 1 : 0);
+
+    body.innerHTML = `
+      <tr>
+        <td colspan="${baseCols + extraCols + 1}"
+            class="text-muted py-4 text-center">
+          No measurement items added
+        </td>
+      </tr>`;
+
+    grandTotalCell.innerHTML = "0.000";
+    ALL_ITEMS = [];
+    return;
+  }
+
+  // ✅ CACHE ALL DATA FOR FILTERING
+  ALL_ITEMS = [];
+
+  snapshot.forEach(child => {
+    ALL_ITEMS.push({
+      id: child.key,
+      ...child.val()
+    });
+  });
+
+  // ✅ Populate Item dropdown only once
+  populateItemFilter();
+
+  // ✅ Render table + grand total using filters
+  renderFilteredItems();
+}
+
+/* =========================
+   EDIT FUNCTION
+========================= */
+
+function editItem(itemId) {
+  const item = ALL_ITEMS.find(i => i.id === itemId);
+  if (!item) return;
+
+  EDIT_ITEM_ID = itemId;
+
+  // Fill inputs
+  itemName.value = item.item || "";
+  nos.value = item.nos || "";
+  length.value = item.l || "";
+  width.value = item.w || "";
+  thickness.value = item.t || "";
+  unit.value = item.unit || "";
+  totalInput.value = item.total || "";
+
+  if (HAS_UNDER) underSelect.value = item.under || "";
+  if (HAS_FOR_ITEM) forItemSelect.value = item.forItem || "";
+
+  // Apply UI rules
+  applyUnitUI();
+  calculateTotal();
+
+  // Change modal title & button
+  document.querySelector("#addItemModal .modal-title").textContent = "Edit Measurement Item";
+
+  new bootstrap.Modal(addItemModalEl).show();
+}
+
+
+/* =========================
+   Delete Item
+========================= */
+async function deleteItem(itemId) {
+  if (!confirm("Delete this measurement item?")) return;
+  await db.ref(`measurementSheet/${sheetId}/items/${itemId}`).remove();
+  loadItems();
+}
+
+/* =========================
+   Helpers
+========================= */
+function clearForm() {
+  itemName.value = "";
+  nos.value = "";
+  length.value = "";
+  width.value = "";
+  thickness.value = "";
+  totalInput.value = "";
+}
+
+
+function printSheet() {
+  window.print();
+}
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+
+/* =========================
+   ASSIGN MODAL
+========================= */
+
+function openAssignModal() {
+  const selected = document.querySelectorAll(".row-check:checked");
+  if (!selected.length) {
+    alert("Select at least one item");
+    return;
+  }
+
+  // Clear
+  assignUnder.innerHTML = `<option value="">Select Under</option>`;
+  assignForItem.innerHTML = `<option value="">Select For Item</option>`;
+
+  if (HAS_UNDER) {
+    assignUnderWrap.classList.remove("d-none");
+    underSelect.querySelectorAll("option").forEach(o => {
+      if (o.value) assignUnder.innerHTML += o.outerHTML;
+    });
+  }
+
+  if (HAS_FOR_ITEM) {
+    assignForItemWrap.classList.remove("d-none");
+    forItemSelect.querySelectorAll("option").forEach(o => {
+      if (o.value) assignForItem.innerHTML += o.outerHTML;
+    });
+  }
+
+  new bootstrap.Modal(
+    document.getElementById("assignModal")
+  ).show();
+}
+
+// async function assignSelected() {
+//   const updates = {};
+//   const under = assignUnder.value;
+//   const forItem = assignForItem.value;
+
+//   document.querySelectorAll(".row-check:checked").forEach(cb => {
+//     const path = `measurementSheet/${sheetId}/items/${cb.value}`;
+
+//     if (HAS_UNDER) updates[`${path}/under`] = under;
+//     if (HAS_FOR_ITEM) updates[`${path}/forItem`] = forItem;
+//   });
+
+//   await db.ref().update(updates);
+
+//   bootstrap.Modal.getInstance(
+//     document.getElementById("assignModal")
+//   ).hide();
+
+//   loadItems();
+// }
+
+async function assignSelected() {
+  const under = assignUnder.value;
+  const forItem = assignForItem.value;
+
+  if (COPY_MODE) {
+    // 🔁 COPY MODE
+    await performCopy(under, forItem);
+  } else {
+    // 🔄 NORMAL ASSIGN MODE
+    const updates = {};
+
+    document.querySelectorAll(".row-check:checked").forEach(cb => {
+      const path = `measurementSheet/${sheetId}/items/${cb.value}`;
+      if (HAS_UNDER) updates[`${path}/under`] = under;
+      if (HAS_FOR_ITEM) updates[`${path}/forItem`] = forItem;
+    });
+
+    await db.ref().update(updates);
+    loadItems();
+  }
+
+  bootstrap.Modal.getInstance(
+    document.getElementById("assignModal")
+  ).hide();
+}
+
+
+/* =========================
+   load Sheet Name Top
+========================= */
+
+
+async function loadSheetInfo() {
+  const snap = await db
+  .ref(`measurementSheet/${sheetId}/MeasurementSheetName`)
+  .once("value");
+
+document.getElementById("sheetTitle").innerHTML = `
+  <i class="bi bi-clipboard-data"></i>
+  ${escapeHtml(snap.val())}
+`;
+
+}
+
+
+/* =========================
+   Filter
+========================= */
+
+
+function populateItemFilter() {
+  const items = [...new Set(ALL_ITEMS.map(i => i.item))];
+
+  filterItem.innerHTML = `<option value="">All Items</option>`;
+  items.forEach(i => {
+    filterItem.innerHTML += `<option value="${i}">${i}</option>`;
+  });
+}
+
+
+function renderFilteredItems() {
+  const body = document.getElementById("measurementBody");
+  const grandTotalCell = document.getElementById("grandTotal");
+
+  body.innerHTML = "";
+  grandTotalCell.innerHTML = "";
+
+  const uFilter = filterUnder.value;
+  const fFilter = filterForItem.value;
+  const iFilter = filterItem.value;
+
+  const unitTotals = {};
+
+  const filtered = ALL_ITEMS.filter(d =>
+    (!uFilter || d.under === uFilter) &&
+    (!fFilter || d.forItem === fFilter) &&
+    (!iFilter || d.item === iFilter)
+  );
+
+  if (!filtered.length) {
+    body.innerHTML = `
+      <tr>
+        <td colspan="10" class="text-muted text-center py-3">
+          No data found
+        </td>
+      </tr>`;
+    return;
+  }
+
+  filtered.forEach(d => {
+    const unit = d.unit;
+    const total = Number(d.total) || 0;
+
+    unitTotals[unit] = (unitTotals[unit] || 0) + total;
+
+    let row = "<tr>";
+
+    row += `<td><input type="checkbox" class="row-check" value="${d.id}"></td>`;
+    if (HAS_UNDER) row += `<td>${d.under || ""}</td>`;
+    if (HAS_FOR_ITEM) row += `<td>${d.forItem || ""}</td>`;
+
+    row += `
+      <td class="text-start">${escapeHtml(d.item)}</td>
+      <td>${d.nos}</td>
+      <td>${d.l}</td>
+      <td>${d.w}</td>
+      <td>${d.t}</td>
+      <td>${d.unit}</td>
+      <td>${total.toFixed(3)} <span class="text-muted">(${d.unit})</span></td>
+      <td>
+        <button class="btn btn-sm btn-primary me-1"
+        onclick="editItem('${d.id}')">
+        <i class="bi bi-pencil"></i>
+        </button>
+        <button class="btn btn-sm btn-danger"
+          onclick="deleteItem('${d.id}')">
+          <i class="bi bi-trash"></i>
+        </button>
+      </td>
+    </tr>`;
+
+    body.innerHTML += row;
+
+ 
+
+  });
+
+  // Grand Total (Filtered)
+  let totalHtml = "";
+  Object.keys(unitTotals).forEach(unit => {
+    totalHtml += `
+      <div>
+        <strong><i class="bi bi-caret-right-fill"></i>${UNIT_LABELS[unit] || unit} :</strong>
+        ${unitTotals[unit].toFixed(3)}
+      </div>`;
+  });
+
+  grandTotalCell.innerHTML = totalHtml;
+
+  applySavedSort();
+//   const parts = [];
+
+// Object.keys(unitTotals).forEach(unit => {
+//   parts.push(
+//     `<strong>${UNIT_LABELS[unit] || unit} :</strong> ${unitTotals[unit].toFixed(3)}`
+//   );
+// });
+
+// grandTotalCell.innerHTML = parts.join(" <span class='mx-2'>|</span> ");
+
+}
+
+
+[filterUnder, filterForItem, filterItem].forEach(el => {
+  el.addEventListener("change", renderFilteredItems);
+});
+
+
+/* =========================
+   auto-suggest (autocomplete)
+========================= */
+let ITEM_SUGGESTIONS = [];
+
+async function loadItemSuggestions() {
+  try {
+    const res = await fetch("js/measurement.json");
+    const data = await res.json();
+
+    ITEM_SUGGESTIONS = data.itemsDescription || [];
+
+    initItemAutocomplete();
+
+  } catch (err) {
+    console.error("Failed to load item suggestions", err);
+  }
+}
+
+function initItemAutocomplete() {
+  const input = document.getElementById("itemName");
+  const box = document.getElementById("itemSuggestBox");
+
+  // Inject CSS (once)
+  if (!document.getElementById("itemAutoCSS")) {
+    const style = document.createElement("style");
+    style.id = "itemAutoCSS";
+    style.innerHTML = `
+      .item-suggest-list {
+        position: absolute;
+        width: 100%;
+        background: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        max-height: 180px;
+        overflow-y: auto;
+        z-index: 9999;
+        box-shadow: 0 4px 12px rgba(0,0,0,.1);
+      }
+      .item-suggest-item {
+        padding: 6px 10px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .item-suggest-item:hover {
+        background: #0d6efd;
+        color: #fff;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  input.addEventListener("input", () => {
+    const val = input.value.trim().toLowerCase();
+    box.innerHTML = "";
+
+    if (!val) return;
+
+    const matches = ITEM_SUGGESTIONS.filter(item =>
+      item.toLowerCase().startsWith(val)
+    );
+
+    if (!matches.length) return;
+
+    const list = document.createElement("div");
+    list.className = "item-suggest-list";
+
+    matches.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "item-suggest-item";
+      div.textContent = item;
+
+      div.onclick = () => {
+        input.value = item;
+        box.innerHTML = "";
+      };
+
+      list.appendChild(div);
+    });
+
+    box.appendChild(list);
+  });
+
+  // Close on outside click
+  document.addEventListener("click", e => {
+    if (!box.contains(e.target) && e.target !== input) {
+      box.innerHTML = "";
+    }
+  });
+}
+
+
+/* =========================
+   COPY BUTTON LOGIC
+========================= */
+
+
+function copySelectedItems() {
+  const selected = document.querySelectorAll(".row-check:checked");
+
+  if (!selected.length) {
+    alert("Select at least one item to copy");
+    return;
+  }
+
+  // If sheet uses Under / For Item → assign first
+  if (HAS_UNDER || HAS_FOR_ITEM) {
+    COPY_MODE = true;
+    openAssignModal(); // reuse existing modal
+  } else {
+    // Direct copy
+    performCopy();
+  }
+}
+
+async function performCopy(assignUnder = "", assignForItem = "") {
+  const updates = [];
+
+  document.querySelectorAll(".row-check:checked").forEach(cb => {
+    const item = ALL_ITEMS.find(i => i.id === cb.value);
+    if (!item) return;
+
+    const newItem = {
+      item: item.item,
+      nos: item.nos,
+      l: item.l,
+      w: item.w,
+      t: item.t,
+      unit: item.unit,
+      total: item.total,
+      createdAt: firebase.database.ServerValue.TIMESTAMP
+    };
+
+    if (HAS_UNDER) newItem.under = assignUnder;
+    if (HAS_FOR_ITEM) newItem.forItem = assignForItem;
+
+    updates.push(
+      db.ref(`measurementSheet/${sheetId}/items`).push(newItem)
+    );
+  });
+
+  await Promise.all(updates);
+
+  // Cleanup
+  COPY_MODE = false;
+  document.querySelectorAll(".row-check").forEach(cb => cb.checked = false);
+  loadItems();
+}
+
+
+
+
+
+/* =========================
+   DELETE BUTTON LOGIC
+========================= */
+
+
+async function deleteSelectedItems() {
+  const selected = document.querySelectorAll(".row-check:checked");
+
+  if (!selected.length) {
+    alert("Select at least one item to delete");
+    return;
+  }
+
+  // Confirmation (VERY important for delete)
+  const confirmDelete = confirm(
+    `Are you sure you want to delete ${selected.length} item(s)?`
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    const deletes = [];
+
+    selected.forEach(cb => {
+      deletes.push(
+        db.ref(`measurementSheet/${sheetId}/items/${cb.value}`).remove()
+      );
+    });
+
+    await Promise.all(deletes);
+
+    // Cleanup
+    document.querySelectorAll(".row-check").forEach(cb => cb.checked = false);
+    loadItems();
+
+    alert("Selected items deleted successfully");
+  } catch (err) {
+    console.error("Bulk delete failed:", err);
+    alert("Failed to delete items");
+  }
+}
+
+/* =========================
+   Table SORTING JS
+========================= */
+const SORT_KEY = `measurement_sort_state_${sheetId}`;
+let sortState = JSON.parse(localStorage.getItem(SORT_KEY)) || {
+  index: null,
+  asc: true
+};
+
+
+/* Header click */
+document.addEventListener("click", function (e) {
+  const th = e.target.closest(".sortable");
+  if (!th) return;
+
+  const headers = Array.from(th.parentNode.children);
+  const colIndex = headers.indexOf(th);
+  const type = th.dataset.type;
+
+  sortState.asc = sortState.index === colIndex ? !sortState.asc : true;
+  sortState.index = colIndex;
+
+  localStorage.setItem(SORT_KEY, JSON.stringify(sortState));
+
+  headers.forEach(h => h.classList.remove("active"));
+  th.classList.add("active");
+
+  sortTable(colIndex, type, sortState.asc);
+  toggleClearButton(true);
+});
+
+/* Sort logic */
+function sortTable(index, type, asc) {
+  const tbody = document.getElementById("measurementBody");
+  const rows = Array.from(tbody.querySelectorAll("tr"));
+
+  rows.sort((a, b) => {
+    let A = a.children[index]?.innerText.trim() || "";
+    let B = b.children[index]?.innerText.trim() || "";
+
+    if (type === "number") {
+      A = parseFloat(A) || 0;
+      B = parseFloat(B) || 0;
+    } else {
+      A = A.toLowerCase();
+      B = B.toLowerCase();
+    }
+
+    return asc ? (A > B ? 1 : -1) : (A < B ? 1 : -1);
+  });
+
+  rows.forEach(r => tbody.appendChild(r));
+}
+
+/* Restore sort on page reload */
+function restoreSort() {
+  if (sortState.index === null) return;
+
+  const headers = document.querySelectorAll("#measurementHead th");
+  const th = headers[sortState.index];
+  if (!th || !th.classList.contains("sortable")) return;
+
+  th.classList.add("active");
+
+  const type = th.dataset.type;
+  sortTable(sortState.index, type, sortState.asc);
+  toggleClearButton(true);
+}
+
+/* Clear sort */
+function clearSort() {
+  localStorage.removeItem(SORT_KEY);
+  sortState = { index: null, asc: true };
+
+  document.querySelectorAll(".sortable")
+    .forEach(th => th.classList.remove("active"));
+
+  loadItems(); // reload original Firebase order
+  toggleClearButton(false);
+}
+
+/* Toggle clear button */
+function toggleClearButton(show) {
+  document
+    .getElementById("clearSortBtn")
+    .classList.toggle("d-none", !show);
+}
+function applySavedSort() {
+  if (sortState.index === null) {
+    toggleClearButton(false);
+    return;
+  }
+
+  const headers = document.querySelectorAll("#measurementHead th");
+  const th = headers[sortState.index];
+  if (!th || !th.classList.contains("sortable")) return;
+
+  headers.forEach(h => h.classList.remove("active"));
+  th.classList.add("active");
+
+  sortTable(sortState.index, th.dataset.type, sortState.asc);
+  toggleClearButton(true);
+}
+function clearSort() {
+  localStorage.removeItem(SORT_KEY);
+  sortState = { index: null, asc: true };
+
+  document.querySelectorAll(".sortable")
+    .forEach(th => th.classList.remove("active"));
+
+  toggleClearButton(false);
+  renderFilteredItems(); // 🔥 instead of loadItems()
+}
+
+
+/* =========================
+   Init
+========================= */
+firebase.auth().onAuthStateChanged(user => {
+  if (!user) {
+    window.location.href = "login.html";
+  } else {
+    
+    loadUnderAndForItem().then(() => {
+      loadSheetInfo();
+      buildTableHeader();
+      loadItems();
+      loadItemSuggestions();
+    });
+  }
+});
+
+
+</script>
+
+</body>
+</html>

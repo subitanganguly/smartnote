@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Payment - Barman Construction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="style/style.css" rel="stylesheet">
+    <!-- jsPDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+<!-- Navbar will load here -->
+<div id="nav-placeholder"></div>
+
+
+
+
+<!-- Main Content -->
+<div class="content p-1">
+    <div class="container-fluid">
+
+        <div class="d-flex justify-content-between align-items-center mb-1 p-2">
+            <h4 class="text-nowrap top-h">
+            <span class="d-none d-lg-inline">Payments Daily Worker</span>
+            </h4>
+  </div>
+
+        <!-- Filters Section -->
+        <div class="card mb-2">
+            <div class="card-header">
+                <h5 class="mb-0">Select Filters</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2 mb-1">
+                        <label for="projectSelect" class="form-label">Project</label>
+                        <select class="form-select" id="projectSelect">
+                            <option value="">Select Project</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2 mb-1 d-none">
+                        <label for="employeeTypeSelect" class="form-label">Employee Type</label>
+                        <select class="form-select" id="employeeTypeSelect">
+                            <option value="daily" selected>Daily Worker</option>
+                            <option value="contract">Contract Basis</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2 mb-1 d-none">
+                        <label for="designationSelect" class="form-label">Designation</label>
+                        <select class="form-select" id="designationSelect">
+                            <option value="">All Designations</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 mb-1">
+                        <label for="fromDate" class="form-label">From Date</label>
+                        <input type="date" class="form-control" id="fromDate">
+                    </div>
+                    
+                    <div class="col-md-2 mb-1">
+                        <label for="toDate" class="form-label">To Date</label>
+                        <input type="date" class="form-control" id="toDate">
+                    </div>
+                    
+                    <div class="col-md-4 mb-1 d-flex align-items-end">
+                        <button class="btn btn-primary me-2" onclick="loadAttendanceData()">
+                            <i class="fas fa-search"></i> Load Data
+                        </button>
+                        <button class="btn btn-success" onclick="calculatePayment()" id="calculateBtn" disabled>
+                            <i class="fas fa-calculator"></i> Calculate
+                        </button>
+                        <button class="btn btn-danger ms-2 d-none" onclick="downloadPDF()" id="pdfBtn" disabled>
+                            <i class="fas fa-file-pdf"></i> Download PDF
+                        </button>
+                    </div>
+                </div>
+            
+                
+                <!-- Settings Section -->
+                 <div class="card-footer">
+                <div class="row mt-1">
+                    <div class="col-md-12">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="halfDayAsFullDay" onchange="toggleHalfDayCalculation()">
+                            <label class="form-check-label" for="halfDayAsFullDay">
+                                Count Half Days as Full Days in Payment Calculation
+                            </label>
+                            <small class="form-text text-muted d-block">
+                                When enabled, half days will be counted as 1 full day instead of 0.5 days
+                            </small>
+                        </div>
+                        <div class="form-check form-switch mt-2 d-none">
+                            <input class="form-check-input" type="checkbox" id="autoMarkUnmarked" checked onchange="toggleAutoMark()">
+                            <label class="form-check-label" for="autoMarkUnmarked">
+                                Automatically count unmarked days as Absent
+                            </label>
+                            <small class="form-text text-muted d-block">
+                                Days without attendance marked will be calculated as Absent (0 days)
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+     <div class="row mb-2 d-none" id="summaryCards">
+
+  <div class="col-6 col-md-3 mb-1">
+    <div class="card border-start border-primary border-2 h-100">
+      <div class="card-body text-center text-md-start p-2 p-md-3">
+        <h6 class="card-title small mb-1">Total Employees</h6>
+        <h6 id="totalEmployeesCount" class="fw-bold mb-0">0</h6>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3 mb-1">
+    <div class="card border-start border-success border-2 h-100">
+      <div class="card-body text-center text-md-start p-2 p-md-3">
+        <h6 class="card-title small mb-1">Present Days</h6>
+        <h6 id="totalPresentDays" class="fw-bold mb-0">0</h6>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3 mb-1">
+    <div class="card border-start border-danger border-2 h-100">
+      <div class="card-body text-center text-md-start p-2 p-md-3">
+        <h6 class="card-title small mb-1">Absent Days</h6>
+        <h6 id="totalAbsentDays" class="fw-bold mb-0">0</h6>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3 mb-1">
+    <div class="card border-start border-warning border-2 h-100">
+      <div class="card-body text-center text-md-start p-2 p-md-3">
+        <h6 class="card-title small mb-1">Total Payment</h6>
+        <h6 id="totalPaymentAmount" class="fw-bold mb-0">₹0</h6>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+        <!-- Payment Table -->
+        <div class="">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Payment Calculation</h5>
+                <div>
+                    <button class="btn btn-outline-primary btn-sm me-2" onclick="exportToExcel()" id="exportBtn" disabled>
+                        <i class="fas fa-file-excel"></i> Export to Excel
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="downloadPDF()" id="pdfBtn2" disabled>
+                        <i class="fas fa-file-pdf"></i> Download PDF
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 600px; font-size: 12px;">
+                    <table class="table table-hover mb-0" id="paymentTable">
+                        <thead class="sticky-top bg-light">
+                            <tr>
+                                <th>Employee Name</th>
+                                <th>Designation</th>
+                                <th>Salary/Day</th>
+                                <!-- Date columns will be inserted here -->
+                                <th class="text-center">Total Days</th>
+                                <th class="text-end">Payment (₹)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentTableBody">
+                            <!-- Table rows will be inserted here -->
+                        </tbody>
+                        <tfoot class="bg-light" id="paymentTableFooter">
+                            <!-- Footer row will be inserted here -->
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="loader text-center d-none mt-4 mb-4" id="loaderOverlay">
+            <section class="loader">
+            <div class="slider" style="--i:0"></div>
+            <div class="slider" style="--i:1"></div>
+            <div class="slider" style="--i:2"></div>
+            <div class="slider" style="--i:3"></div>
+            <div class="slider" style="--i:4"></div>
+            </section>
+        </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="js/firebaseconfig.js"></script>
+<script src="js/all.js"></script>
+<!-- Excel Export Library -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<script>
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    const auth = firebase.auth();
+    const database = firebase.database();
+    let currentUser = null;
+    let currentUserRole = 'user';
+    let allProjects = [];
+    let selectedProjectId = null;
+    let selectedEmployeeType = null;
+    let fromDate = '';
+    let toDate = '';
+    let dateRange = [];
+    let employees = [];
+    let attendanceData = {};
+    let paymentData = {};
+    let halfDayAsFullDay = false;
+    let autoMarkUnmarked = true;
+
+    // Check authentication
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.href = "login.html";
+        } else {
+            currentUser = user;
+            await initializePage();
+        }
+    });
+
+    // Initialize page
+    async function initializePage() {
+        try {
+            // Get user role
+            const userSnapshot = await database.ref(`users/${currentUser.uid}`).once('value');
+            const userData = userSnapshot.val();
+            currentUserRole = userData?.role || 'user';
+
+            // Set default dates (last 7 days)
+            const today = new Date();
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(today.getDate() - 7);
+            
+            document.getElementById('fromDate').value = sevenDaysAgo.toISOString().split('T')[0];
+            document.getElementById('toDate').value = today.toISOString().split('T')[0];
+
+            // Load projects
+            await loadProjects();
+
+            // Setup event listeners
+            setupEventListeners();
+
+        } catch (error) {
+            console.error("Error initializing page:", error);
+            alert("Error loading page: " + error.message);
+        }
+    }
+
+    // Load projects
+    async function loadProjects() {
+        try {
+            const projectSelect = document.getElementById('projectSelect');
+            
+            if (currentUserRole === 'admin') {
+                // Admin can see all projects
+                const snapshot = await database.ref('projects').once('value');
+                const allProjectsData = snapshot.val();
+                
+                if (allProjectsData) {
+                    allProjects = [];
+                    Object.keys(allProjectsData).forEach(projectId => {
+                        allProjects.push({
+                            id: projectId,
+                            name: allProjectsData[projectId].projectName || 'Unnamed Project'
+                        });
+                    });
+                }
+            } else {
+                // User can only see assigned projects
+                const userSnapshot = await database.ref(`users/${currentUser.uid}`).once('value');
+                const userData = userSnapshot.val();
+                const userProjects = userData?.projects || {};
+                
+                allProjects = [];
+                const projectIds = Object.keys(userProjects).filter(
+                    projectId => userProjects[projectId] === true
+                );
+                
+                for (const projectId of projectIds) {
+                    const projectSnap = await database.ref(`projects/${projectId}`).once('value');
+                    if (projectSnap.exists()) {
+                        const projectData = projectSnap.val();
+                        allProjects.push({
+                            id: projectId,
+                            name: projectData.projectName || 'Unnamed Project'
+                        });
+                    }
+                }
+            }
+
+            // Populate project dropdown
+            projectSelect.innerHTML = '<option value="">Select Project</option>';
+            allProjects.forEach(project => {
+                const option = document.createElement('option');
+                option.value = project.id;
+                option.textContent = project.name;
+                projectSelect.appendChild(option);
+            });
+
+        } catch (error) {
+            console.error("Error loading projects:", error);
+        }
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+        // Project select change
+        document.getElementById('projectSelect').addEventListener('change', async function(e) {
+            selectedProjectId = e.target.value;
+            if (selectedProjectId) {
+                await loadDesignations();
+            } else {
+                clearDesignations();
+            }
+        });
+
+        // Employee type change
+        document.getElementById('employeeTypeSelect').addEventListener('change', function(e) {
+            selectedEmployeeType = e.target.value;
+        });
+    }
+
+    // Load designations for selected project
+    async function loadDesignations() {
+        try {
+            const designationSelect = document.getElementById('designationSelect');
+            designationSelect.innerHTML = '<option value="">All Designations</option>';
+            
+            if (!selectedProjectId) return;
+            
+            // Load employees to get unique designations
+            const snapshot = await database.ref(`employees/${selectedProjectId}`).once('value');
+            const employeesData = snapshot.val();
+            
+            if (!employeesData) return;
+            
+            const designations = new Set();
+            Object.values(employeesData).forEach(employee => {
+                if (employee.designation) {
+                    designations.add(employee.designation);
+                }
+            });
+            
+            // Add designations to select
+            designations.forEach(designation => {
+                const option = document.createElement('option');
+                option.value = designation;
+                option.textContent = designation;
+                designationSelect.appendChild(option);
+            });
+            
+        } catch (error) {
+            console.error("Error loading designations:", error);
+        }
+    }
+
+    // Clear designations
+    function clearDesignations() {
+        const designationSelect = document.getElementById('designationSelect');
+        designationSelect.innerHTML = '<option value="">All Designations</option>';
+    }
+
+    // Show loader
+    function showLoader() {
+        document.getElementById('loaderOverlay').classList.remove('d-none');
+        document.getElementById('loaderOverlay').classList.add('d-flex');
+    }
+
+    // Hide loader
+    function hideLoader() {
+        document.getElementById('loaderOverlay').classList.remove('d-flex');
+        document.getElementById('loaderOverlay').classList.add('d-none');
+    }
+
+    // Toggle half day calculation
+    function toggleHalfDayCalculation() {
+        halfDayAsFullDay = document.getElementById('halfDayAsFullDay').checked;
+        if (employees.length > 0) {
+            updateAllEmployeeTotals();
+        }
+    }
+
+    // Toggle auto mark unmarked
+    function toggleAutoMark() {
+        autoMarkUnmarked = document.getElementById('autoMarkUnmarked').checked;
+        if (employees.length > 0) {
+            updateAllEmployeeTotals();
+        }
+    }
+
+    // Load attendance data
+    async function loadAttendanceData() {
+        try {
+            // Validate inputs
+            selectedProjectId = document.getElementById('projectSelect').value;
+            selectedEmployeeType = document.getElementById('employeeTypeSelect').value;
+            fromDate = document.getElementById('fromDate').value;
+            toDate = document.getElementById('toDate').value;
+            
+            if (!selectedProjectId) {
+                alert('Please select a project');
+                return;
+            }
+            
+            if (!selectedEmployeeType) {
+                alert('Please select employee type');
+                return;
+            }
+            
+            if (!fromDate || !toDate) {
+                alert('Please select date range');
+                return;
+            }
+            
+            if (new Date(fromDate) > new Date(toDate)) {
+                alert('From date cannot be after to date');
+                return;
+            }
+            
+            // Show loader
+            showLoader();
+            
+            // Generate date range
+            dateRange = generateDateRange(fromDate, toDate);
+            
+            // Load employees for the selected project and type
+            await loadEmployees();
+            
+            // Load attendance data for each date
+            await loadAttendanceForDateRange();
+            
+            // Display data in table
+            displayPaymentTable();
+            
+            // Enable calculate button
+            document.getElementById('calculateBtn').disabled = false;
+            document.getElementById('pdfBtn').disabled = false;
+            document.getElementById('pdfBtn2').disabled = false;
+            
+            // Hide loader
+            hideLoader();
+            
+        } catch (error) {
+            console.error("Error loading attendance data:", error);
+            hideLoader();
+            alert('Error loading attendance data: ' + error.message);
+        }
+    }
+
+    // Generate date range
+    function generateDateRange(fromDate, toDate) {
+        const dates = [];
+        const currentDate = new Date(fromDate);
+        const endDate = new Date(toDate);
+        
+        while (currentDate <= endDate) {
+            dates.push(currentDate.toISOString().split('T')[0]);
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+        
+        return dates;
+    }
+
+    // Load employees
+    async function loadEmployees() {
+        try {
+            const snapshot = await database.ref(`employees/${selectedProjectId}`).once('value');
+            const employeesData = snapshot.val();
+            
+            employees = [];
+            if (employeesData) {
+                Object.keys(employeesData).forEach(employeeId => {
+                    const employee = employeesData[employeeId];
+                    
+                    // Filter by employee type
+                    if (employee.employeeType === selectedEmployeeType) {
+                        
+                        // Filter by designation if selected
+                        const selectedDesignation = document.getElementById('designationSelect').value;
+                        if (!selectedDesignation || employee.designation === selectedDesignation) {
+                            
+                            employees.push({
+                                id: employeeId,
+                                ...employee
+                            });
+                        }
+                    }
+                });
+            }
+            
+        } catch (error) {
+            console.error("Error loading employees:", error);
+            throw error;
+        }
+    }
+
+    // Load attendance for date range
+    async function loadAttendanceForDateRange() {
+        try {
+            attendanceData = {};
+            
+            // Load attendance for each date
+            for (const date of dateRange) {
+                const snapshot = await database.ref(`projects/${selectedProjectId}/attendance/${date}`).once('value');
+                const dateAttendance = snapshot.val();
+                
+                if (dateAttendance) {
+                    attendanceData[date] = dateAttendance;
+                } else {
+                    attendanceData[date] = {};
+                }
+            }
+            
+        } catch (error) {
+            console.error("Error loading attendance:", error);
+            throw error;
+        }
+    }
+
+    // Display payment table
+    function displayPaymentTable() {
+        const tableBody = document.getElementById('paymentTableBody');
+        const tableHead = document.querySelector('#paymentTable thead tr');
+        
+        // Clear existing data
+        tableBody.innerHTML = '';
+        
+        // Add date columns to header
+        const dateColumns = dateRange.map(date => {
+            const day = new Date(date).getDate();
+            const month = new Date(date).toLocaleString('default', { month: 'short' });
+            const dayName = new Date(date).toLocaleString('default', { weekday: 'short' });
+            return `
+                <th class="text-center">
+                    <div>${day} ${month}</div>
+                    <div class="text-muted small">${dayName}</div>
+                </th>
+            `;
+        }).join('');
+        
+        // Insert date columns after first three columns
+        const headerCells = tableHead.querySelectorAll('th');
+        const afterSalaryCell = headerCells[2]; // Salary/Day column
+        
+        // Remove existing date columns
+        //const existingDateColumns = tableHead.querySelectorAll('.text-center');
+        const existingDateColumns = tableHead.querySelectorAll('.date-col');
+        existingDateColumns.forEach(col => {
+            if (col !== afterSalaryCell) col.remove();
+        });
+        
+        // Insert new date columns
+        afterSalaryCell.insertAdjacentHTML('afterend', dateColumns);
+        
+        // Add rows for each employee
+        employees.forEach(employee => {
+            const row = createEmployeeRow(employee);
+            tableBody.innerHTML += row;
+        });
+        
+        // Show summary cards
+        document.getElementById('summaryCards').classList.remove('d-none');
+        updateAllEmployeeTotals();
+    }
+
+    // Create employee row with attendance text display
+    function createEmployeeRow(employee) {
+        const salary = employee.salaryAmount || 0;
+        
+        // Create date columns with attendance text
+        const dateColumns = dateRange.map(date => {
+            const attendance = attendanceData[date]?.[employee.id];
+            const currentStatus = attendance?.status || '';
+            
+            // Determine text and color based on status
+            let statusText = '';
+            let statusClass = '';
+            
+            if (currentStatus === 'present') {
+                statusText = 'P';
+                statusClass = 'text-success fw-bold';
+            } else if (currentStatus === 'halfday') {
+                statusText = 'H';
+                statusClass = 'text-warning fw-bold';
+            } else if (currentStatus === 'absent') {
+                statusText = 'A';
+                statusClass = 'text-danger fw-bold';
+            } else {
+                statusText = '-';
+                statusClass = 'text-secondary';
+            }
+            
+            return `
+                <td class="text-center">
+                    <span class="${statusClass}" style="font-size: 0.9rem;">${statusText}</span>
+                </td>
+            `;
+        }).join('');
+        
+        // Calculate initial totals
+        const totals = calculateEmployeeTotals(employee.id);
+        
+        // Generate row
+        return `
+            <tr data-employee-id="${employee.id}">
+                <td>${escapeHtml(employee.employeeName || 'Unnamed')}</td>
+                <td>${escapeHtml(employee.designation || 'N/A')}</td>
+                <td class="text-end">₹${formatCurrency(salary)}</td>
+                ${dateColumns}
+                <td class="text-center">
+                    <span id="totalDays_${employee.id}">${totals.totalDays.toFixed(1)}</span>
+                </td>
+                <td class="text-end">
+                    <span class="fw-bold text-success">₹<span id="paymentAmount_${employee.id}">${formatCurrency(totals.payment)}</span></span>
+                </td>
+                <td>
+                    <span class="badge bg-secondary" id="status_${employee.id}">
+                        Not Calculated
+                    </span>
+                </td>
+            </tr>
+        `;
+    }
+
+    // Calculate employee totals
+    function calculateEmployeeTotals(employeeId) {
+        let totalDays = 0;
+        let presentDays = 0;
+        let absentDays = 0;
+        let halfDays = 0;
+        
+        const employee = employees.find(e => e.id === employeeId);
+        const salary = employee?.salaryAmount || 0;
+        
+        // Count attendance statuses for each date
+        dateRange.forEach(date => {
+            const attendance = attendanceData[date]?.[employeeId];
+            if (attendance) {
+                if (attendance.status === 'present') {
+                    totalDays += 1;
+                    presentDays += 1;
+                } else if (attendance.status === 'halfday') {
+                    if (halfDayAsFullDay) {
+                        totalDays += 1; // Count as full day
+                    } else {
+                        totalDays += 0.5; // Count as half day
+                    }
+                    halfDays += 1;
+                } else if (attendance.status === 'absent') {
+                    absentDays += 1;
+                }
+            } else {
+                // Unmarked days - count as absent if autoMarkUnmarked is true
+                if (autoMarkUnmarked) {
+                    absentDays += 1;
+                }
+            }
+        });
+        
+        // Calculate payment
+        const payment = totalDays * salary;
+        
+        return {
+            totalDays: totalDays,
+            presentDays: presentDays,
+            absentDays: absentDays,
+            halfDays: halfDays,
+            payment: payment
+        };
+    }
+
+    // Update employee totals in table
+    function updateEmployeeTotals(employeeId) {
+        const totals = calculateEmployeeTotals(employeeId);
+        
+        // Update display
+        document.getElementById(`totalDays_${employeeId}`).textContent = totals.totalDays.toFixed(1);
+        document.getElementById(`paymentAmount_${employeeId}`).textContent = formatCurrency(totals.payment);
+        
+        // Update status
+        const statusBadge = document.getElementById(`status_${employeeId}`);
+        if (totals.totalDays > 0) {
+            statusBadge.className = 'badge bg-warning';
+            statusBadge.textContent = 'Pending';
+        } else {
+            statusBadge.className = 'badge bg-secondary';
+            statusBadge.textContent = 'Not Calculated';
+        }
+        
+        // Update summary
+        updateSummaryCards();
+    }
+
+    // Update all employee totals
+    function updateAllEmployeeTotals() {
+        employees.forEach(employee => {
+            updateEmployeeTotals(employee.id);
+        });
+    }
+
+    // Update summary cards
+    function updateSummaryCards() {
+        let totalEmployees = employees.length;
+        let totalPresentDays = 0;
+        let totalAbsentDays = 0;
+        let totalPayment = 0;
+        
+        employees.forEach(employee => {
+            const totals = calculateEmployeeTotals(employee.id);
+            totalPresentDays += totals.totalDays;
+            totalAbsentDays += totals.absentDays;
+            totalPayment += totals.payment;
+        });
+        
+        document.getElementById('totalEmployeesCount').textContent = totalEmployees;
+        document.getElementById('totalPresentDays').textContent = totalPresentDays.toFixed(1);
+        document.getElementById('totalAbsentDays').textContent = totalAbsentDays;
+        document.getElementById('totalPaymentAmount').textContent = '₹' + formatCurrency(totalPayment);
+    }
+
+    // Calculate payment for all employees
+    function calculatePayment() {
+        try {
+            let allCalculated = true;
+            
+            employees.forEach(employee => {
+                const totals = calculateEmployeeTotals(employee.id);
+                
+                // Mark as calculated even if totalDays is 0 (for absent employees)
+                const statusBadge = document.getElementById(`status_${employee.id}`);
+                if (totals.totalDays > 0) {
+                    statusBadge.className = 'badge bg-success';
+                    statusBadge.textContent = 'Calculated';
+                } else if (totals.absentDays > 0) {
+                    statusBadge.className = 'badge bg-info';
+                    statusBadge.textContent = 'Absent';
+                } else {
+                    statusBadge.className = 'badge bg-secondary';
+                    statusBadge.textContent = 'No Data';
+                    allCalculated = false;
+                }
+                
+                // Store payment data
+                paymentData[employee.id] = {
+                    employeeName: employee.employeeName,
+                    designation: employee.designation,
+                    salary: employee.salaryAmount,
+                    totalDays: totals.totalDays,
+                    presentDays: totals.presentDays,
+                    halfDays: totals.halfDays,
+                    absentDays: totals.absentDays,
+                    payment: totals.payment,
+                    calculationDate: new Date().toISOString()
+                };
+            });
+            
+            // Enable export button
+            document.getElementById('exportBtn').disabled = false;
+            document.getElementById('pdfBtn').disabled = false;
+            document.getElementById('pdfBtn2').disabled = false;
+            
+            // Show success message
+            showNotification('Payment calculation completed successfully!', 'success');
+            
+        } catch (error) {
+            console.error("Error calculating payment:", error);
+            showNotification('Error calculating payment: ' + error.message, 'danger');
+        }
+    }
+
+// Download PDF with specific format
+// Download PDF with specific format
+function downloadPDF() {
+    if (employees.length === 0) {
+        alert('No data to export.');
+        return;
+    }
+
+    // Load logo first
+    const img = new Image();
+    img.src = 'img/logo.png';
+    img.crossOrigin = 'anonymous';
+
+    img.onload = function () {
+        // Convert image to Base64 using canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+
+        const logoBase64 = canvas.toDataURL('image/png');
+
+        // Generate PDF after logo is ready
+        generatePDF(logoBase64);
+    };
+
+    img.onerror = function () {
+        alert('Logo not found. Check img/tab-logo.png path.');
+    };
+}
+
+function generatePDF(logoBase64) {
+    try {
+        const projectName = allProjects.find(p => p.id === selectedProjectId)?.name || 'Project';
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+
+        // ================= LOGO =================
+        doc.addImage(logoBase64, 'PNG', 20, 10, 40, 15);
+
+        // ================= HEADER =================
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.text('Barman Construction', pageWidth / 2, 15, { align: 'center' });
+
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text(
+            'Employee Payment Report',
+            pageWidth / 2,
+            22,
+            { align: 'center' }
+        );
+
+        // ================= INFO =================
+        const startY = 35;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Project: ${projectName}`, 20, startY);
+        doc.text(
+            `Period: ${formatDate(fromDate)} to ${formatDate(toDate)}`,
+            20,
+            startY + 6
+        );
+        
+        // Calculate total days in period
+        const totalDaysInPeriod = dateRange.length;
+        
+        doc.text(
+            `Employee Type: ${
+                selectedEmployeeType === 'daily' ? 'Daily Worker' : 'Contract Basis'
+            }`,
+            20,
+            startY + 12
+        );
+        doc.text(
+            `Generated On: ${new Date().toLocaleDateString()}`,
+            pageWidth - 20,
+            startY + 12,
+            { align: 'right' }
+        );
+
+
+        doc.line(20, startY + 14, pageWidth - 20, startY + 14);
+
+        // ================= TABLE =================
+        let totalPayment = 0;
+        let totalDaysWorked = 0;
+
+        const tableData = employees.map(emp => {
+            const totals = calculateEmployeeTotals(emp.id);
+            totalPayment += totals.payment;
+            totalDaysWorked += totals.totalDays;
+
+            return [
+                emp.employeeName || 'Unnamed',
+                `Rs. ${formatCurrency(emp.salaryAmount || 0)}`,
+                totalDaysInPeriod.toString(),  // Total days in period
+                totals.totalDays.toFixed(1),   // Days worked (including half days)
+                `Rs. ${formatCurrency(totals.payment)}`,
+                '' // Signature column (empty)
+            ];
+        });
+
+        // Add TOTAL row
+    //     tableData.push([
+    // { content: 'TOTAL', styles: { fontStyle: 'bold' } },
+    // '',
+    // '',
+    // { content: totalDaysWorked.toFixed(1), styles: { fontStyle: 'bold' } },
+    // { content: `Rs. ${formatCurrency(totalPayment)}`, styles: { fontStyle: 'bold' } }
+    //     ]);
+
+    tableData.push([
+    { content: 'TOTAL', styles: { fontStyle: 'bold' } },
+    '',
+    '',
+    { content: totalDaysWorked.toFixed(1), styles: { fontStyle: 'bold' } },
+    { content: `Rs. ${formatCurrency(totalPayment)}`, styles: { fontStyle: 'bold' } },
+    '' // Signature
+]);
+
+
+
+//    const usableWidth = pageWidth - 40;
+
+// doc.autoTable({
+//     startY: startY + 30,
+//     head: [[
+//         'Employee Name',
+//         'Salary/Day',
+//         'Total Days',
+//         'Present Days',
+//         'Payment',
+//         'Signature'
+//     ]],
+//     body: tableData,
+//     theme: 'grid',
+//     margin: { left: 20, right: 20 },
+
+//     styles: {
+//         fontSize: 11,
+//         lineWidth: 0.3,
+//         lineColor: [0, 0, 0],
+//         textColor: 0
+//     },
+
+//     headStyles: {
+//         fillColor: [255, 255, 255],
+//         textColor: 0,
+//         fontStyle: 'bold',
+//         lineWidth: 0.3,
+//         lineColor: [0, 0, 0]
+//     },
+
+//     // 👇 ADD THIS BLOCK
+//     columnStyles: {
+//         0: { cellWidth: usableWidth * 0.25 },                 // Employee Name
+//         1: { cellWidth: usableWidth * 0.14 },                 // Salary/Day
+//         2: { cellWidth: usableWidth * 0.12, halign: 'center' }, // Total Days
+//         3: { cellWidth: usableWidth * 0.12, halign: 'center' }, // Present Days
+//         4: { cellWidth: usableWidth * 0.17 },                 // Payment
+//         5: { cellWidth: usableWidth * 0.20, halign: 'center' }  // Signature
+//     },
+
+//     didDrawPage: () => {
+//         doc.setFontSize(8);
+//         doc.text(
+//             `Page ${doc.internal.getNumberOfPages()}`,
+//             pageWidth / 2,
+//             pageHeight - 10,
+//             { align: 'center' }
+//         );
+//     }
+// });
+
+
+
+        doc.autoTable({
+    startY: startY + 20,
+    head: [[
+        'Employee Name',
+        'Salary/Day',
+        'Total Days',
+        'Present Days',
+        'Payment',
+        'Signature'
+    ]],
+    body: tableData,
+    theme: 'grid',
+    margin: { left: 20, right: 20 },
+
+    styles: {
+        fontSize: 11,
+        lineWidth: 0.3,
+        lineColor: [0, 0, 0],
+        textColor: 0
+    },
+
+    headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: 0,
+        fontStyle: 'bold',
+        lineWidth: 0.3,
+        lineColor: [0, 0, 0]
+    },
+
+    // 👇 CENTER ALIGN THESE COLUMNS
+    // columnStyles: {
+    //     2: { halign: 'center' }, // Total Days
+    //     3: { halign: 'center' }  // Present Days
+    // },
+
+    columnStyles: {
+    2: { halign: 'center' }, // Total Days
+    3: { halign: 'center' }, // Present Days
+    5: { halign: 'center' }  // Signature
+},
+
+
+    didDrawPage: () => {
+        doc.setFontSize(8);
+        doc.text(
+            `Page ${doc.internal.getNumberOfPages()}`,
+            pageWidth / 2,
+            pageHeight - 10,
+            { align: 'center' }
+        );
+    }
+});
+
+
+        // ================= FOOTER NOTES =================
+        const finalY = doc.lastAutoTable.finalY + 10;
+        
+                // Add notes below the table
+        doc.setFontSize(9);
+
+        // 1️⃣ Total Employees (TOP)
+        doc.setFont('helvetica', 'bold');
+        doc.text(
+            `* Total Employees: ${employees.length} Employees in the selected period`,
+            20,
+            finalY
+        );
+
+        // 2️⃣ Present Days note
+        doc.setFont('helvetica', 'normal');
+        doc.text(
+            `* Present Days column shows actual days worked (half days count as ${halfDayAsFullDay ? '1.0' : '0.5'} days)`,
+            20,
+            finalY + 5
+        );
+
+        // 3️⃣ Total Days note (BOTTOM)
+        doc.text(
+            `* Total Days: ${totalDaysInPeriod} working days in the selected period`,
+            20,
+            finalY + 10
+        );
+
+
+      
+        // ================= SAVE =================
+        doc.save(
+            `Payment_Report_${projectName}_${fromDate}_to_${toDate}.pdf`
+        );
+    } catch (err) {
+        console.error(err);
+        alert('PDF generation failed.');
+    }
+}
+
+    // Export to Excel
+    function exportToExcel() {
+        try {
+            // Prepare data for export
+            const exportData = [];
+            
+            // Add header row
+            const headerRow = ['Employee Name', 'Designation', 'Salary/Day', ...dateRange, 'Total Days', 'Payment (₹)', 'Status'];
+            exportData.push(headerRow);
+            
+            // Add employee rows
+            employees.forEach(employee => {
+                const rowData = [
+                    employee.employeeName || 'Unnamed',
+                    employee.designation || 'N/A',
+                    employee.salaryAmount || 0
+                ];
+                
+                // Add attendance for each date
+                dateRange.forEach(date => {
+                    const attendance = attendanceData[date]?.[employee.id];
+                    rowData.push(attendance?.status || (autoMarkUnmarked ? 'absent' : ''));
+                });
+                
+                // Add totals
+                const totals = calculateEmployeeTotals(employee.id);
+                rowData.push(totals.totalDays);
+                rowData.push(totals.payment);
+                
+                // Add status
+                const statusBadge = document.getElementById(`status_${employee.id}`);
+                rowData.push(statusBadge?.textContent || '');
+                
+                exportData.push(rowData);
+            });
+            
+            // Add summary row
+            const summaryRow = ['', '', 'TOTAL:', ...Array(dateRange.length).fill(''), '', ''];
+            let totalPayment = 0;
+            employees.forEach(employee => {
+                totalPayment += calculateEmployeeTotals(employee.id).payment;
+            });
+            summaryRow[summaryRow.length - 2] = totalPayment;
+            exportData.push(summaryRow);
+            
+            // Create worksheet
+            const ws = XLSX.utils.aoa_to_sheet(exportData);
+            
+            // Set column widths
+            const wscols = [
+                {wch: 20}, // Employee Name
+                {wch: 15}, // Designation
+                {wch: 12}, // Salary/Day
+                ...dateRange.map(() => ({wch: 8})), // Date columns
+                {wch: 10}, // Total Days
+                {wch: 12}, // Payment
+                {wch: 12}  // Status
+            ];
+            ws['!cols'] = wscols;
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Payment Report');
+            
+            // Generate filename
+            const projectName = allProjects.find(p => p.id === selectedProjectId)?.name || 'Project';
+            const filename = `Payment_Report_${projectName}_${fromDate}_to_${toDate}.xlsx`;
+            
+            // Export file
+            XLSX.writeFile(wb, filename);
+            
+            showNotification('Excel file exported successfully!', 'success');
+            
+        } catch (error) {
+            console.error("Error exporting to Excel:", error);
+            showNotification('Error exporting to Excel: ' + error.message, 'danger');
+        }
+    }
+
+    // Helper functions
+    function formatCurrency(amount) {
+        return parseFloat(amount).toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        });
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Show notification
+    function showNotification(message, type) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+        notification.innerHTML = `
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            ${message}
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    // Add keyboard shortcut
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'Enter') {
+            e.preventDefault();
+            calculatePayment();
+        }
+    });
+</script>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

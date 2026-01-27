@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barman Construction</title>
+    <link rel="icon" type="image/png" href="img/tab-logo.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="style/style.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Navbar will load here -->
+<div id="nav-placeholder"></div>
+
+<!-- Loader Overlay -->
+<div class="position-fixed top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-none justify-content-center align-items-center" id="loaderOverlay" style="z-index: 9999;">
+    <div class="text-center">
+        <section class="loader">
+      <div class="slider" style="--i:0"></div>
+      <div class="slider" style="--i:1"></div>
+      <div class="slider" style="--i:2"></div>
+      <div class="slider" style="--i:3"></div>
+      <div class="slider" style="--i:4"></div>
+    </section>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="content p-3">
+
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-1 top-h">
+            <div>
+                <h4 class="mb-1"><span class="d-none d-lg-inline">Monthly Staff Payment</span></h4>
+                <p class="text-muted"><span class="d-none d-lg-inline">Calculate salaries for monthly staff based on attendance deductions</span></p>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="fix-card mb-2 p-3">
+            <div class="card-header">
+                <h5 class="mb-0">Select Filters</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-1">
+                        <label for="projectSelect" class="form-label">Project</label>
+                        <select class="form-select" id="projectSelect">
+                            <option value="">Select Project</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2 mb-1">
+                        <label for="monthSelect" class="form-label">Month</label>
+                        <select class="form-select" id="monthSelect">
+                            <option value="">Select Month</option>
+                            <option value="01">January</option>
+                            <option value="02">February</option>
+                            <option value="03">March</option>
+                            <option value="04">April</option>
+                            <option value="05">May</option>
+                            <option value="06">June</option>
+                            <option value="07">July</option>
+                            <option value="08">August</option>
+                            <option value="09">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2 mb-1">
+                        <label for="yearSelect" class="form-label">Year</label>
+                        <select class="form-select" id="yearSelect">
+                            <option value="">Select Year</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-5 mb-1 d-flex align-items-end">
+                        <button class="btn btn-primary me-2" onclick="loadMonthlyStaffData()">
+                            <i class="fas fa-search"></i> Load Staff
+                        </button>
+                        <button class="btn btn-success" onclick="calculateMonthlyPayment()" id="calculateBtn" disabled>
+                            <i class="fas fa-calculator"></i> Calculate
+                        </button>
+                    </div>
+                </div>
+                
+                
+                <!-- Settings Section -->
+                <div class="row mt-1">
+                    <div class="col-md-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="includeDeductions" checked>
+                            <label class="form-check-label" for="includeDeductions">
+                                Include Attendance Deductions
+                            </label>
+                            <small class="form-text text-muted d-block">
+                                When enabled, salary will be deducted for absent days
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check form-switch mt-1">
+                            <input class="form-check-input" type="checkbox" id="includeHalfDay" checked>
+                            <label class="form-check-label" for="includeHalfDay">
+                                Deduct for Half Days (50% deduction)
+                            </label>
+                            <small class="form-text text-muted d-block">
+                                Half days will result in 50% salary deduction for that day
+                            </small>
+                        </div>
+                    </div>
+                        <!-- Holiday Settings -->                      
+                        <div class="mt-3 border-top">
+                            <h6>Holiday Settings</h6>
+                            <div class="form-check form-switch mt-1">
+                                <input class="form-check-input" type="checkbox" id="saturdayHoliday">
+                                <label class="form-check-label" for="saturdayHoliday">
+                                    Mark Saturdays as Holidays
+                                </label>
+                            </div>
+                            <div class="form-check form-switch mt-1">
+                                <input class="form-check-input" type="checkbox" id="sundayHoliday" checked>
+                                <label class="form-check-label" for="sundayHoliday">
+                                    Mark Sundays as Holidays
+                                </label>
+                            </div>
+                            <div class="mt-2">
+                                <label for="additionalHolidays" class="form-label">Additional Holiday Dates (comma separated, format: DD)</label>
+                                <input type="text" class="form-control" id="additionalHolidays" placeholder="e.g., 15, 26, 30">
+                                <small class="form-text text-muted">Enter specific days of the month to mark as holidays</small>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm mt-2" onclick="saveHolidaySettings()">
+                                <i class="fas fa-save"></i> Save Holiday Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        <!-- Summary Cards -->
+        <div class="row mb-4 d-none g-1" id="summaryCards">
+
+  <!-- Row 1: Total Staff | Working Days | Absent Days -->
+  <div class="col-4 col-md-2">
+    <div class="card border-start border-primary border-2 text-center">
+      <div class="card-body p-2">
+        <h6 class="card-title small mb-1">Total Staff</h6>
+        <h6 id="totalStaffCount" class="fw-bold mb-0">0</h6>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-4 col-md-2">
+    <div class="card border-start border-success border-2 text-center">
+      <div class="card-body p-2">
+        <h6 class="card-title small mb-1">Working Days</h6>
+        <h6 id="totalWorkingDays" class="fw-bold mb-0">0</h6>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-4 col-md-2">
+    <div class="card border-start border-danger border-2 text-center">
+      <div class="card-body p-2">
+        <h6 class="card-title small mb-1">Absent Days</h6>
+        <h6 id="totalAbsentDays" class="fw-bold mb-0">0</h6>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Total Holidays -->
+  <div class="col-6 col-md-3 ">
+    <div class="card border-start border-warning border-2 text-center">
+      <div class="card-body p-2">
+        <h6 class="card-title small mb-1">Total Holidays</h6>
+        <h6 id="totalHolidays" class="fw-bold mb-0">4</h6>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 3: Total Payable -->
+  <div class="col-6 col-md-3">
+    <div class="card border-start border-info border-2 text-center">
+      <div class="card-body p-2">
+        <h6 class="card-title small mb-1">Total Payable</h6>
+        <h6 id="totalPayable" class="fw-bold text-success mb-0">₹0</h6>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+        <!-- Monthly Staff Table -->
+        <div class="fix-card p-1">
+            <div class="card-header d-flex justify-content-between align-items-center mb-1">
+                <h5 class="mb-0">Payment Calculation</h5>
+                <div>
+                    <button class="btn btn-outline-primary btn-sm me-2" onclick="exportMonthlyToExcel()" id="exportBtn" disabled>
+                        <i class="fas fa-file-excel"></i> Export to Excel
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 600px; font-size: 12px;">
+                    <table class="table table-hover mb-0" id="monthlyPaymentTable">
+                        <thead class="sticky-top bg-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Designation</th>
+                                <th class="text-end">Salary</th>
+                                <th class="text-end">Per Day</th>
+                                <th class="text-center">Present Days</th>
+                                <th class="text-center">Absent Days</th>
+                                <th class="text-center">Half Days</th>
+                                <th class="text-center">Present in Holiday</th>
+                                <th class="text-center">Holiday Days</th>
+                                <th class="text-center">Total Present Days</th>
+                                <th class="text-end">Deduction (₹)</th>
+                                <th class="text-end">Payable (₹)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monthlyPaymentTableBody">
+                            <!-- Table rows will be inserted here -->
+                        </tbody>
+                        <tfoot class="bg-light" id="monthlyPaymentTableFooter">
+                            <!-- Footer row will be inserted here -->
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="js/firebaseconfig.js"></script>
+<script src="js/all.js"></script>
+<!-- Excel Export Library -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<script>
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    const auth = firebase.auth();
+    const database = firebase.database();
+    let currentUser = null;
+    let currentUserRole = 'user';
+    let allProjects = [];
+    let selectedProjectId = null;
+    let selectedMonth = '';
+    let selectedYear = '';
+    let dateRange = [];
+    let monthlyStaff = [];
+    let attendanceData = {};
+    let salaryData = {};
+    let includeDeductions = true;
+    let includeHalfDay = true;
+    let holidaySettings = {
+        saturdayHoliday: false,
+        sundayHoliday: true,
+        additionalHolidays: []
+    };
+    let holidayDates = [];
+
+    // Check authentication
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.href = "login.html";
+        } else {
+            currentUser = user;
+            await initializePage();
+        }
+    });
+
+    // Initialize page
+    async function initializePage() {
+        try {
+            // Get user role
+            const userSnapshot = await database.ref(`users/${currentUser.uid}`).once('value');
+            const userData = userSnapshot.val();
+            currentUserRole = userData?.role || 'user';
+
+            // Set current month and year
+            const today = new Date();
+            const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0');
+            const currentYear = today.getFullYear().toString();
+            
+            document.getElementById('monthSelect').value = currentMonth;
+            document.getElementById('yearSelect').value = currentYear;
+
+            // Populate year dropdown (last 5 years and next 1 year)
+            const yearSelect = document.getElementById('yearSelect');
+            yearSelect.innerHTML = '<option value="">Select Year</option>';
+            for (let year = today.getFullYear() - 5; year <= today.getFullYear() + 1; year++) {
+                const option = document.createElement('option');
+                option.value = year.toString();
+                option.textContent = year.toString();
+                option.selected = (year === today.getFullYear());
+                yearSelect.appendChild(option);
+            }
+
+            // Load projects
+            await loadProjects();
+
+            // Load holiday settings from localStorage
+            loadHolidaySettings();
+
+            // Setup event listeners
+            setupEventListeners();
+
+        } catch (error) {
+            console.error("Error initializing page:", error);
+            alert("Error loading page: " + error.message);
+        }
+    }
+
+    // Load holiday settings from localStorage
+    function loadHolidaySettings() {
+        const savedSettings = localStorage.getItem('holidaySettings');
+        if (savedSettings) {
+            holidaySettings = JSON.parse(savedSettings);
+        }
+        
+        // Update UI
+        document.getElementById('saturdayHoliday').checked = holidaySettings.saturdayHoliday;
+        document.getElementById('sundayHoliday').checked = holidaySettings.sundayHoliday;
+        document.getElementById('additionalHolidays').value = holidaySettings.additionalHolidays.join(', ');
+    }
+
+    // Save holiday settings to localStorage
+    function saveHolidaySettings() {
+        holidaySettings.saturdayHoliday = document.getElementById('saturdayHoliday').checked;
+        holidaySettings.sundayHoliday = document.getElementById('sundayHoliday').checked;
+        
+        // Parse additional holidays
+        const additionalHolidaysInput = document.getElementById('additionalHolidays').value;
+        holidaySettings.additionalHolidays = additionalHolidaysInput
+            .split(',')
+            .map(day => day.trim())
+            .filter(day => day !== '' && !isNaN(day) && parseInt(day) >= 1 && parseInt(day) <= 31);
+        
+        // Save to localStorage
+        localStorage.setItem('holidaySettings', JSON.stringify(holidaySettings));
+        
+        // Recalculate if data is loaded
+        if (monthlyStaff.length > 0) {
+            calculateHolidayDates();
+            calculateAllStaffSalaries();
+        }
+        
+        showNotification('Holiday settings saved successfully!', 'success');
+    }
+
+    // Calculate holiday dates for the selected month
+    function calculateHolidayDates() {
+        holidayDates = [];
+        
+        dateRange.forEach(dateStr => {
+            const date = new Date(dateStr);
+            const dayOfMonth = date.getDate();
+            const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
+            
+            // Check if Saturday is holiday
+            if (holidaySettings.saturdayHoliday && dayOfWeek === 6) {
+                holidayDates.push(dateStr);
+                return;
+            }
+            
+            // Check if Sunday is holiday
+            if (holidaySettings.sundayHoliday && dayOfWeek === 0) {
+                holidayDates.push(dateStr);
+                return;
+            }
+            
+            // Check additional holidays
+            if (holidaySettings.additionalHolidays.includes(dayOfMonth.toString())) {
+                holidayDates.push(dateStr);
+            }
+        });
+    }
+
+    // Load projects
+    async function loadProjects() {
+        try {
+            const projectSelect = document.getElementById('projectSelect');
+            
+            if (currentUserRole === 'admin') {
+                // Admin can see all projects
+                const snapshot = await database.ref('projects').once('value');
+                const allProjectsData = snapshot.val();
+                
+                if (allProjectsData) {
+                    allProjects = [];
+                    Object.keys(allProjectsData).forEach(projectId => {
+                        allProjects.push({
+                            id: projectId,
+                            name: allProjectsData[projectId].projectName || 'Unnamed Project'
+                        });
+                    });
+                }
+            } else {
+                // User can only see assigned projects
+                const userSnapshot = await database.ref(`users/${currentUser.uid}`).once('value');
+                const userData = userSnapshot.val();
+                const userProjects = userData?.projects || {};
+                
+                allProjects = [];
+                const projectIds = Object.keys(userProjects).filter(
+                    projectId => userProjects[projectId] === true
+                );
+                
+                for (const projectId of projectIds) {
+                    const projectSnap = await database.ref(`projects/${projectId}`).once('value');
+                    if (projectSnap.exists()) {
+                        const projectData = projectSnap.val();
+                        allProjects.push({
+                            id: projectId,
+                            name: projectData.projectName || 'Unnamed Project'
+                        });
+                    }
+                }
+            }
+
+            // Populate project dropdown
+            projectSelect.innerHTML = '<option value="">Select Project</option>';
+            allProjects.forEach(project => {
+                const option = document.createElement('option');
+                option.value = project.id;
+                option.textContent = project.name;
+                projectSelect.appendChild(option);
+            });
+
+        } catch (error) {
+            console.error("Error loading projects:", error);
+        }
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+        // Project select change
+        document.getElementById('projectSelect').addEventListener('change', function(e) {
+            selectedProjectId = e.target.value;
+        });
+
+        // Month select change
+        document.getElementById('monthSelect').addEventListener('change', function(e) {
+            selectedMonth = e.target.value;
+        });
+
+        // Year select change
+        document.getElementById('yearSelect').addEventListener('change', function(e) {
+            selectedYear = e.target.value;
+        });
+
+        // Settings change
+        document.getElementById('includeDeductions').addEventListener('change', function(e) {
+            includeDeductions = e.target.checked;
+            if (monthlyStaff.length > 0) {
+                calculateAllStaffSalaries();
+            }
+        });
+
+        document.getElementById('includeHalfDay').addEventListener('change', function(e) {
+            includeHalfDay = e.target.checked;
+            if (monthlyStaff.length > 0) {
+                calculateAllStaffSalaries();
+            }
+        });
+    }
+
+    // Show loader
+    function showLoader() {
+        document.getElementById('loaderOverlay').classList.remove('d-none');
+        document.getElementById('loaderOverlay').classList.add('d-flex');
+    }
+
+    // Hide loader
+    function hideLoader() {
+        document.getElementById('loaderOverlay').classList.remove('d-flex');
+        document.getElementById('loaderOverlay').classList.add('d-none');
+    }
+
+    // Load monthly staff data
+    async function loadMonthlyStaffData() {
+        try {
+            // Validate inputs
+            selectedProjectId = document.getElementById('projectSelect').value;
+            selectedMonth = document.getElementById('monthSelect').value;
+            selectedYear = document.getElementById('yearSelect').value;
+            
+            if (!selectedProjectId) {
+                alert('Please select a project');
+                return;
+            }
+            
+            if (!selectedMonth || !selectedYear) {
+                alert('Please select month and year');
+                return;
+            }
+            
+            // Show loader
+            showLoader();
+            
+            // Generate date range for the selected month
+            dateRange = generateMonthDateRange(selectedMonth, selectedYear);
+            
+            // Calculate holiday dates
+            calculateHolidayDates();
+
+            // Load monthly staff for the selected project
+            await loadMonthlyStaff();
+
+            // Load attendance for the month
+            await loadAttendanceForMonth();
+
+            if (monthlyStaff.length === 0) {
+                hideLoader();
+                alert('No monthly staff found for this project');
+                return;
+            }
+
+            // Display staff in table
+            displayMonthlyStaffTable();
+
+            // Calculate salaries
+            calculateAllStaffSalaries();
+
+            // Enable buttons
+            document.getElementById('calculateBtn').disabled = false;
+            document.getElementById('exportBtn').disabled = false;
+
+            // Hide loader
+            hideLoader();
+            
+        } catch (error) {
+            console.error("Error loading monthly staff data:", error);
+            hideLoader();
+            alert('Error loading monthly staff data: ' + error.message);
+        }
+    }
+
+    // Generate date range for a month
+    function generateMonthDateRange(month, year) {
+        const dates = [];
+        const daysInMonth = new Date(year, month, 0).getDate();
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateString = `${year}-${month.padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+            dates.push(dateString);
+        }
+        
+        return dates;
+    }
+
+    // Load monthly staff
+    async function loadMonthlyStaff() {
+        try {
+            const snapshot = await database.ref(`employees/${selectedProjectId}`).once('value');
+            const employeesData = snapshot.val();
+            
+            monthlyStaff = [];
+            if (employeesData) {
+                Object.keys(employeesData).forEach(employeeId => {
+                    const employee = employeesData[employeeId];
+                    
+                    // Filter for monthly staff only
+                    if (employee.employeeType === 'monthly') {
+                        monthlyStaff.push({
+                            id: employeeId,
+                            ...employee
+                        });
+                    }
+                });
+            }
+            
+        } catch (error) {
+            console.error("Error loading monthly staff:", error);
+            throw error;
+        }
+    }
+
+    // Load attendance for the month
+    async function loadAttendanceForMonth() {
+        try {
+            attendanceData = {};
+            
+            // Load attendance for each date
+            for (const date of dateRange) {
+                const snapshot = await database.ref(`projects/${selectedProjectId}/attendance/${date}`).once('value');
+                const dateAttendance = snapshot.val();
+                
+                if (dateAttendance) {
+                    attendanceData[date] = dateAttendance;
+                } else {
+                    attendanceData[date] = {};
+                }
+            }
+            
+        } catch (error) {
+            console.error("Error loading attendance:", error);
+            throw error;
+        }
+    }
+
+    // Display monthly staff table
+    function displayMonthlyStaffTable() {
+        const tableBody = document.getElementById('monthlyPaymentTableBody');
+        
+        // Clear existing data
+        tableBody.innerHTML = '';
+        
+        // Add rows for each monthly staff
+        monthlyStaff.forEach(staff => {
+            const row = createMonthlyStaffRow(staff);
+            tableBody.innerHTML += row;
+        });
+        
+        // Show summary cards
+        document.getElementById('summaryCards').classList.remove('d-none');
+    }
+
+    // Create monthly staff row
+    function createMonthlyStaffRow(staff) {
+        const monthlySalary = staff.salaryAmount || 0;
+        const workingDays = dateRange.length - holidayDates.length;
+        const perDaySalary = calculatePerDaySalary(monthlySalary, workingDays);
+        
+        return `
+            <tr data-staff-id="${staff.id}">
+                <td>${escapeHtml(staff.employeeName || 'Unnamed')}</td>
+                <td>${escapeHtml(staff.designation || 'N/A')}</td>
+                <td class="text-end">₹${formatCurrency(monthlySalary)}</td>
+                <td class="text-end">₹${formatCurrency(perDaySalary)}</td>
+                <td class="text-center">
+                    <span id="presentDays_${staff.id}">0</span>
+                </td>
+                <td class="text-center">
+                    <span id="absentDays_${staff.id}">0</span>
+                </td>
+                <td class="text-center">
+                    <span id="halfDays_${staff.id}">0</span>
+                </td>
+                <td class="text-center">
+                    <span id="presentHoliday_${staff.id}">0</span>
+                </td>
+                <td class="text-center">
+                    <span id="holidayDays_${staff.id}">${holidayDates.length}</span>
+                </td>
+                <td class="text-center">
+                    <span id="totalPresentDays_${staff.id}">0</span>
+                </td>
+                <td class="text-end">
+                    <span id="deduction_${staff.id}" class="text-danger">₹0</span>
+                </td>
+                <td class="text-end">
+                    <span id="payable_${staff.id}" class="fw-bold text-success">₹0</span>
+                </td>
+                <td>
+                    <span class="badge bg-secondary" id="status_${staff.id}">
+                        Not Calculated
+                    </span>
+                </td>
+            </tr>
+        `;
+    }
+
+    // Calculate per day salary (excluding holidays)
+    function calculatePerDaySalary(monthlySalary, workingDays) {
+        if (workingDays <= 0) return monthlySalary;
+        return monthlySalary / workingDays;
+    }
+
+    // Calculate staff attendance and salary
+    function calculateStaffSalary(staffId) {
+        const staff = monthlyStaff.find(s => s.id === staffId);
+        if (!staff) return { 
+            presentDays: 0, 
+            absentDays: 0, 
+            halfDays: 0, 
+            presentHoliday: 0,
+            holidayDays: holidayDates.length,
+            totalPresentDays: 0,
+            deduction: 0, 
+            payable: 0 
+        };
+        
+        const monthlySalary = staff.salaryAmount || 0;
+        const workingDays = dateRange.length - holidayDates.length;
+        const perDaySalary = calculatePerDaySalary(monthlySalary, workingDays);
+        
+        let presentDays = 0;
+        let absentDays = 0;
+        let halfDays = 0;
+        let presentHoliday = 0;
+        
+        // Count attendance for each date
+        dateRange.forEach(date => {
+            const isHoliday = holidayDates.includes(date);
+            const attendance = attendanceData[date]?.[staffId];
+            
+            if (isHoliday) {
+                // Count if employee worked on holiday
+                if (attendance && (attendance.status === 'present' || attendance.status === 'halfday')) {
+                    presentHoliday += 1;
+                }
+            } else {
+                // Regular working day
+                if (attendance) {
+                    if (attendance.status === 'present') {
+                        presentDays += 1;
+                    } else if (attendance.status === 'halfday') {
+                        halfDays += 1;
+                    } else if (attendance.status === 'absent') {
+                        absentDays += 1;
+                    }
+                } else {
+                    // Unmarked days count as absent
+                    absentDays += 1;
+                }
+            }
+        });
+        
+        // Calculate total present days
+        const totalPresentDays = presentDays + presentHoliday;
+        
+        // Calculate deduction
+        let deduction = 0;
+        if (includeDeductions) {
+            // Full deduction for absent days
+            deduction += absentDays * perDaySalary;
+            
+            // 50% deduction for half days if enabled
+            if (includeHalfDay) {
+                deduction += halfDays * (perDaySalary / 2);
+            }
+        }
+        
+        // Calculate payable amount
+        let payable = monthlySalary - deduction;
+        
+        // Ensure payable is not negative
+        payable = Math.max(0, payable);
+        
+        return {
+            presentDays: presentDays,
+            absentDays: absentDays,
+            halfDays: halfDays,
+            presentHoliday: presentHoliday,
+            holidayDays: holidayDates.length,
+            totalPresentDays: totalPresentDays,
+            deduction: deduction,
+            payable: payable,
+            perDaySalary: perDaySalary,
+            monthlySalary: monthlySalary,
+            workingDays: workingDays
+        };
+    }
+
+    // Update staff salary in table
+    function updateStaffSalary(staffId) {
+        const calculation = calculateStaffSalary(staffId);
+        
+        // Update table
+        document.getElementById(`presentDays_${staffId}`).textContent = calculation.presentDays;
+        document.getElementById(`absentDays_${staffId}`).textContent = calculation.absentDays;
+        document.getElementById(`halfDays_${staffId}`).textContent = calculation.halfDays;
+        document.getElementById(`presentHoliday_${staffId}`).textContent = calculation.presentHoliday;
+        document.getElementById(`holidayDays_${staffId}`).textContent = calculation.holidayDays;
+        document.getElementById(`totalPresentDays_${staffId}`).textContent = calculation.totalPresentDays;
+        document.getElementById(`deduction_${staffId}`).innerHTML = `₹${formatCurrency(calculation.deduction)}`;
+        document.getElementById(`payable_${staffId}`).innerHTML = `₹${formatCurrency(calculation.payable)}`;
+        
+        // Store salary data
+        salaryData[staffId] = {
+            employeeName: monthlyStaff.find(s => s.id === staffId)?.employeeName || 'Unknown',
+            designation: monthlyStaff.find(s => s.id === staffId)?.designation || 'N/A',
+            monthlySalary: calculation.monthlySalary,
+            perDaySalary: calculation.perDaySalary,
+            presentDays: calculation.presentDays,
+            absentDays: calculation.absentDays,
+            halfDays: calculation.halfDays,
+            presentHoliday: calculation.presentHoliday,
+            holidayDays: calculation.holidayDays,
+            totalPresentDays: calculation.totalPresentDays,
+            deduction: calculation.deduction,
+            payable: calculation.payable,
+            workingDays: calculation.workingDays
+        };
+        
+        // Update summary
+        updateSummaryCards();
+    }
+
+    // Calculate all staff salaries
+    function calculateAllStaffSalaries() {
+        monthlyStaff.forEach(staff => {
+            updateStaffSalary(staff.id);
+        });
+    }
+
+    // Calculate monthly payment (main calculation function)
+    function calculateMonthlyPayment() {
+        try {
+            monthlyStaff.forEach(staff => {
+                const calculation = calculateStaffSalary(staff.id);
+                
+                // Update status
+                const statusBadge = document.getElementById(`status_${staff.id}`);
+                if (calculation.deduction > 0) {
+                    statusBadge.className = 'badge bg-warning';
+                    statusBadge.textContent = 'Deductions Applied';
+                } else if (calculation.payable === calculation.monthlySalary) {
+                    statusBadge.className = 'badge bg-success';
+                    statusBadge.textContent = 'Full Salary';
+                } else {
+                    statusBadge.className = 'badge bg-info';
+                    statusBadge.textContent = 'Calculated';
+                }
+                
+                // Store final data
+                salaryData[staff.id] = {
+                    ...calculation,
+                    employeeName: staff.employeeName,
+                    designation: staff.designation,
+                    calculationDate: new Date().toISOString(),
+                    month: selectedMonth,
+                    year: selectedYear,
+                    projectId: selectedProjectId,
+                    projectName: allProjects.find(p => p.id === selectedProjectId)?.name || 'Unknown'
+                };
+            });
+            
+            // Enable export button
+            const exportBtn = document.getElementById('exportBtn');
+            if (exportBtn) {
+                exportBtn.disabled = false;
+            }
+            
+            // Show success message
+            showNotification('Monthly salaries calculated successfully!', 'success');
+            
+        } catch (error) {
+            console.error("Error calculating monthly payment:", error);
+            showNotification('Error calculating payment: ' + error.message, 'danger');
+        }
+    }
+
+    // Update summary cards
+    function updateSummaryCards() {
+        let totalStaff = monthlyStaff.length;
+        let totalWorkingDays = dateRange.length - holidayDates.length;
+        let totalAbsentDays = 0;
+        let totalHalfDays = 0;
+        let totalPresentHoliday = 0;
+        let totalDeduction = 0;
+        let totalPayable = 0;
+        
+        monthlyStaff.forEach(staff => {
+            const calculation = calculateStaffSalary(staff.id);
+            totalAbsentDays += calculation.absentDays;
+            totalHalfDays += calculation.halfDays;
+            totalPresentHoliday += calculation.presentHoliday;
+            totalDeduction += calculation.deduction;
+            totalPayable += calculation.payable;
+        });
+        
+        document.getElementById('totalStaffCount').textContent = totalStaff;
+        document.getElementById('totalWorkingDays').textContent = totalWorkingDays;
+        document.getElementById('totalAbsentDays').textContent = totalAbsentDays;
+        document.getElementById('totalHolidays').textContent = holidayDates.length;
+        document.getElementById('totalPayable').textContent = '₹' + formatCurrency(totalPayable);
+    }
+
+    // Export to Excel
+    function exportMonthlyToExcel() {
+        try {
+            // Prepare data for export
+            const exportData = [];
+            
+            // Add header rows
+            const projectName = allProjects.find(p => p.id === selectedProjectId)?.name || 'Project';
+            const monthName = getMonthName(selectedMonth);
+            
+            exportData.push(['Barman Construction']);
+            exportData.push(['Monthly Staff Salary Report']);
+            exportData.push([`Project: ${projectName}`]);
+            exportData.push([`Period: ${monthName} ${selectedYear}`]);
+            exportData.push([`Total Working Days: ${dateRange.length - holidayDates.length}`]);
+            exportData.push([`Total Holidays: ${holidayDates.length}`]);
+            exportData.push([`Generated On: ${new Date().toLocaleDateString()}`]);
+            exportData.push([]); // Empty row
+            
+            // Add table headers
+            const headerRow = [
+                'Name',
+                'Designation',
+                'Salary',
+                'Per Day',
+                'Present Days',
+                'Absent Days',
+                'Half Days',
+                'Present in Holiday',
+                'Holiday Days',
+                'Total Present Days',
+                'Deduction (₹)',
+                'Payable (₹)',
+                'Status'
+            ];
+            exportData.push(headerRow);
+            
+            // Add staff data
+            let totalMonthlySalary = 0;
+            let totalDeduction = 0;
+            let totalPayable = 0;
+            
+            monthlyStaff.forEach(staff => {
+                const calculation = calculateStaffSalary(staff.id);
+                totalMonthlySalary += calculation.monthlySalary;
+                totalDeduction += calculation.deduction;
+                totalPayable += calculation.payable;
+                
+                const statusBadge = document.getElementById(`status_${staff.id}`);
+                
+                exportData.push([
+                    staff.employeeName || 'Unnamed',
+                    staff.designation || 'N/A',
+                    calculation.monthlySalary,
+                    calculation.perDaySalary,
+                    calculation.presentDays,
+                    calculation.absentDays,
+                    calculation.halfDays,
+                    calculation.presentHoliday,
+                    calculation.holidayDays,
+                    calculation.totalPresentDays,
+                    calculation.deduction,
+                    calculation.payable,
+                    statusBadge?.textContent || ''
+                ]);
+            });
+            
+            // Add totals row
+            exportData.push([
+                'TOTAL',
+                '',
+                totalMonthlySalary,
+                '',
+                '',
+                '',
+                '',
+                '',
+                holidayDates.length,
+                '',
+                totalDeduction,
+                totalPayable,
+                ''
+            ]);
+            
+            // Create worksheet
+            const ws = XLSX.utils.aoa_to_sheet(exportData);
+            
+            // Merge header cells
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                ws['!merges'] = ws['!merges'] || [];
+                ws['!merges'].push({s: {r:0, c:C}, e: {r:0, c:C}});
+                ws['!merges'].push({s: {r:1, c:C}, e: {r:1, c:C}});
+            }
+            
+            // Set column widths
+            const wscols = [
+                {wch: 25}, // Employee Name
+                {wch: 20}, // Designation
+                {wch: 15}, // Monthly Salary
+                {wch: 15}, // Per Day Salary
+                {wch: 12}, // Present Days
+                {wch: 12}, // Absent Days
+                {wch: 12}, // Half Days
+                {wch: 15}, // Present in Holiday
+                {wch: 12}, // Holiday Days
+                {wch: 15}, // Total Present Days
+                {wch: 15}, // Deduction
+                {wch: 15}, // Payable
+                {wch: 15}  // Status
+            ];
+            ws['!cols'] = wscols;
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Monthly Salary Report');
+            
+            // Generate filename
+            const filename = `Monthly_Salary_${projectName}_${monthName}_${selectedYear}.xlsx`;
+            
+            // Export file
+            XLSX.writeFile(wb, filename);
+            
+            showNotification('Excel file exported successfully!', 'success');
+            
+        } catch (error) {
+            console.error("Error exporting to Excel:", error);
+            showNotification('Error exporting to Excel: ' + error.message, 'danger');
+        }
+    }
+
+    // Helper functions
+    function formatCurrency(amount) {
+        return parseFloat(amount).toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function getMonthName(monthNumber) {
+        const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        return months[parseInt(monthNumber) - 1] || 'Unknown';
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Show notification
+    function showNotification(message, type) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+        notification.innerHTML = `
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            ${message}
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    // Add keyboard shortcut
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'Enter') {
+            e.preventDefault();
+            calculateMonthlyPayment();
+        }
+    });
+</script>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

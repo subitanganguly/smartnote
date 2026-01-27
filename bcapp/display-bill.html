@@ -1,0 +1,938 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bills Overview - Barman Construction</title>
+  <link rel="icon" type="image/png" href="img/tab-logo.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="style/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Add Bootstrap Datepicker CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.9.0/dist/css/bootstrap-datepicker.min.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="js/firebaseconfig.js"></script>
+  <script src="js/all.js"></script>
+  <style>
+    .bill-card {
+      transition: all 0.3s ease;
+      border-left: 4px solid #007bff;
+      font-size: 12px;
+    }
+    .bill-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .bill-card.tax-invoice { border-left-color: #28a745; }
+    .bill-card.delivery-challan { border-left-color: #ffc107; }
+    .bill-card.quotation { border-left-color: #17a2b8; }
+    .bill-card.proforma-invoice { border-left-color: #6f42c1; }
+    .bill-card.purchase-invoice { border-left-color: #fd1414; }
+    .bill-card.cash-memo { border-left-color: #1afa34; }
+    
+    .document-badge {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+    }
+    
+    .total-amount {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .status-badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.4rem;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #6c757d;
+    }
+    
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+    
+    .loading-spinner {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 300px;
+    }
+    
+    .action-buttons .btn {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    /* Checkbox group styling */
+    .checkbox-group {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #dee2e6;
+      border-radius: 0.375rem;
+      padding: 10px;
+      margin-top: 5px;
+    }
+    
+    .form-check {
+      margin-bottom: 5px;
+    }
+    
+    .form-check-input:checked {
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+    }
+    
+    /* Date range input styling */
+    .date-range-inputs .input-group {
+      margin-bottom: 5px;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .bill-card .row > div {
+        margin-bottom: 0.5rem;
+      }
+      .action-buttons {
+        margin-top: 1rem;
+      }
+      .checkbox-group {
+        max-height: 150px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar will load here -->
+<div id="nav-placeholder"></div>
+
+<!-- Main Content -->
+<div class="content p-3">
+  <!-- Page Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="text-nowrap top-h">
+        <span class="d-none d-lg-inline">Bills Overview</span>
+        </h4>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" id="refreshBtn" class="btn btn-outline-primary">
+        <i class="fas fa-sync-alt me-1"></i> Refresh
+      </button>
+      <!-- Archive Page Button -->
+      <a href="display-bill-archive.html" class="btn btn-outline-dark">
+        <i class="fas fa-archive me-1"></i> View Archive
+      </a>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="fix-card mb-2 p-3">
+    <div class="card-body">
+      <div class="row g-3">
+        <!-- Document Type Checkboxes -->
+        <div class="col-md-12">
+        <label class="form-label">Document Type</label>
+
+        <div class="checkbox-group d-flex flex-wrap gap-3">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="type-all" value="all" checked>
+            <label class="form-check-label" for="type-all">All Types</label>
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="type-tax-invoice" value="tax-invoice" checked>
+            <label class="form-check-label" for="type-tax-invoice">Tax Invoice</label>
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="type-delivery-challan" value="delivery-challan" checked>
+            <label class="form-check-label" for="type-delivery-challan">Delivery Challan</label>
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="type-quotation" value="quotation" checked>
+            <label class="form-check-label" for="type-quotation">Quotation</label>
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="type-proforma-invoice" value="proforma-invoice" checked>
+            <label class="form-check-label" for="type-proforma-invoice">Proforma Invoice</label>
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="type-purchase-invoice" value="purchase-invoice" checked>
+            <label class="form-check-label" for="type-purchase-invoice">Purchase Invoice</label>
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="type-cash-memo" value="cash-memo" checked>
+            <label class="form-check-label" for="type-cash-memo">Cash Memo</label>
+          </div>
+        </div>
+      </div>
+        
+        <!-- Payment Status Filter -->
+        <div class="col-md-3">
+          <label class="form-label">Payment Status</label>
+          <select class="form-select" id="paymentStatusFilter">
+            <option value="all">All Status</option>
+            <option value="Paid">Paid</option>
+            <option value="Due">Due</option>
+            <option value="Pending">Pending</option>
+            <option value="Partial">Partial</option>
+          </select>
+        </div>
+        
+        <!-- Search -->
+        <div class="col-md-3">
+          <label for="searchInput" class="form-label">Search</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" class="form-control" id="searchInput" placeholder="Search by client name or invoice number...">
+          </div>
+        </div>
+        
+        <!-- Date Range Picker -->
+       <div class="col-md-4">
+  <label class="form-label">Date Range</label>
+
+  <!-- Date Inputs Row -->
+  <div class="row g-2">
+    <div class="col-md-6">
+      <div class="input-group">
+        <span class="input-group-text">
+          <i class="fas fa-calendar"></i>
+        </span>
+        <input type="text" class="form-control datepicker" id="dateFrom" placeholder="From Date">
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="input-group">
+        <span class="input-group-text">
+          <i class="fas fa-calendar"></i>
+        </span>
+        <input type="text" class="form-control datepicker" id="dateTo" placeholder="To Date">
+      </div>
+    </div>
+  </div>
+
+
+</div>
+<div class="col-md-2 d-flex align-items-end gap-2">
+    <button type="button" id="clearFilters" class="btn btn-outline-secondary">
+      <i class="fas fa-times me-1"></i> Clear
+    </button>
+
+    <button type="button" id="applyFilter" class="btn btn btn-primary">
+      <i class="fas fa-filter me-1"></i> Filter
+    </button>
+
+</div>
+  <!-- Buttons -->
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="row mb-4" id="statsOverview">
+    <!-- Stats will be loaded dynamically -->
+  </div>
+
+  <!-- Bills List -->
+  <div class="">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0">All Documents</h5>
+        <div class="text-muted" id="billCount">Loading...</div>
+      </div>
+      
+      <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      
+      <div id="billsList" class="row g-3">
+        <!-- Bills will be loaded here dynamically -->
+      </div>
+      
+      <div id="emptyState" class="empty-state d-none">
+        <i class="fas fa-file-invoice"></i>
+        <h5>No documents found</h5>
+        <p class="mb-3">No documents match your filter criteria.</p>
+        <button type="button" id="clearAllFilters" class="btn btn-primary">
+          <i class="fas fa-times me-1"></i> Clear All Filters
+        </button>
+      </div>
+      
+      <!-- Pagination -->
+      <nav id="pagination" class="mt-4 d-none" aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+          <!-- Pagination will be loaded here dynamically -->
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- Status Message -->
+<div id="statusMessage" class="alert alert-dismissible fade" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 1050; display: none;">
+  <span id="statusText"></span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.9.0/dist/js/bootstrap-datepicker.min.js"></script>
+
+<script>
+  // Firebase initialization
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+
+  // Global variables
+  let allBills = [];
+  let filteredBills = [];
+  let currentPage = 1;
+  const itemsPerPage = 12;
+
+  // Document type labels and colors
+  const documentTypeLabels = {
+    'tax-invoice': { label: 'Tax Invoice', class: 'tax-invoice', badge: 'success' },
+    'delivery-challan': { label: 'Delivery Challan', class: 'delivery-challan', badge: 'warning' },
+    'quotation': { label: 'Quotation', class: 'quotation', badge: 'info' },
+    'proforma-invoice': { label: 'Proforma Invoice', class: 'proforma-invoice', badge: 'primary' },
+    'purchase-invoice': { label: 'Purchase Invoice', class: 'purchase-invoice', badge: 'danger' },
+    'cash-memo': { label: 'Cash Memo', class: 'cash-memo', badge: 'success' }
+  };
+
+  // Check authentication
+  firebase.auth().onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = "login.html";
+    } else {
+      loadAllBills();
+    }
+  });
+
+  // Show status message
+  function showStatus(message, type = 'success') {
+    const statusEl = document.getElementById('statusMessage');
+    const statusText = document.getElementById('statusText');
+    
+    statusText.textContent = message;
+    statusEl.className = `alert alert-${type} alert-dismissible fade show`;
+    statusEl.style.display = 'block';
+    
+    setTimeout(() => {
+      statusEl.style.display = 'none';
+    }, 5000);
+  }
+
+  // Format currency
+  function formatCurrency(amount) {
+    if (typeof amount !== 'number') amount = parseFloat(amount) || 0;
+    return '₹' + amount.toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  // Format date
+  function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        // Try parsing as timestamp
+        const timestamp = parseInt(dateString);
+        if (!isNaN(timestamp)) {
+          return new Date(timestamp).toLocaleDateString('en-GB');
+        }
+        return dateString;
+      }
+      return date.toLocaleDateString('en-GB');
+    } catch (e) {
+      return dateString;
+    }
+  }
+
+  // Parse date string to Date object
+  function parseDate(dateStr) {
+    if (!dateStr) return null;
+    
+    // Try parsing as DD/MM/YYYY
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+      return new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+    
+    // Try parsing as YYYY-MM-DD
+    if (dateStr.includes('-')) {
+      return new Date(dateStr);
+    }
+    
+    // Try parsing as timestamp
+    const timestamp = parseInt(dateStr);
+    if (!isNaN(timestamp)) {
+      return new Date(timestamp);
+    }
+    
+    return new Date(dateStr);
+  }
+
+  // Load all bills from Firebase
+  async function loadAllBills() {
+    try {
+      const billsRef = firebase.database().ref('bill');
+      const snapshot = await billsRef.once('value');
+      
+      if (!snapshot.exists()) {
+        allBills = [];
+        showEmptyState();
+        updateStats([]);
+        return;
+      }
+      
+      const billsArray = [];
+      snapshot.forEach(childSnapshot => {
+        const bill = childSnapshot.val();
+        bill.id = childSnapshot.key;
+        
+        // Only include non-archived bills by default
+        if (!bill.isArchived) {
+          billsArray.push(bill);
+        }
+      });
+      
+      // Sort by creation date (newest first)
+      allBills = billsArray.sort((a, b) => {
+        const dateA = a.createdAt || a.updatedAt || 0;
+        const dateB = b.createdAt || b.updatedAt || 0;
+        return dateB - dateA;
+      });
+      
+      // Initial filter and display
+      filterBills();
+      updateStats(allBills);
+      
+    } catch (error) {
+      console.error('Error loading bills:', error);
+      showStatus('Failed to load bills: ' + error.message, 'danger');
+      showEmptyState();
+    }
+  }
+
+  // Filter bills based on selected filters
+  function filterBills() {
+    // Get selected document types
+    const typeCheckboxes = document.querySelectorAll('.form-check-input[type="checkbox"]:not(#type-all)');
+    const selectedTypes = [];
+    
+    typeCheckboxes.forEach(checkbox => {
+      if (checkbox.checked) {
+        selectedTypes.push(checkbox.value);
+      }
+    });
+    
+    // Check if "All Types" is selected
+    const allTypesChecked = document.getElementById('type-all').checked;
+    
+    // Get payment status filter
+    const paymentStatusFilter = document.getElementById('paymentStatusFilter').value;
+    
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const dateFrom = document.getElementById('dateFrom').value;
+    const dateTo = document.getElementById('dateTo').value;
+    
+    filteredBills = allBills.filter(bill => {
+      // Filter by document type
+      if (!allTypesChecked && selectedTypes.length > 0) {
+        if (!selectedTypes.includes(bill.documentType)) {
+          return false;
+        }
+      }
+      
+      // Filter by payment status
+      if (paymentStatusFilter !== 'all') {
+        if (bill.paymentStatus !== paymentStatusFilter) {
+          return false;
+        }
+      }
+      
+      // Filter by search term
+      if (searchTerm) {
+        const clientName = (bill.clientName || '').toLowerCase();
+        const invoiceNo = (bill.invoiceNo || '').toLowerCase();
+        
+        if (!clientName.includes(searchTerm) && !invoiceNo.includes(searchTerm)) {
+          return false;
+        }
+      }
+      
+      // Filter by date range
+      if (dateFrom || dateTo) {
+        const billDate = bill.invoiceDate || bill.createdAt || bill.updatedAt || 0;
+        const billDateObj = parseDate(billDate);
+        
+        if (!billDateObj) return false;
+        
+        if (dateFrom) {
+          const fromDate = parseDate(dateFrom);
+          if (fromDate && billDateObj < fromDate) return false;
+        }
+        
+        if (dateTo) {
+          const toDate = parseDate(dateTo);
+          if (toDate) {
+            // Set to end of day for comparison
+            const toDateEnd = new Date(toDate);
+            toDateEnd.setHours(23, 59, 59, 999);
+            if (billDateObj > toDateEnd) return false;
+          }
+        }
+      }
+      
+      return true;
+    });
+    
+    // Reset to page 1 after filtering
+    currentPage = 1;
+    
+    // Update stats with filtered bills
+    updateStats(filteredBills);
+    
+    // Display filtered bills
+    displayBills();
+  }
+
+  // Display bills with pagination
+  function displayBills() {
+    const billsList = document.getElementById('billsList');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const emptyState = document.getElementById('emptyState');
+    const pagination = document.getElementById('pagination');
+    const billCount = document.getElementById('billCount');
+    
+    // Hide loading spinner
+    loadingSpinner.style.display = 'none';
+    
+    if (filteredBills.length === 0) {
+      billsList.innerHTML = '';
+      emptyState.classList.remove('d-none');
+      pagination.classList.add('d-none');
+      billCount.textContent = '0 documents found';
+      return;
+    }
+    
+    // Show bills
+    emptyState.classList.add('d-none');
+    billCount.textContent = `${filteredBills.length} document${filteredBills.length !== 1 ? 's' : ''} found`;
+    
+    // Calculate pagination
+    const totalPages = Math.ceil(filteredBills.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const pageBills = filteredBills.slice(startIndex, endIndex);
+    
+    // Generate HTML for bills
+    let html = '';
+    pageBills.forEach(bill => {
+      const docType = documentTypeLabels[bill.documentType] || 
+                     { label: bill.documentType || 'Unknown', class: '', badge: 'secondary' };
+      
+      // Determine payment status badge
+      let paymentStatusBadge = '';
+      if (bill.paymentStatus) {
+        let badgeClass = '';
+        switch(bill.paymentStatus) {
+          case 'Paid':
+            badgeClass = 'bg-success';
+            break;
+          case 'Due':
+            badgeClass = 'bg-danger';
+            break;
+          case 'Pending':
+            badgeClass = 'bg-warning';
+            break;
+          case 'Partial':
+            badgeClass = 'bg-info';
+            break;
+          default:
+            badgeClass = 'bg-secondary';
+        }
+        
+        let dueAmountText = '';
+        if ((bill.paymentStatus === 'Due' || bill.paymentStatus === 'Partial') && bill.dueAmount !== undefined) {
+          dueAmountText = `<span class="ms-1">${formatCurrency(bill.dueAmount)}</span>`;
+        }
+        
+        paymentStatusBadge = `
+          <span class="badge ${badgeClass}">${bill.paymentStatus}</span>
+          ${dueAmountText}
+        `;
+      }
+      
+      html += `
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mt-2">
+          <div class="card bill-card ${docType.class} h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <span class="badge bg-${docType.badge} document-badge">${docType.label}</span>
+                <div class="text-end">
+                  ${paymentStatusBadge}
+                </div>
+              </div>
+
+              <h6 class="card-title text-truncate" title="${bill.clientName || 'No client name'}">
+                ${bill.clientName || 'No client name'} 
+              </h6>
+              
+              <div>
+                <small class="text-muted">Invoice No:</small>
+                <p class="mb-0 fw-bold">${bill.invoiceNo || 'N/A'}</p>
+              </div>
+              
+              <div>
+                <small class="text-muted">Date:</small>
+                <p class="mb-0">${formatDate(bill.invoiceDate || bill.createdAt)}</p>
+              </div>
+              
+              <div class="d-flex justify-content-between align-items-center mt-auto">
+                <div class="total-amount text-primary">
+                  ${formatCurrency(bill.grandTotal || bill.invoiceTotal || 0)}
+                </div>
+                <div class="action-buttons d-flex gap-1">
+                  <button class="btn btn-sm btn-outline-primary view-bill-btn" data-bill-id="${bill.id}">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger delete-bill-btn" data-bill-id="${bill.id}">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+    
+    billsList.innerHTML = html;
+    
+    // Setup pagination
+    if (totalPages > 1) {
+      let paginationHtml = '';
+      
+      // Previous button
+      paginationHtml += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+          <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
+        </li>
+      `;
+      
+      // Page numbers
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+          paginationHtml += `
+            <li class="page-item ${i === currentPage ? 'active' : ''}">
+              <a class="page-link" href="#" data-page="${i}">${i}</a>
+            </li>
+          `;
+        } else if (i === currentPage - 3 || i === currentPage + 3) {
+          paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+      }
+      
+      // Next button
+      paginationHtml += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+          <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
+        </li>
+      `;
+      
+      pagination.innerHTML = paginationHtml;
+      pagination.classList.remove('d-none');
+      
+      // Add event listeners to pagination buttons
+      pagination.querySelectorAll('.page-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const page = parseInt(this.dataset.page);
+          if (!isNaN(page)) {
+            currentPage = page;
+            displayBills();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        });
+      });
+    } else {
+      pagination.classList.add('d-none');
+    }
+    
+    // Add event listeners to action buttons
+    document.querySelectorAll('.view-bill-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const billId = this.dataset.billId;
+        window.open(`bill.html?billId=${billId}`, '_blank');
+      });
+    });
+    
+    document.querySelectorAll('.delete-bill-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const billId = this.dataset.billId;
+        if (confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
+          deleteBill(billId);
+        }
+      });
+    });
+  }
+
+  // Show empty state
+  function showEmptyState() {
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const emptyState = document.getElementById('emptyState');
+    const billsList = document.getElementById('billsList');
+    const pagination = document.getElementById('pagination');
+    const billCount = document.getElementById('billCount');
+    
+    loadingSpinner.style.display = 'none';
+    billsList.innerHTML = '';
+    emptyState.classList.remove('d-none');
+    pagination.classList.add('d-none');
+    billCount.textContent = '0 documents found';
+  }
+
+  // Update statistics overview with filtered bills
+  function updateStats(bills) {
+    const statsOverview = document.getElementById('statsOverview');
+    
+    // Calculate statistics
+    const totalBills = bills.length;
+    const totalAmount = bills.reduce((sum, bill) => sum + (parseFloat(bill.grandTotal) || 0), 0);
+    
+    // Calculate total due amount
+    const totalDueAmount = bills.reduce((sum, bill) => {
+      if (bill.paymentStatus === 'Due' || bill.paymentStatus === 'Partial') {
+        return sum + (parseFloat(bill.dueAmount) || parseFloat(bill.grandTotal) || 0);
+      }
+      return sum;
+    }, 0);
+    
+    // Count by payment status
+    const paidCount = bills.filter(b => b.paymentStatus === 'Paid').length;
+    const dueCount = bills.filter(b => b.paymentStatus === 'Due').length;
+    
+    statsOverview.innerHTML = `
+    <div class="col-6 col-lg-3 mb-3">
+      <div class="bg-primary text-white h-100">
+        <div class="card-body p-2 p-lg-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <small class="text-uppercase opacity-75">Documents</small>
+              <div class="fs-5 fs-lg-4 fw-semibold">${totalBills}</div>
+            </div>
+            <i class="fas fa-file-invoice fs-4 fs-lg-2 opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3 mb-3">
+      <div class="bg-success text-white h-100">
+        <div class="card-body p-2 p-lg-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <small class="text-uppercase opacity-75">Total Amount</small>
+              <div class="fs-6 fs-lg-4 fw-semibold">
+                ${formatCurrency(totalAmount).replace('₹', '')}
+              </div>
+            </div>
+            <i class="fas fa-rupee-sign fs-4 fs-lg-2 opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3 mb-3">
+      <div class="bg-danger text-white h-100">
+        <div class="card-body p-2 p-lg-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="text-truncate">
+              <small class="text-uppercase opacity-75">Total Due</small>
+              <div class="fs-6 fs-lg-4 fw-semibold text-truncate">
+                ${formatCurrency(totalDueAmount).replace('₹', '')}
+              </div>
+            </div>
+            <i class="fas fa-exclamation-triangle fs-4 fs-lg-2 opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3 mb-3">
+      <div class="bg-warning text-white h-100">
+        <div class="card-body p-2 p-lg-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <small class="text-uppercase opacity-75">Paid/Due</small>
+              <div class="fs-6 fs-lg-4 fw-semibold">
+                ${paidCount}/${dueCount}
+              </div>
+            </div>
+            <i class="fas fa-calculator fs-4 fs-lg-2 opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  }
+
+  // Delete a bill
+  async function deleteBill(billId) {
+    if (!confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      // Instead of deleting, mark as archived
+      await firebase.database().ref(`bill/${billId}`).update({
+        isArchived: true,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP
+      });
+      
+      // Remove from local array
+      allBills = allBills.filter(bill => bill.id !== billId);
+      
+      // Refresh display
+      filterBills();
+      
+      showStatus('Document archived successfully!', 'success');
+    } catch (error) {
+      console.error('Error deleting bill:', error);
+      showStatus('Failed to delete document: ' + error.message, 'danger');
+    }
+  }
+
+  // Clear all filters
+  function clearAllFilters() {
+    // Reset all checkboxes
+    document.querySelectorAll('.form-check-input').forEach(checkbox => {
+      checkbox.checked = true;
+    });
+    
+    // Reset payment status filter
+    document.getElementById('paymentStatusFilter').value = 'all';
+    
+    // Clear search
+    document.getElementById('searchInput').value = '';
+    
+    // Clear date inputs
+    document.getElementById('dateFrom').value = '';
+    document.getElementById('dateTo').value = '';
+    
+    // Apply filters
+    filterBills();
+    
+    showStatus('All filters cleared', 'info');
+  }
+
+  // Event listeners for filters
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize date pickers
+    $('.datepicker').datepicker({
+      format: 'dd/mm/yyyy',
+      autoclose: true,
+      todayHighlight: true
+    });
+    
+    // Handle "All Types" checkbox
+    const allTypesCheckbox = document.getElementById('type-all');
+    const typeCheckboxes = document.querySelectorAll(
+      '.form-check-input[type="checkbox"]:not(#type-all)'
+    );
+
+    allTypesCheckbox.addEventListener('change', function () {
+      typeCheckboxes.forEach(cb => {
+        cb.checked = this.checked;
+      });
+    });
+    
+    // Handle individual type checkboxes
+    typeCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        // If any individual checkbox is unchecked, uncheck "All Types"
+        if (!this.checked) {
+          allTypesCheckbox.checked = false;
+        }
+        
+        // If all individual checkboxes are checked, check "All Types"
+        const allChecked = Array.from(typeCheckboxes).every(cb => cb.checked);
+        if (allChecked) {
+          allTypesCheckbox.checked = true;
+        }
+      });
+    });
+    
+    // Apply filter button
+    document.getElementById('applyFilter').addEventListener('click', filterBills);
+    
+    // Clear filters button
+    document.getElementById('clearFilters').addEventListener('click', clearAllFilters);
+    
+    // Clear all filters button
+    document.getElementById('clearAllFilters').addEventListener('click', clearAllFilters);
+    
+    // Search input with debounce
+    let searchTimeout;
+    document.getElementById('searchInput').addEventListener('input', function() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(filterBills, 300);
+    });
+    
+    // Refresh button
+    document.getElementById('refreshBtn').addEventListener('click', function() {
+      const btn = this;
+      const originalHtml = btn.innerHTML;
+      
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Refreshing...';
+      btn.disabled = true;
+      
+      loadAllBills();
+      
+      setTimeout(() => {
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+      }, 1000);
+    });
+    
+    // Add keyboard shortcut for search (Ctrl+F)
+    document.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+      }
+      
+      // Clear filters with Escape key
+      if (e.key === 'Escape') {
+        clearAllFilters();
+      }
+    });
+  });
+</script>
+
+<!-- Bootstrap JS Bundle --> 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
