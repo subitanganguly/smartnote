@@ -25,10 +25,7 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
         
-        .zoom:hover {
-            transform: scale(1.02);
-            transition: transform 0.2s ease;
-        }
+       
         
         .modal-content {
             background: rgba(255, 255, 255, 0.1);
@@ -89,28 +86,38 @@
         
         .transaction-item {
             border-left: 4px solid #32CD32;
+            background-color: #15ff0049;
             margin-bottom: 10px;
         }
         
         .transaction-item.negative {
-            border-left-color: #ff416c;
+            border-left-color: #ff033d;
+            background-color: #ff004c49;
         }
         
         .amount-positive {
-            color: #32CD32;
+            color: rgb(0, 112, 0);
             font-weight: bold;
+            box-shadow: inset 0 2px 10px 30px rgb(255, 255, 254);
+            padding: 0px 2px;
+            font-size: 12px;
         }
         
-        .amount-negative {
-            color: #ff416c;
+        .amount-negative { 
+            color: red;
             font-weight: bold;
+            box-shadow: inset 0 2px 10px 30px rgb(255, 255, 254);
+            padding: 0px 2px;
+            font-size: 12px;
+
         }
         
         .total-amount {
-            font-size: 18px;
+            font-size: 15px;
             font-weight: bold;
             text-align: center;
-            margin: 10x 0;
+            background: linear-gradient(245deg, #94ff94, #ff00c8, #007bff);
+            
         }
         
         .record-header {
@@ -221,7 +228,7 @@
                 <a class="navbar-brand" href="records.html">
                     <i class="fas fa-arrow-left me-2"></i>
                     <img src="img/logo.png" alt="Bootstrap" width="40" height="34" class="brand-logo">
-                    <span id="greetingMessage" class="mb-0">Record Details</span>
+                    <span id="recordTitle" class="mb-0" style="font-size: 14px;">Record Details</span>
                 </a>
                 <div class="d-flex align-items-center">
                     
@@ -246,19 +253,9 @@
                     </button>
             <div class="row justify-content-center">
                 <div class="">
-                    <!-- Record Header -->
-                    <div class="glass record-header d-flex justify-content-between align-items-center">
-                    <h5 id="recordTitle" class="mb-0">Record Title</h5>
-                    <button class="btn btn-info btn-sm" id="copyTransactionsBtn">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                    </div>
-
-                    
-
-                    
+    
                     <!-- Total Amount -->
-                    <div class="total-amount glass text-start  p-2 mb-3">
+                    <div class="total-amount glass text-start  p-2 mb-2">
                         Total: ₹<span id="totalAmount">0.00</span>
                     </div>
                    
@@ -328,7 +325,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="transactionDescription" class="form-label">Description (Optional)</label>
-                            <textarea class="form-control" id="transactionDescription" rows="3" placeholder="Enter description"></textarea>
+                            <textarea class="form-control" id="transactionDescription" rows="1" placeholder="Enter description"></textarea>
                         </div>
                     </form>
                 </div>
@@ -346,395 +343,536 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
  
     <script>
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        
-        let currentUser = null;
-        let currentRecord = null;
-        let transactions = [];
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    
+    let currentUser = null;
+    let currentRecord = null;
+    let transactions = [];
+    let TRANSACTION_SUGGESTIONS = [];
 
-        // Get record ID from URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const recordId = urlParams.get('id');
+    // Get record ID from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const recordId = urlParams.get('id');
 
-        // Firebase Authentication State Listener
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                currentUser = user;
-                
-                // Check user role from localStorage
-                const userRole = localStorage.getItem("userRole");
-                if (userRole === "admin") {
-                    document.getElementById("adminLink").classList.remove("d-none");
-                }
+    // Firebase Authentication State Listener
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            currentUser = user;
+            
+            // Check user role from localStorage
+            const userRole = localStorage.getItem("userRole");
+            if (userRole === "admin") {
+                document.getElementById("adminLink").classList.remove("d-none");
+            }
 
-                // Extract user ID
-                const userId = user.uid;
+            // Extract user ID
+            const userId = user.uid;
 
-                // Get the first name, fallback to 'User' if displayName is null
-                const firstName = user.displayName ? user.displayName.split(' ')[0] : 'User';
+            // Get the first name, fallback to 'User' if displayName is null
+            const firstName = user.displayName ? user.displayName.split(' ')[0] : 'User';
 
-                // Update greeting message
-                const greetingElement = document.getElementById("greetingMessage");
-                if (greetingElement) {
-                    greetingElement.innerHTML = `Record Details`;
-                }
+            // Update greeting message
+            const greetingElement = document.getElementById("greetingMessage");
+            if (greetingElement) {
+                greetingElement.innerHTML = `Record Details`;
+            }
 
-                // Load record details and transactions
-                if (recordId) {
-                    loadRecordDetails(userId, recordId);
-                    loadTransactions(userId, recordId);
-                } else {
-                    // Redirect if no record ID provided
-                    window.location.href = "records.html";
-                }
+            // Load all transaction descriptions for autocomplete
+            loadTransactionDescriptions(userId);
 
-                // Update `lastUse` in Firebase Database
-                firebase.database().ref(`users/${userId}`).update({
-                    lastUse: Date.now(),
-                    lastUseFormatted: new Date().toLocaleString()
-                });
-
+            // Load record details and transactions
+            if (recordId) {
+                loadRecordDetails(userId, recordId);
+                loadTransactions(userId, recordId);
             } else {
-                window.location.href = "login.html";
+                // Redirect if no record ID provided
+                window.location.href = "records.html";
             }
-        });
 
-        // Load record details from Firebase
-        function loadRecordDetails(userId, recordId) {
-            const recordRef = firebase.database().ref(`records/${userId}/${recordId}`);
-            
-            recordRef.once('value').then((snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    currentRecord = { key: recordId, ...data };
-                    document.getElementById('recordTitle').textContent = data.title;
-                } else {
-                    // Redirect if record doesn't exist
-                    window.location.href = "records.html";
-                }
+            // Update `lastUse` in Firebase Database
+            firebase.database().ref(`users/${userId}`).update({
+                lastUse: Date.now(),
+                lastUseFormatted: new Date().toLocaleString()
             });
-        }
 
-        // Load transactions from Firebase
-       // Load transactions from Firebase
-function loadTransactions(userId, recordId) {
-    // Show loader
-    document.getElementById('transactionsLoader').style.display = 'block';
-    // Hide the transactions list while loading
-    document.getElementById('transactionsList').style.display = 'none';
-    
-    const transactionsRef = firebase.database().ref(`transactions/${userId}/${recordId}`);
-    
-    transactionsRef.on('value', (snapshot) => {
-        transactions = [];
-        const data = snapshot.val();
-        
-        // Hide loader after data is loaded
-        document.getElementById('transactionsLoader').style.display = 'none';
-        // Show the transactions list
-        document.getElementById('transactionsList').style.display = 'block';
-        
-        if (data) {
-            Object.keys(data).forEach(key => {
-                transactions.push({
-                    key: key,
-                    ...data[key]
-                });
-            });
-            
-            // Sort transactions by date (newest first)
-            transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            displayTransactions();
-            calculateTotal();
         } else {
-            displayTransactions(); // Show empty state
-            calculateTotal();
+            window.location.href = "login.html";
         }
-    }, (error) => {
-        // Hide loader on error too
-        document.getElementById('transactionsLoader').style.display = 'none';
-        document.getElementById('transactionsList').style.display = 'block';
-        console.error('Error loading transactions:', error);
     });
-}
 
-        // Display transactions in the list
-// Display transactions in the list
-function displayTransactions() {
-    const transactionsList = document.getElementById('transactionsList');
-    
-    if (transactions.length === 0) {
-        transactionsList.innerHTML = `
-            <div class="empty-transactions">
-                <i class="fas fa-exchange-alt"></i>
-                <h4>No Transactions Yet</h4>
-                <p>Click the "Add Transaction" button to create your first transaction.</p>
-            </div>
-        `;
-        return;
+    // Load record details from Firebase
+    function loadRecordDetails(userId, recordId) {
+        const recordRef = firebase.database().ref(`records/${userId}/${recordId}`);
+        
+        recordRef.once('value').then((snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                currentRecord = { key: recordId, ...data };
+                document.getElementById('recordTitle').textContent = data.title;
+            } else {
+                // Redirect if record doesn't exist
+                window.location.href = "records.html";
+            }
+        });
     }
-    
-    transactionsList.innerHTML = '';
-    
-    transactions.forEach(transaction => {
-        // Fix for null/undefined dates
-        let formattedDate = "Not Provided";
-        if (transaction.date) {
-            const dateObj = new Date(transaction.date);
-            if (!isNaN(dateObj.getTime())) { // Check if valid date
-                formattedDate = dateObj.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
+
+    // Load transactions from Firebase
+    function loadTransactions(userId, recordId) {
+        // Show loader
+        document.getElementById('transactionsLoader').style.display = 'block';
+        // Hide the transactions list while loading
+        document.getElementById('transactionsList').style.display = 'none';
+        
+        const transactionsRef = firebase.database().ref(`transactions/${userId}/${recordId}`);
+        
+        transactionsRef.on('value', (snapshot) => {
+            transactions = [];
+            const data = snapshot.val();
+            
+            // Hide loader after data is loaded
+            document.getElementById('transactionsLoader').style.display = 'none';
+            // Show the transactions list
+            document.getElementById('transactionsList').style.display = 'block';
+            
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    transactions.push({
+                        key: key,
+                        ...data[key]
+                    });
                 });
+                
+                // Sort transactions by date (newest first)
+                transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                displayTransactions();
+                calculateTotal();
+                
+                // Refresh suggestions after loading transactions
+                loadTransactionDescriptions(userId);
+            } else {
+                displayTransactions(); // Show empty state
+                calculateTotal();
             }
+        }, (error) => {
+            // Hide loader on error too
+            document.getElementById('transactionsLoader').style.display = 'none';
+            document.getElementById('transactionsList').style.display = 'block';
+            console.error('Error loading transactions:', error);
+        });
+    }
+
+    // Display transactions in the list
+    function displayTransactions() {
+        const transactionsList = document.getElementById('transactionsList');
+        
+        if (transactions.length === 0) {
+            transactionsList.innerHTML = `
+                <div class="empty-transactions">
+                    <i class="fas fa-exchange-alt"></i>
+                    <h4>No Transactions Yet</h4>
+                    <p>Click the "Add Transaction" button to create your first transaction.</p>
+                </div>
+            `;
+            return;
         }
         
-        const isNegative = transaction.type === 'negative';
-        const amountClass = isNegative ? 'amount-negative' : 'amount-positive';
-        const sign = isNegative ? '-' : '+';
+        transactionsList.innerHTML = '';
         
-        const listItem = document.createElement('div');
-        listItem.className = `transaction-item glass p-3 text-light zoom ${isNegative ? 'negative' : ''}`;
-        listItem.innerHTML = `
-    <div class="d-flex justify-content-between align-items-center">
-        <!-- Date + Description -->
-        <div>
-            <div style="font-size: 14px;">
-                <i class="fas fa-calendar-alt me-1"></i> ${formattedDate}
-            </div>
-            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">
-                ${transaction.description || 'No description'}
-            </div>
-        </div>
-
-        <!-- Amount -->
-        <div class="text-end me-3">
-            <div class="${amountClass}">
-                ${sign} ₹${parseFloat(transaction.amount).toFixed(2)}
-            </div>
-            <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">
-                ${transaction.type === 'positive' ? 'Added' : 'Deducted'}
-            </div>
-        </div>
-
-        <!-- Delete button -->
-        <button class="btn btn-sm btn-light ms-2" onclick="deleteTransaction('${transaction.key}')">
-            <i class="fas fa-trash"></i>
-        </button>
-    </div>
-`;
-
-        transactionsList.appendChild(listItem);
-    });
-}
-
-        // Calculate and display total amount
-        function calculateTotal() {
-            let total = 0;
-            
-            transactions.forEach(transaction => {
-                if (transaction.type === 'positive') {
-                    total += parseFloat(transaction.amount);
-                } else {
-                    total -= parseFloat(transaction.amount);
+        transactions.forEach(transaction => {
+            // Fix for null/undefined dates
+            let formattedDate = "Not Provided";
+            if (transaction.date) {
+                const dateObj = new Date(transaction.date);
+                if (!isNaN(dateObj.getTime())) { // Check if valid date
+                    formattedDate = dateObj.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
                 }
-            });
-            
-            document.getElementById('totalAmount').textContent = total.toFixed(2);
-        }
-
-        // Transaction type buttons
-        document.getElementById('positiveBtn').addEventListener('click', () => {
-            document.getElementById('transactionType').value = 'positive';
-            document.getElementById('positiveBtn').classList.add('active');
-            document.getElementById('negativeBtn').classList.remove('active');
-        });
-        
-        document.getElementById('negativeBtn').addEventListener('click', () => {
-            document.getElementById('transactionType').value = 'negative';
-            document.getElementById('negativeBtn').classList.add('active');
-            document.getElementById('positiveBtn').classList.remove('active');
-        });
-
-        // Save new transaction
-        document.getElementById('saveTransactionBtn').addEventListener('click', () => {
-            const type = document.getElementById('transactionType').value;
-            const date = document.getElementById('transactionDate').value;
-            const amount = document.getElementById('transactionAmount').value;
-            const description = document.getElementById('transactionDescription').value.trim();
-            
-            if (!amount) {
-                alert('Please fill in all required fields.');
-                return;
             }
             
+            const isNegative = transaction.type === 'negative';
+            const amountClass = isNegative ? 'amount-negative' : 'amount-positive';
+            const sign = isNegative ? '-' : '+';
+            
+            const listItem = document.createElement('div');
+            listItem.className = `transaction-item glass p-2 text-light hover-card ${isNegative ? 'negative' : ''}`;
+            listItem.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <!-- Date + Description -->
+                    <div>
+                        <div style="font-size: 14px;">
+                            <i class="fas fa-calendar-alt me-1"></i> ${formattedDate}
+                        </div>
+                        <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">
+                            ${transaction.description || 'No description'}
+                        </div>
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="text-end me-3">
+                        <div class="${amountClass}">
+                            ${sign} ₹${parseFloat(transaction.amount).toFixed(2)}
+                        </div>
+                        <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">
+                            ${transaction.type === 'positive' ? 'Added' : 'Deducted'}
+                        </div>
+                    </div>
+
+                    <!-- Delete button -->
+                    <button class="btn btn-sm btn-light ms-2" onclick="deleteTransaction('${transaction.key}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+
+            transactionsList.appendChild(listItem);
+        });
+    }
+
+    // Calculate and display total amount
+    function calculateTotal() {
+        let total = 0;
+        
+        transactions.forEach(transaction => {
+            if (transaction.type === 'positive') {
+                total += parseFloat(transaction.amount);
+            } else {
+                total -= parseFloat(transaction.amount);
+            }
+        });
+        
+        document.getElementById('totalAmount').textContent = total.toFixed(2);
+    }
+
+    // Transaction type buttons
+    document.getElementById('positiveBtn').addEventListener('click', () => {
+        document.getElementById('transactionType').value = 'positive';
+        document.getElementById('positiveBtn').classList.add('active');
+        document.getElementById('negativeBtn').classList.remove('active');
+    });
+    
+    document.getElementById('negativeBtn').addEventListener('click', () => {
+        document.getElementById('transactionType').value = 'negative';
+        document.getElementById('negativeBtn').classList.add('active');
+        document.getElementById('positiveBtn').classList.remove('active');
+    });
+
+    // Save new transaction
+    document.getElementById('saveTransactionBtn').addEventListener('click', () => {
+        const type = document.getElementById('transactionType').value;
+        const date = document.getElementById('transactionDate').value;
+        const amount = document.getElementById('transactionAmount').value;
+        const description = document.getElementById('transactionDescription').value.trim();
+        
+        if (!amount) {
+            alert('Please fill in all required fields.');
+            return;
+        }
+        
+        if (currentUser && currentRecord) {
+            const userId = currentUser.uid;
+            const recordId = currentRecord.key;
+            const transactionsRef = firebase.database().ref(`transactions/${userId}/${recordId}`);
+            
+            const newTransaction = {
+                type: type,
+                date: date,
+                amount: parseFloat(amount),
+                description: description,
+                createdAt: Date.now(),
+                createdAtFormatted: new Date().toLocaleString()
+            };
+            
+            transactionsRef.push(newTransaction)
+                .then(() => {
+                    // Refresh suggestions after adding new transaction
+                    loadTransactionDescriptions(userId);
+                    
+                    // Reset form and close modal
+                    document.getElementById('transactionForm').reset();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addTransactionModal'));
+                    modal.hide();
+                })
+                .catch(error => {
+                    console.error('Error saving transaction:', error);
+                    alert('Error saving transaction. Please try again.');
+                });
+        }
+    });
+
+    // Delete transaction
+    function deleteTransaction(transactionKey) {
+        if (confirm('Are you sure you want to delete this transaction?')) {
             if (currentUser && currentRecord) {
                 const userId = currentUser.uid;
                 const recordId = currentRecord.key;
-                const transactionsRef = firebase.database().ref(`transactions/${userId}/${recordId}`);
+                const transactionRef = firebase.database().ref(`transactions/${userId}/${recordId}/${transactionKey}`);
                 
-                const newTransaction = {
-                    type: type,
-                    date: date,
-                    amount: parseFloat(amount),
-                    description: description,
-                    createdAt: Date.now(),
-                    createdAtFormatted: new Date().toLocaleString()
-                };
-                
-                transactionsRef.push(newTransaction)
+                transactionRef.remove()
                     .then(() => {
-                        // Reset form and close modal
-                        document.getElementById('transactionForm').reset();
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('addTransactionModal'));
-                        modal.hide();
+                        // Refresh suggestions after deletion
+                        loadTransactionDescriptions(userId);
+                        console.log('Transaction deleted successfully');
                     })
                     .catch(error => {
-                        console.error('Error saving transaction:', error);
-                        alert('Error saving transaction. Please try again.');
+                        console.error('Error deleting transaction:', error);
+                        alert('Error deleting transaction. Please try again.');
                     });
             }
-        });
+        }
+    }
 
-        // Delete transaction
-        function deleteTransaction(transactionKey) {
-            if (confirm('Are you sure you want to delete this transaction?')) {
-                if (currentUser && currentRecord) {
-                    const userId = currentUser.uid;
-                    const recordId = currentRecord.key;
-                    const transactionRef = firebase.database().ref(`transactions/${userId}/${recordId}/${transactionKey}`);
-                    
-                    transactionRef.remove()
-                        .then(() => {
-                            console.log('Transaction deleted successfully');
-                        })
-                        .catch(error => {
-                            console.error('Error deleting transaction:', error);
-                            alert('Error deleting transaction. Please try again.');
-                        });
+    // Log out function
+    document.getElementById("logoutButton").addEventListener("click", () => {
+        firebase.auth().signOut().then(() => {
+            window.location.href = "login.html";
+        }).catch((error) => {
+            alert("Error logging out: " + error.message);
+        });
+    });
+
+    // Track toggle state globally
+    let dateEnabled = true; // default ON
+
+    // Toggle button functionality
+    const toggleDateBtn = document.getElementById("toggleDateBtn");
+    const transactionDate = document.getElementById("transactionDate");
+
+    toggleDateBtn.addEventListener("click", () => {
+        dateEnabled = !dateEnabled;
+
+        if (dateEnabled) {
+            // Set today's date when enabling
+            const today = new Date().toISOString().split('T')[0];
+            transactionDate.value = today;
+            transactionDate.disabled = false;
+            
+            toggleDateBtn.classList.remove("btn-danger");
+            toggleDateBtn.classList.add("btn-outline-warning");
+            toggleDateBtn.innerHTML = `<i class="fas fa-toggle-on"></i>`;
+        } else {
+            transactionDate.value = "";
+            transactionDate.disabled = true;
+            
+            toggleDateBtn.classList.remove("btn-outline-warning");
+            toggleDateBtn.classList.add("btn-danger");
+            toggleDateBtn.innerHTML = `<i class="fas fa-toggle-off"></i>`;
+        }
+    });
+
+    // Modal open listener
+    document.getElementById('addTransactionModal').addEventListener('shown.bs.modal', () => {
+        // Set today's date when modal opens and date is enabled
+        if (dateEnabled) {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('transactionDate').value = today;
+            document.getElementById('transactionDate').disabled = false;
+            
+            // Update button appearance
+            toggleDateBtn.classList.remove("btn-danger");
+            toggleDateBtn.classList.add("btn-outline-warning");
+            toggleDateBtn.innerHTML = `<i class="fas fa-toggle-on"></i>`;
+        } else {
+            document.getElementById('transactionDate').value = "";
+            document.getElementById('transactionDate').disabled = true;
+            
+            // Update button appearance
+            toggleDateBtn.classList.remove("btn-outline-warning");
+            toggleDateBtn.classList.add("btn-danger");
+            toggleDateBtn.innerHTML = `<i class="fas fa-toggle-off"></i>`;
+        }
+
+        // Default transaction type = positive
+        document.getElementById('positiveBtn').classList.add('active');
+        document.getElementById('negativeBtn').classList.remove('active');
+        
+        // Attach autocomplete to description input
+        const descriptionInput = document.getElementById('transactionDescription');
+        attachDescriptionAutocomplete(descriptionInput);
+    });
+
+    // Also attach autocomplete when modal is shown (for first time)
+    document.getElementById('addTransactionModal').addEventListener('show.bs.modal', () => {
+        // Small delay to ensure DOM is ready
+        setTimeout(() => {
+            const descriptionInput = document.getElementById('transactionDescription');
+            attachDescriptionAutocomplete(descriptionInput);
+        }, 100);
+    });
+
+    // Copy all transactions to clipboard with running total
+    document.getElementById("copyTransactionsBtn").addEventListener("click", () => {
+        if (transactions.length === 0) {
+            alert("No transactions to copy.");
+            return;
+        }
+
+        let copyText = "";
+        let runningTotal = 0;
+
+        // Since transactions are already sorted by date (newest first), 
+        // we'll iterate from the end to show oldest → newest
+        const sortedTransactions = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        sortedTransactions.forEach(t => {
+            // Fix for null/undefined dates - same logic as display function
+            let formattedDate = "Date Not Provided";
+            if (t.date) {
+                const dateObj = new Date(t.date);
+                if (!isNaN(dateObj.getTime())) { // Check if valid date
+                    formattedDate = dateObj.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
                 }
             }
-        }
 
+            const sign = t.type === "negative" ? "-" : "+";
+            const amount = parseFloat(t.amount);
 
+            // Update running total
+            runningTotal += (t.type === "negative" ? -amount : amount);
 
-        // Log out function
-        document.getElementById("logoutButton").addEventListener("click", () => {
-            firebase.auth().signOut().then(() => {
-                window.location.href = "login.html";
-            }).catch((error) => {
-                alert("Error logging out: " + error.message);
-            });
+            const description = t.description && t.description.trim() !== "" ? t.description : "Null";
+            
+            copyText += `${description} | ${formattedDate} | ${sign} ₹${amount.toFixed(2)} | Total: ₹${runningTotal.toFixed(2)}\n`;
         });
 
-      // Track toggle state globally
-// Track toggle state globally
-let dateEnabled = true; // default ON
+        // Copy to clipboard
+        navigator.clipboard.writeText(copyText).then(() => {
+           // alert("Transactions with totals copied to clipboard!");
+        }).catch(err => {
+            console.error("Failed to copy: ", err);
+            alert("Failed to copy transactions.");
+        });
+    });
 
-// Modal open listener - FIXED VERSION
-document.getElementById('addTransactionModal').addEventListener('show.bs.modal', () => {
-    // Set today's date when modal opens and date is enabled
-    if (dateEnabled) {
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('transactionDate').value = today;
-        document.getElementById('transactionDate').disabled = false;
+    // Function to load all transaction descriptions for autocomplete
+    function loadTransactionDescriptions(userId) {
+        const transactionsRef = firebase.database().ref(`transactions/${userId}`);
         
-        // Update button appearance
-        toggleDateBtn.classList.remove("btn-danger");
-        toggleDateBtn.classList.add("btn-outline-warning");
-        toggleDateBtn.innerHTML = `<i class="fas fa-toggle-on"></i>`;
-    } else {
-        document.getElementById('transactionDate').value = "";
-        document.getElementById('transactionDate').disabled = true;
-        
-        // Update button appearance
-        toggleDateBtn.classList.remove("btn-outline-warning");
-        toggleDateBtn.classList.add("btn-danger");
-        toggleDateBtn.innerHTML = `<i class="fas fa-toggle-off"></i>`;
-    }
-
-    // Default transaction type = positive
-    document.getElementById('positiveBtn').classList.add('active');
-    document.getElementById('negativeBtn').classList.remove('active');
-});
-
-// Toggle button functionality - FIXED VERSION
-const toggleDateBtn = document.getElementById("toggleDateBtn");
-const transactionDate = document.getElementById("transactionDate");
-
-toggleDateBtn.addEventListener("click", () => {
-    dateEnabled = !dateEnabled;
-
-    if (dateEnabled) {
-        // Set today's date when enabling
-        const today = new Date().toISOString().split('T')[0];
-        transactionDate.value = today;
-        transactionDate.disabled = false;
-        
-        toggleDateBtn.classList.remove("btn-danger");
-        toggleDateBtn.classList.add("btn-outline-warning");
-        toggleDateBtn.innerHTML = `<i class="fas fa-toggle-on"></i>`;
-    } else {
-        transactionDate.value = "";
-        transactionDate.disabled = true;
-        
-        toggleDateBtn.classList.remove("btn-outline-warning");
-        toggleDateBtn.classList.add("btn-danger");
-        toggleDateBtn.innerHTML = `<i class="fas fa-toggle-off"></i>`;
-    }
-});
-       // Copy all transactions to clipboard with running total
-document.getElementById("copyTransactionsBtn").addEventListener("click", () => {
-    if (transactions.length === 0) {
-        alert("No transactions to copy.");
-        return;
-    }
-
-    let copyText = "";
-    let runningTotal = 0;
-
-    // Since transactions are already sorted by date (newest first), 
-    // we'll iterate from the end to show oldest → newest
-    const sortedTransactions = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
-
-    sortedTransactions.forEach(t => {
-        // Fix for null/undefined dates - same logic as display function
-        let formattedDate = "Date Not Provided";
-        if (t.date) {
-            const dateObj = new Date(t.date);
-            if (!isNaN(dateObj.getTime())) { // Check if valid date
-                formattedDate = dateObj.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
+        transactionsRef.once('value', (snapshot) => {
+            const allTransactions = snapshot.val();
+            const suggestionsSet = new Set();
+            
+            if (allTransactions) {
+                // Iterate through all records and their transactions
+                Object.keys(allTransactions).forEach(recordId => {
+                    const recordTransactions = allTransactions[recordId];
+                    Object.keys(recordTransactions).forEach(transactionKey => {
+                        const transaction = recordTransactions[transactionKey];
+                        if (transaction.description && transaction.description.trim() !== '') {
+                            suggestionsSet.add(transaction.description.trim());
+                        }
+                    });
                 });
             }
+            
+            TRANSACTION_SUGGESTIONS = Array.from(suggestionsSet).sort();
+            //console.log('Loaded suggestions:', TRANSACTION_SUGGESTIONS);
+        }).catch(error => {
+            console.error('Error loading suggestions:', error);
+        });
+    }
+
+    // Auto-suggestion function for description input - EXACT same pattern
+    function attachDescriptionAutocomplete(input) {
+        const wrapper = input.parentElement;
+        wrapper.style.position = "relative";
+
+        const box = document.createElement("div");
+        box.className = "item-suggest-box";
+        wrapper.appendChild(box);
+
+        // Add CSS if not already present
+        if (!document.getElementById("itemAutoCSS")) {
+            const style = document.createElement("style");
+            style.id = "itemAutoCSS";
+            style.innerHTML = `
+                .item-suggest-box {
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    width: 100%;
+                    z-index: 9999;
+                }
+                .item-suggest-list {
+                    background: #1a1a1a;
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    border-radius: 6px;
+                    max-height: 180px;
+                    overflow-y: auto;
+                    box-shadow: 0 4px 12px rgba(0,0,0,.3);
+                }
+                .item-suggest-item {
+                    padding: 8px 12px;
+                    cursor: pointer;
+                    font-size: 13px;
+                    color: #fff;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                }
+                .item-suggest-item:last-child {
+                    border-bottom: none;
+                }
+                .item-suggest-item:hover {
+                    background: linear-gradient(45deg, #6a11cb 0%, #2575fc 100%);
+                    color: #fff;
+                }
+            `;
+            document.head.appendChild(style);
         }
 
-        const sign = t.type === "negative" ? "-" : "+";
-        const amount = parseFloat(t.amount);
+        // Input event listener - EXACT same pattern
+        input.addEventListener("input", () => {
+            const val = input.value.trim().toLowerCase();
+            box.innerHTML = "";
 
-        // Update running total
-        runningTotal += (t.type === "negative" ? -amount : amount);
+            if (!val) return;
 
-        const description = t.description && t.description.trim() !== "" ? t.description : "Null";
-        
-        copyText += `${description} | ${formattedDate} | ${sign} ₹${amount.toFixed(2)} | Total: ₹${runningTotal.toFixed(2)}\n`;
-    });
+            const matches = TRANSACTION_SUGGESTIONS.filter(item =>
+                item.toLowerCase().startsWith(val)
+            );
 
-    // Copy to clipboard
-    navigator.clipboard.writeText(copyText).then(() => {
-       // alert("Transactions with totals copied to clipboard!");
-    }).catch(err => {
-        console.error("Failed to copy: ", err);
-        alert("Failed to copy transactions.");
-    });
-});
+            if (!matches.length) return;
 
+            const list = document.createElement("div");
+            list.className = "item-suggest-list";
 
-    </script>
+            matches.forEach(item => {
+                const div = document.createElement("div");
+                div.className = "item-suggest-item";
+                div.textContent = item;
+
+                div.onclick = () => {
+                    input.value = item;
+                    box.innerHTML = "";
+                };
+
+                list.appendChild(div);
+            });
+
+            box.appendChild(list);
+        });
+
+        // Close on outside click - EXACT same pattern
+        document.addEventListener("click", e => {
+            if (!wrapper.contains(e.target)) {
+                box.innerHTML = "";
+            }
+        });
+
+        // Close on escape key
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                box.innerHTML = "";
+            }
+        });
+    }
+</script>
   </body>
 </html>
