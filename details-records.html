@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="style/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-      <script src="js/gradient-loader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="js/gradient-loader.js"></script>
     <script src="js/auth.js"></script>
    <style>
         /* Custom styles to match your existing design */
@@ -24,8 +25,6 @@
             transition: transform 0.3s ease;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
-        
-       
         
         .modal-content {
             background: rgba(255, 255, 255, 0.1);
@@ -116,7 +115,7 @@
             font-size: 15px;
             font-weight: bold;
             text-align: center;
-            background: linear-gradient(245deg, #94ff94, #ff00c8, #007bff);
+            background: linear-gradient(245deg, #610031, #ff00c8, #007bff);
             
         }
         
@@ -127,7 +126,6 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
         
-       
         .empty-transactions {
             text-align: center;
             padding: 40px 20px;
@@ -159,8 +157,7 @@
             transform: scale(1.1);
         }
 
-          @media (max-width: 768px) {
-            
+        @media (max-width: 768px) {
             .floating-btn {
                 width: 50px;
                 height: 50px;
@@ -168,44 +165,48 @@
                 bottom: 15px;
                 right: 15px;
             }
-        
         }
 
         /* Neon Glow for Active Buttons */
-/* Neon glow with subtle area + animation */
-@keyframes neonPulseGreen {
-    0%, 100% {
-        box-shadow: 0 0 6px #00ff99, 0 0 12px #00ff99, 0 0 18px #00ff99;
-    }
-    50% {
-        box-shadow: 0 0 2px #00ff99, 0 0 6px #00ff99, 0 0 12px #00ff99;
-    }
-}
+        @keyframes neonPulseGreen {
+            0%, 100% {
+                box-shadow: 0 0 6px #00ff99, 0 0 12px #00ff99, 0 0 18px #00ff99;
+            }
+            50% {
+                box-shadow: 0 0 2px #00ff99, 0 0 6px #00ff99, 0 0 12px #00ff99;
+            }
+        }
 
-@keyframes neonPulseRed {
-    0%, 100% {
-        box-shadow: 0 0 6px #ff004c, 0 0 12px #ff004c, 0 0 18px #ff004c;
-    }
-    50% {
-        box-shadow: 0 0 2px #ff004c, 0 0 6px #ff004c, 0 0 12px #ff004c;
-    }
-}
+        @keyframes neonPulseRed {
+            0%, 100% {
+                box-shadow: 0 0 6px #ff004c, 0 0 12px #ff004c, 0 0 18px #ff004c;
+            }
+            50% {
+                box-shadow: 0 0 2px #ff004c, 0 0 6px #ff004c, 0 0 12px #ff004c;
+            }
+        }
 
-/* Active buttons with glowing animation */
-#positiveBtn.active {
-    border: none;
-    animation: neonPulseGreen 1.5s infinite alternate;
-}
+        #positiveBtn.active {
+            border: none;
+            animation: neonPulseGreen 1.5s infinite alternate;
+        }
 
-#negativeBtn.active {
-    border: none;
-    animation: neonPulseRed 1.5s infinite alternate;
-}
+        #negativeBtn.active {
+            border: none;
+            animation: neonPulseRed 1.5s infinite alternate;
+        }
 
-#transactionsLoader {
-  display: none;
-}
+        #transactionsLoader {
+            display: none;
+        }
 
+        .label-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            margin-left: 5px;
+        }
     </style>
   </head>
   <body>
@@ -231,7 +232,6 @@
                     <span id="recordTitle" class="mb-0" style="font-size: 14px;">Record Details</span>
                 </a>
                 <div class="d-flex align-items-center">
-                    
                     <div class="dropstart">
                         <a class="btn" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fa-solid fa-gear" style="font-size: larger;"></i>
@@ -248,32 +248,35 @@
         </nav>
   
         <div class="container main-content" style="margin-top: 80px;">
+        
+            
+            <!-- Add Transaction Button -->
             <button class="btn floating-btn btn-warning" data-bs-toggle="modal" data-bs-target="#addTransactionModal">
-                        <i class="fas fa-plus"></i>
-                    </button>
+                <i class="fas fa-plus"></i>
+            </button>
+            
             <div class="row justify-content-center">
                 <div class="">
     
                     <!-- Total Amount -->
-                    <div class="total-amount glass text-start  p-2 mb-2">
-                        Total: ₹<span id="totalAmount">0.00</span>
+                    <div class="total-amount glass d-flex justify-content-between align-items-center p-2 mb-2">
+                        <div>
+                            Total: ₹<span id="totalAmount">0.00</span>
+                        </div>
+
+                        <button class="btn btn-success" onclick="downloadExcel()" title="Download Excel">
+                            <i class="fas fa-file-excel"></i>
+                        </button>
                     </div>
                    
-
-
                     <div class="text-center" id="transactionsLoader">
-                <!-- Records will be dynamically added here -->
-                <!-- Loading state -->
-                <div class="loader"></div>
-                
-                   </div>
+                        <!-- Records will be dynamically added here -->
+                        <!-- Loading state -->
+                        <div class="loader"></div>
+                    </div>
 
-                
-                    
                     <!-- Transactions List -->
                     <div id="transactionsList">
-                       
-
                         <!-- Transactions will be dynamically added here -->
                         <div class="empty-transactions">
                             <i class="fas fa-exchange-alt"></i>
@@ -308,21 +311,27 @@
                             </div>
                             <input type="hidden" id="transactionType" value="positive">
                         </div>
+                        
                         <div class="mb-3">
-                        <label for="transactionDate" class="form-label">Date</label>
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="date" class="form-control" id="transactionDate">
-                            <!-- Toggle Button -->
-                            <button type="button" class="btn btn-outline-warning" id="toggleDateBtn">
-                                <i class="fas fa-toggle-on"></i>
-                            </button>
+                            <label for="transactionDate" class="form-label">Date</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="date" class="form-control" id="transactionDate">
+                                <button type="button" class="btn btn-outline-warning" id="toggleDateBtn">
+                                    <i class="fas fa-toggle-on"></i>
+                                </button>
+                            </div>
                         </div>
-                    </div>
+
+                        <div class="mb-3">
+                            <label for="transactionLabel" class="form-label">Label (Optional)</label>
+                            <input type="text" class="form-control" id="transactionLabel" placeholder="Enter label (e.g., Food, Shopping, Salary)">
+                        </div>
 
                         <div class="mb-3">
                             <label for="transactionAmount" class="form-label">Amount</label>
                             <input type="number" class="form-control" id="transactionAmount" placeholder="Enter amount" step="0.01" required>
                         </div>
+                        
                         <div class="mb-3">
                             <label for="transactionDescription" class="form-label">Description (Optional)</label>
                             <textarea class="form-control" id="transactionDescription" rows="1" placeholder="Enter description"></textarea>
@@ -350,6 +359,7 @@
     let currentRecord = null;
     let transactions = [];
     let TRANSACTION_SUGGESTIONS = [];
+    let LABEL_SUGGESTIONS = [];
 
     // Get record ID from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
@@ -378,8 +388,8 @@
                 greetingElement.innerHTML = `Record Details`;
             }
 
-            // Load all transaction descriptions for autocomplete
-            loadTransactionDescriptions(userId);
+            // Load all transaction descriptions and labels for autocomplete
+            loadTransactionDescriptionsAndLabels(userId);
 
             // Load record details and transactions
             if (recordId) {
@@ -450,7 +460,7 @@
                 calculateTotal();
                 
                 // Refresh suggestions after loading transactions
-                loadTransactionDescriptions(userId);
+                loadTransactionDescriptionsAndLabels(userId);
             } else {
                 displayTransactions(); // Show empty state
                 calculateTotal();
@@ -500,12 +510,18 @@
             
             const listItem = document.createElement('div');
             listItem.className = `transaction-item glass p-2 text-light hover-card ${isNegative ? 'negative' : ''}`;
+            
+            // Add label badge if exists
+            const labelHtml = transaction.label ? 
+                `<span class="label-badge"><i class="fas fa-tag me-1"></i>${transaction.label}</span>` : '';
+            
             listItem.innerHTML = `
                 <div class="d-flex justify-content-between align-items-center">
-                    <!-- Date + Description -->
+                    <!-- Date + Description + Label -->
                     <div>
                         <div style="font-size: 14px;">
                             <i class="fas fa-calendar-alt me-1"></i> ${formattedDate}
+                            ${labelHtml}
                         </div>
                         <div style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">
                             ${transaction.description || 'No description'}
@@ -565,6 +581,7 @@
     document.getElementById('saveTransactionBtn').addEventListener('click', () => {
         const type = document.getElementById('transactionType').value;
         const date = document.getElementById('transactionDate').value;
+        const label = document.getElementById('transactionLabel').value.trim();
         const amount = document.getElementById('transactionAmount').value;
         const description = document.getElementById('transactionDescription').value.trim();
         
@@ -581,6 +598,7 @@
             const newTransaction = {
                 type: type,
                 date: date,
+                label: label || null,
                 amount: parseFloat(amount),
                 description: description,
                 createdAt: Date.now(),
@@ -590,7 +608,7 @@
             transactionsRef.push(newTransaction)
                 .then(() => {
                     // Refresh suggestions after adding new transaction
-                    loadTransactionDescriptions(userId);
+                    loadTransactionDescriptionsAndLabels(userId);
                     
                     // Reset form and close modal
                     document.getElementById('transactionForm').reset();
@@ -615,7 +633,7 @@
                 transactionRef.remove()
                     .then(() => {
                         // Refresh suggestions after deletion
-                        loadTransactionDescriptions(userId);
+                        loadTransactionDescriptionsAndLabels(userId);
                         console.log('Transaction deleted successfully');
                     })
                     .catch(error => {
@@ -690,9 +708,11 @@
         document.getElementById('positiveBtn').classList.add('active');
         document.getElementById('negativeBtn').classList.remove('active');
         
-        // Attach autocomplete to description input
+        // Attach autocomplete to description and label inputs
         const descriptionInput = document.getElementById('transactionDescription');
+        const labelInput = document.getElementById('transactionLabel');
         attachDescriptionAutocomplete(descriptionInput);
+        attachLabelAutocomplete(labelInput);
     });
 
     // Also attach autocomplete when modal is shown (for first time)
@@ -700,7 +720,9 @@
         // Small delay to ensure DOM is ready
         setTimeout(() => {
             const descriptionInput = document.getElementById('transactionDescription');
+            const labelInput = document.getElementById('transactionLabel');
             attachDescriptionAutocomplete(descriptionInput);
+            attachLabelAutocomplete(labelInput);
         }, 100);
     });
 
@@ -739,26 +761,28 @@
             runningTotal += (t.type === "negative" ? -amount : amount);
 
             const description = t.description && t.description.trim() !== "" ? t.description : "Null";
+            const label = t.label && t.label.trim() !== "" ? t.label : "No Label";
             
-            copyText += `${description} | ${formattedDate} | ${sign} ₹${amount.toFixed(2)} | Total: ₹${runningTotal.toFixed(2)}\n`;
+            copyText += `${description} | ${label} | ${formattedDate} | ${sign} ₹${amount.toFixed(2)} | Total: ₹${runningTotal.toFixed(2)}\n`;
         });
 
         // Copy to clipboard
         navigator.clipboard.writeText(copyText).then(() => {
-           // alert("Transactions with totals copied to clipboard!");
+            // alert("Transactions with totals copied to clipboard!");
         }).catch(err => {
             console.error("Failed to copy: ", err);
             alert("Failed to copy transactions.");
         });
     });
 
-    // Function to load all transaction descriptions for autocomplete
-    function loadTransactionDescriptions(userId) {
+    // Function to load all transaction descriptions and labels for autocomplete
+    function loadTransactionDescriptionsAndLabels(userId) {
         const transactionsRef = firebase.database().ref(`transactions/${userId}`);
         
         transactionsRef.once('value', (snapshot) => {
             const allTransactions = snapshot.val();
             const suggestionsSet = new Set();
+            const labelSet = new Set();
             
             if (allTransactions) {
                 // Iterate through all records and their transactions
@@ -769,18 +793,23 @@
                         if (transaction.description && transaction.description.trim() !== '') {
                             suggestionsSet.add(transaction.description.trim());
                         }
+                        if (transaction.label && transaction.label.trim() !== '') {
+                            labelSet.add(transaction.label.trim());
+                        }
                     });
                 });
             }
             
             TRANSACTION_SUGGESTIONS = Array.from(suggestionsSet).sort();
+            LABEL_SUGGESTIONS = Array.from(labelSet).sort();
             //console.log('Loaded suggestions:', TRANSACTION_SUGGESTIONS);
+            //console.log('Loaded labels:', LABEL_SUGGESTIONS);
         }).catch(error => {
             console.error('Error loading suggestions:', error);
         });
     }
 
-    // Auto-suggestion function for description input - EXACT same pattern
+    // Auto-suggestion function for description input
     function attachDescriptionAutocomplete(input) {
         const wrapper = input.parentElement;
         wrapper.style.position = "relative";
@@ -827,7 +856,7 @@
             document.head.appendChild(style);
         }
 
-        // Input event listener - EXACT same pattern
+        // Input event listener
         input.addEventListener("input", () => {
             const val = input.value.trim().toLowerCase();
             box.innerHTML = "";
@@ -859,7 +888,7 @@
             box.appendChild(list);
         });
 
-        // Close on outside click - EXACT same pattern
+        // Close on outside click
         document.addEventListener("click", e => {
             if (!wrapper.contains(e.target)) {
                 box.innerHTML = "";
@@ -872,6 +901,136 @@
                 box.innerHTML = "";
             }
         });
+    }
+
+    // Auto-suggestion function for label input
+    function attachLabelAutocomplete(input) {
+        const wrapper = input.parentElement;
+        wrapper.style.position = "relative";
+
+        const box = document.createElement("div");
+        box.className = "item-suggest-box";
+        wrapper.appendChild(box);
+
+        // Input event listener
+        input.addEventListener("input", () => {
+            const val = input.value.trim().toLowerCase();
+            box.innerHTML = "";
+
+            if (!val) return;
+
+            const matches = LABEL_SUGGESTIONS.filter(item =>
+                item.toLowerCase().startsWith(val)
+            );
+
+            if (!matches.length) return;
+
+            const list = document.createElement("div");
+            list.className = "item-suggest-list";
+
+            matches.forEach(item => {
+                const div = document.createElement("div");
+                div.className = "item-suggest-item";
+                div.textContent = item;
+
+                div.onclick = () => {
+                    input.value = item;
+                    box.innerHTML = "";
+                };
+
+                list.appendChild(div);
+            });
+
+            box.appendChild(list);
+        });
+
+        // Close on outside click
+        document.addEventListener("click", e => {
+            if (!wrapper.contains(e.target)) {
+                box.innerHTML = "";
+            }
+        });
+
+        // Close on escape key
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                box.innerHTML = "";
+            }
+        });
+    }
+
+    // Excel Download Function
+    function downloadExcel() {
+        if (transactions.length === 0) {
+            alert("No transactions to download.");
+            return;
+        }
+
+        // Prepare data for Excel
+        const excelData = [];
+        
+        // Add header row
+        excelData.push(['Date', 'Label', 'Description', 'Type', 'Amount (₹)', 'Running Total (₹)']);
+        
+        // Sort transactions by date (oldest to newest for running total)
+        const sortedTransactions = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+        let runningTotal = 0;
+        
+        sortedTransactions.forEach(t => {
+            // Format date
+            let formattedDate = "";
+            if (t.date) {
+                const dateObj = new Date(t.date);
+                if (!isNaN(dateObj.getTime())) {
+                    formattedDate = dateObj.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                }
+            }
+            
+            const amount = parseFloat(t.amount);
+            const type = t.type === 'positive' ? 'Credit' : 'Debit';
+            const signedAmount = t.type === 'positive' ? amount : -amount;
+            
+            // Update running total
+            runningTotal += signedAmount;
+            
+            excelData.push([
+                formattedDate,
+                t.label || 'No Label',
+                t.description || 'No Description',
+                type,
+                signedAmount.toFixed(2),
+                runningTotal.toFixed(2)
+            ]);
+        });
+
+        // Create workbook and worksheet
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(excelData);
+
+        // Add column widths
+        ws['!cols'] = [
+            { wch: 15 }, // Date
+            { wch: 15 }, // Label
+            { wch: 30 }, // Description
+            { wch: 10 }, // Type
+            { wch: 15 }, // Amount
+            { wch: 15 }  // Running Total
+        ];
+
+        // Add the worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, ws, 'Transactions');
+
+        // Get record title for filename
+        const recordTitle = document.getElementById('recordTitle').textContent || 'transactions';
+        const filename = `${recordTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+        // Download the file
+        XLSX.writeFile(wb, filename);
     }
 </script>
   </body>
