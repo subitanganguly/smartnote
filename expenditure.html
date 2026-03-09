@@ -68,6 +68,7 @@
         padding: 0.5rem 0.4rem; /* Smaller padding for mobile */
         font-size: 0.75rem; /* Smaller font size for mobile */
         border-radius: 20px; /* More rounded corners for mobile */
+    
     }
 
 }
@@ -212,7 +213,7 @@
   <div class="container">
     <a class="navbar-brand" href="index.html">
     <img src="img/logo.png" alt="Bootstrap" width="40" height="34" class="brand-logo">
-    <span id="greetingMessage" class="mb-0"><span class="mt-3">ExpenseTotal: ₹ <span id="totalAmount">0.00</span></span></span>
+    <span id="greetingMessage" class="mb-0"><span class="mt-3"><span id="totalAmount" class="bg-light p-1 rounded">0.00</span></span></span>
     </a>
     <div class="d-flex align-items-center">
         <a class="dropdown-item" alt="Log Out" href="#" id="logoutButton"><i class="fa-solid fa-right-from-bracket"></i></a>
@@ -223,7 +224,21 @@
   
    <div class="container main-content" style="margin-top: 80px;">
      <div class="container mt-1 text-light ">
-        <nav>
+   <!-- Payment Summary Boxes -->
+<div class="row mb-1">
+    <div class="col-6">
+        <div class="glass bg-light p-1 text-center">
+            <small class="text-success"><span class="d-none d-lg-inline">Total Earnings</span>(In)</small>
+            <small class="text-success mb-0 fw-bold" id="totalEarnings">₹0.00</small>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="glass bg-light p-1 text-center">
+            <small class="text-danger"><span class="d-none d-lg-inline">Total Expenses</span>(Out)</small>
+            <small class="text-danger mb-0 fw-bold" id="totalExpenses">₹0.00</small>
+        </div>
+    </div>
+</div>
 
     <!-- Filters -->
     <div class="mb-1">
@@ -244,6 +259,15 @@
       <option value="">All Labels</option>
     </select>
   </div>
+
+  <!-- Type Filter -->
+<div class="col-md-6">
+    <select id="typeFilter" class="form-select mb-1 zoom">
+        <option value="">All Types</option>
+        <option value="expense">Expenses Only</option>
+        <option value="earnings">Earnings Only</option>
+    </select>
+</div>
 </div>
 
         <div class="d-flex" style="display: none;">
@@ -304,24 +328,37 @@
             </div>
             
             <div class="modal-body">
-                <div class="mb-3">
-                    <!-- Expense Description -->
-                    <input type="text" id="expenseDescription" class="form-control mb-2 text-uppercase" placeholder="Expense description" list="descriptionSuggestions" autocomplete="off">
-                    <datalist class="text-lowercase" id="descriptionSuggestions" style="background-color: #c3def8; border: 1px solid #c0c2c3; padding: 5px; max-height: 150px; overflow-y: auto; font-size: 14px;"></datalist>
-                    
-                    <!-- Label Input -->
-                    <input type="text" id="expenseLabel" list="labelSuggestions" class="form-control mb-2 text-uppercase" placeholder="Label (e.g., Food, Travel)" autocomplete="off">
-                    <datalist id="labelSuggestions" style="background-color: #c3def8; border: 1px solid #c0c2c3; padding: 5px; max-height: 150px; overflow-y: auto; font-size: 14px;"></datalist>         
-                    <!-- Expense Amount -->
-                    <input type="number" id="expenseAmount" class="form-control mb-2" placeholder="Amount" min="0">
-                    
-                    <!-- Expense Date -->
-                    <div class="form-floating ">
-                        <input type="date" id="expenseDate" class="form-control mb-2">
-                        <label for="expenseDate">Date</label>
-                    </div>
-                </div>
-            </div>
+    <div class="mb-3">
+        <!-- Type Selector (Expense or Earnings) -->
+        <div class="btn-group w-100 mb-2" role="group" aria-label="Expense type">
+            <input type="radio" class="btn-check" name="expenseType" id="typeExpense" value="expense" checked autocomplete="off">
+            <label class="btn btn-outline-danger" for="typeExpense">
+                <i class="fas fa-arrow-down"></i> Expense (Out)
+            </label>
+            
+            <input type="radio" class="btn-check" name="expenseType" id="typeEarnings" value="earnings" autocomplete="off">
+            <label class="btn btn-outline-success" for="typeEarnings">
+                <i class="fas fa-arrow-up"></i> Earnings (In)
+            </label>
+        </div>
+        
+        <!-- Expense Description -->
+        <input type="text" id="expenseDescription" class="form-control mb-2 text-uppercase" placeholder="Expense description" list="descriptionSuggestions" autocomplete="off">
+        <datalist class="text-lowercase" id="descriptionSuggestions" style="background-color: #c3def8; border: 1px solid #c0c2c3; padding: 5px; max-height: 150px; overflow-y: auto; font-size: 14px;"></datalist>
+        
+        <!-- Label Input -->
+        <input type="text" id="expenseLabel" list="labelSuggestions" class="form-control mb-2 text-uppercase" placeholder="Label (e.g., Food, Travel)" autocomplete="off">
+        <datalist id="labelSuggestions" style="background-color: #c3def8; border: 1px solid #c0c2c3; padding: 5px; max-height: 150px; overflow-y: auto; font-size: 14px;"></datalist>         
+        <!-- Expense Amount -->
+        <input type="number" id="expenseAmount" class="form-control mb-2" placeholder="Amount" min="0">
+        
+        <!-- Expense Date -->
+        <div class="form-floating ">
+            <input type="date" id="expenseDate" class="form-control mb-2">
+            <label for="expenseDate">Date</label>
+        </div>
+    </div>
+</div>
             <div class="modal-footer d-flex justify-content-center">
                 <button type="button" class="btn btn-secondary " data-bs-dismiss="modal">Close</button>
                 <button type="button" id="addExpenseBtn" class="btn btn-primary">Add</button>
@@ -392,490 +429,531 @@
 </div>
 
 
-    <script>
-        // Function to reset the form fields
-function resetForm() {
-    expenseDescription.value = "";
-    expenseAmount.value = "";
-    expenseDate.value = "";
-    expenseLabel.value = "";
-}
+   <script>
+    // Function to reset the form fields
+    function resetForm() {
+        expenseDescription.value = "";
+        expenseAmount.value = "";
+        expenseDate.value = "";
+        expenseLabel.value = "";
+        document.getElementById("typeExpense").checked = true; // Reset to expense by default
+    }
 
-        // UI Elements
-        const loadingSpinner = document.getElementById("loadingSpinner");
-        const expenseDescription = document.getElementById("expenseDescription");
-        const expenseAmount = document.getElementById("expenseAmount");
-        const expenseDate = document.getElementById("expenseDate");
-        const addExpenseBtn = document.getElementById("addExpenseBtn");
-        const expensesList = document.getElementById("expensesList");
-        const totalAmount = document.getElementById("totalAmount");
-        const expenseLabel = document.getElementById("expenseLabel");
-
-        let userId;
-
-        // Listen for authentication state changes
-        firebase.auth().onAuthStateChanged((user) => {
-            
-            if (user) {
-                userId = user.uid;
-                
-                loadUserExpenses();  // Load the expenses
-                loadDescriptionSuggestions(); // Load description suggestions
-                loadLabelSuggestions();
-                loadLabels();
-            } else {
-                console.log("User not authenticated. Redirecting to login...");
-                window.location.href = "login.html";
-            }
-        });
+    // UI Elements
+    const loadingSpinner = document.getElementById("loadingSpinner");
+    const expenseDescription = document.getElementById("expenseDescription");
+    const expenseAmount = document.getElementById("expenseAmount");
+    const expenseDate = document.getElementById("expenseDate");
+    const addExpenseBtn = document.getElementById("addExpenseBtn");
+    const expensesList = document.getElementById("expensesList");
+    const totalAmount = document.getElementById("totalAmount");
+    const expenseLabel = document.getElementById("expenseLabel");
     
-        let selectedMonth = null; // Track the selected month
+    // Additional UI Elements
+    const expenseTypeExpense = document.getElementById("typeExpense");
+    const expenseTypeEarnings = document.getElementById("typeEarnings");
+    const typeFilter = document.getElementById("typeFilter");
+    const totalEarnings = document.getElementById("totalEarnings");
+    const totalExpenses = document.getElementById("totalExpenses");
 
-        function loadLabels() {
-    const labelFilter = document.getElementById("labelFilter");
-    const expensesRef = firebase.database().ref(`expenses/${userId}`);
+    let userId;
+    let selectedMonth = null; // Track the selected month
 
-    // Fetch all expenses to extract unique labels
-    expensesRef.once("value", (snapshot) => {
-        const labels = new Set(); // Use a Set to ensure uniqueness
-        snapshot.forEach((childSnapshot) => {
-            const expense = childSnapshot.val();
-            if (expense.label) {
-                labels.add(expense.label); // Add the label if it exists
-            }
-        });
-
-        // Clear and repopulate the dropdown
-        labelFilter.innerHTML = '<option value="">All Labels</option>'; // Default option
-        labels.forEach((label) => {
-            const option = document.createElement("option");
-            option.value = label;
-            option.textContent = label;
-            labelFilter.appendChild(option);
-        });
+    // Listen for authentication state changes
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            userId = user.uid;
+            
+            // Automatically archive previous year records when the user logs in
+            archiveExpenses();
+            
+            loadUserExpenses();  // Load the expenses
+            loadDescriptionSuggestions(); // Load description suggestions
+            loadLabelSuggestions();
+            loadLabels();
+        } else {
+            console.log("User not authenticated. Redirecting to login...");
+            window.location.href = "login.html";
+        }
     });
-}
 
-document.getElementById("labelFilter").addEventListener("change", function() {
-    loadUserExpenses();
-});
+    // Function to load unique labels for filter dropdown
+    function loadLabels() {
+        const labelFilter = document.getElementById("labelFilter");
+        const expensesRef = firebase.database().ref(`expenses/${userId}`);
 
-// Function to load user-specific expenses with filters
-function loadUserExpenses() {
-    // Show loading spinner
-    document.getElementById("loadingSpinner").style.display = "flex";
+        // Fetch all expenses to extract unique labels
+        expensesRef.once("value", (snapshot) => {
+            const labels = new Set(); // Use a Set to ensure uniqueness
+            snapshot.forEach((childSnapshot) => {
+                const expense = childSnapshot.val();
+                if (expense.label) {
+                    labels.add(expense.label); // Add the label if it exists
+                }
+            });
 
-    const expensesRef = firebase.database().ref(`expenses/${userId}`);
-    const searchText = document.getElementById("searchInput").value.toLowerCase();
-    const startDate = document.getElementById("startDate").value;
-    const endDate = document.getElementById("endDate").value;
-    const selectedLabel = document.getElementById("labelFilter").value;
-
-    expensesRef.once("value", (snapshot) => {
-        expensesList.innerHTML = "";
-        let totalSpent = 0;
-        let expensesArray = [];
-
-        snapshot.forEach((childSnapshot) => {
-            const expense = childSnapshot.val();
-            const expenseDate = new Date(expense.date);
-            const expenseYearMonthDay = expenseDate.toISOString().split("T")[0];
-            const expenseMonth = expenseDate.getMonth();
-
-            // Apply filters: description, date range, month, and label
-            const matchesDescription = searchText ? expense.description.toLowerCase().includes(searchText) : true;
-            const matchesStartDate = startDate ? expenseYearMonthDay >= startDate : true;
-            const matchesEndDate = endDate ? expenseYearMonthDay <= endDate : true;
-            const matchesMonth = selectedMonth !== null ? expenseMonth === selectedMonth : true;
-            const matchesLabel = selectedLabel ? expense.label === selectedLabel : true; // Match label if selected
-
-            // Include expense only if it matches all active filters
-            if (matchesDescription && matchesStartDate && matchesEndDate && matchesMonth && matchesLabel) {
-                expensesArray.push({
-                    id: childSnapshot.key,
-                    date: expense.date,
-                    description: expense.description,
-                    amount: expense.amount,
-                    label: expense.label || "No Label" // Use default value if label is missing
-                });
-            }
+            // Clear and repopulate the dropdown
+            labelFilter.innerHTML = '<option value="">All Labels</option>'; // Default option
+            labels.forEach((label) => {
+                const option = document.createElement("option");
+                option.value = label;
+                option.textContent = label;
+                labelFilter.appendChild(option);
+            });
         });
+    }
 
-        // Reverse the array to show the most recent expense first
-        expensesArray.reverse();
+    // Function to load user-specific expenses with filters
+    function loadUserExpenses() {
+        // Show loading spinner
+        document.getElementById("loadingSpinner").style.display = "flex";
 
-        // Display expenses in reverse order
-        if (expensesArray.length > 0) {
-            expensesArray.forEach((expense) => {
-                const expenseDateFormatted = new Date(expense.date).toLocaleDateString("en-GB", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric"
-                });
-                const listItem = document.createElement("li");
-                listItem.classList.add("group-item");
+        const expensesRef = firebase.database().ref(`expenses/${userId}`);
+        const searchText = document.getElementById("searchInput").value.toLowerCase();
+        const startDate = document.getElementById("startDate").value;
+        const endDate = document.getElementById("endDate").value;
+        const selectedLabel = document.getElementById("labelFilter").value;
+        const selectedType = document.getElementById("typeFilter")?.value || "";
 
-                listItem.innerHTML = `
-                    <div class="glass mb-1 text-light text-uppercase zoom p-1">
-                        <div class="d-flex justify-content-between align-items-center" style="margin-left: 20px;">
-                            <span style="font-size: 12px; ">
-                                <b><i class="fas fa-wallet"></i> ${expense.description}</b>
-                                <span class="text-light"> ₹${expense.amount.toFixed(2)}<br>
-                                <span class="me-2" style="font-size: 12px;">${expenseDateFormatted}
+        expensesRef.once("value", (snapshot) => {
+            expensesList.innerHTML = "";
+            let totalBalance = 0;
+            let totalEarningsAmount = 0;
+            let totalExpensesAmount = 0;
+            let expensesArray = [];
+
+            snapshot.forEach((childSnapshot) => {
+                const expense = childSnapshot.val();
+                const expenseDate = new Date(expense.date);
+                const expenseYearMonthDay = expenseDate.toISOString().split("T")[0];
+                const expenseMonth = expenseDate.getMonth();
+                
+                // Set default type if not exists (for backward compatibility)
+                const expenseType = expense.type || "expense";
+
+                // Apply filters: description, date range, month, label, and type
+                const matchesDescription = searchText ? expense.description.toLowerCase().includes(searchText) : true;
+                const matchesStartDate = startDate ? expenseYearMonthDay >= startDate : true;
+                const matchesEndDate = endDate ? expenseYearMonthDay <= endDate : true;
+                const matchesMonth = selectedMonth !== null ? expenseMonth === selectedMonth : true;
+                const matchesLabel = selectedLabel ? expense.label === selectedLabel : true;
+                const matchesType = selectedType ? expenseType === selectedType : true;
+
+                // Include expense only if it matches all active filters
+                if (matchesDescription && matchesStartDate && matchesEndDate && matchesMonth && matchesLabel && matchesType) {
+                    expensesArray.push({
+                        id: childSnapshot.key,
+                        date: expense.date,
+                        description: expense.description,
+                        amount: expense.amount,
+                        label: expense.label || "No Label",
+                        type: expenseType
+                    });
+                }
+            });
+
+            // Reverse the array to show the most recent expense first
+            expensesArray.reverse();
+
+            // Display expenses in reverse order
+            if (expensesArray.length > 0) {
+                expensesArray.forEach((expense) => {
+                    const expenseDateFormatted = new Date(expense.date).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric"
+                    });
+                    
+                    // Set color based on type
+                    const typeColor = expense.type === "earnings" ? "text-success" : "text-danger";
+                    const typeIcon = expense.type === "earnings" ? "fa-arrow-up" : "fa-arrow-down";
+                    
+                    const listItem = document.createElement("li");
+                    listItem.classList.add("group-item");
+
+                    listItem.innerHTML = `
+                        <div class="glass mb-1 text-light text-uppercase zoom p-1">
+                            <div class="d-flex justify-content-between align-items-center" style="margin-left: 20px;">
+                                <span style="font-size: 12px; ">
+                                    <b><i class="fas fa-wallet"></i> ${expense.description}</b>
+                                    <span class="${typeColor}"> 
+                                        <i class="fas ${typeIcon}"></i> ₹${expense.amount.toFixed(2)}
+                                    </span><br>
+                                    <span class="me-2" style="font-size: 12px;">${expenseDateFormatted}
+                                    </span>
+                                    <span class="badge category-badge bg-primary">${expense.label}</span>
+                                    <span class="badge ${expense.type === 'earnings' ? 'bg-success' : 'bg-danger'}">${expense.type}</span>
+                                </span> 
+                                <span>
+                                    <div class="dropstart">
+                                        <a class="btn btn-sm text-light" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fas fa-ellipsis-v"></i>  
+                                        </a>
+                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink" data-bs-boundary="viewport">
+                                            <li>
+                                                <a class="btn btn-sm me-3 edit-btn" data-id="${expense.id}" style="font-size: 12px;">Edit</a>
+                                                <a class="btn btn-sm delete-btn" data-id="${expense.id}" style="font-size: 12px;">Delete</a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </span>
-                                <span class="badge category-badge bg-primary">${expense.label}</span>
-                                </span>
-                            </span> 
-                            <span>
-                                <div class="dropstart">
-                                    <a class="btn btn-sm text-light" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-v"></i>  
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink"  data-bs-boundary="viewport">
-                                    <li><a class="btn  btn-sm me-3 edit-btn" data-id="${expense.id}" style="font-size: 12px;">Edit</a><a class="btn  btn-sm delete-btn" data-id="${expense.id}" style="font-size: 12px;">Delete</a></li>
-                                </ul>
-                                </div>
-                            </span>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
 
-                // Add edit functionality
-                listItem.querySelector(".edit-btn").addEventListener("click", (e) => {
-                    const expenseId = e.target.getAttribute("data-id");
-                    openEditModal(expenseId); // Open the modal and pre-fill the data
-                });
+                    // Add edit functionality
+                    listItem.querySelector(".edit-btn").addEventListener("click", (e) => {
+                        const expenseId = e.target.getAttribute("data-id");
+                        openEditModal(expenseId);
+                    });
 
-                // Add delete functionality with confirmation alert
-                listItem.querySelector(".delete-btn").addEventListener("click", () => {
-                    if (confirm("Are you sure you want to delete this expense?")) {
-                        expensesRef.child(expense.id).remove()
-                            .then(() => {
-                                alert("Expense deleted successfully.");
-                                loadUserExpenses(); // Reload the list after deletion
-                                loadLabels();
-                                loadDescriptionSuggestions(); // Load description suggestions
-                                loadLabelSuggestions();
-                                archiveExpenses();
-                            })
-                            .catch((error) => {
-                                console.error("Error deleting expense:", error);
-                                alert("Failed to delete the expense. Please try again.");
-                            });
+                    // Add delete functionality with confirmation alert
+                    listItem.querySelector(".delete-btn").addEventListener("click", () => {
+                        if (confirm("Are you sure you want to delete this expense?")) {
+                            expensesRef.child(expense.id).remove()
+                                .then(() => {
+                                    alert("Expense deleted successfully.");
+                                    loadUserExpenses();
+                                    loadLabels();
+                                    loadDescriptionSuggestions();
+                                    loadLabelSuggestions();
+                                    archiveExpenses();
+                                })
+                                .catch((error) => {
+                                    console.error("Error deleting expense:", error);
+                                    alert("Failed to delete the expense. Please try again.");
+                                });
+                        }
+                    });
+
+                    expensesList.appendChild(listItem);
+                    
+                    // Calculate totals based on type
+                    if (expense.type === "earnings") {
+                        totalEarningsAmount += expense.amount;
+                        totalBalance += expense.amount;
+                    } else {
+                        totalExpensesAmount += expense.amount;
+                        totalBalance -= expense.amount;
                     }
                 });
 
-                expensesList.appendChild(listItem);
-                totalSpent += expense.amount;
-            });
+                // Update total amount (net balance)
+                const balanceColor = totalBalance >= 0 ? "text-success" : "text-danger";
+                totalAmount.innerHTML = `<span class="${balanceColor}">₹${Math.abs(totalBalance).toFixed(2)} ${totalBalance >= 0 ? '(Credit)' : '(Debit)'}</span>`;
+                
+                // Update summary boxes
+                document.getElementById("totalEarnings").innerHTML = `₹${totalEarningsAmount.toFixed(2)}`;
+                document.getElementById("totalExpenses").innerHTML = `₹${totalExpensesAmount.toFixed(2)}`;
+                
+            } else {
+                // Show message when no expenses are found
+                expensesList.innerHTML = "<li class='list-group-item glass text-light'>No records found</li>";
+                totalAmount.innerHTML = "₹0.00";
+                document.getElementById("totalEarnings").innerHTML = "₹0.00";
+                document.getElementById("totalExpenses").innerHTML = "₹0.00";
+            }
 
-            // Update total amount spent
-            totalAmount.textContent = totalSpent.toFixed(2);
+            // Hide loading spinner after data is loaded
+            document.getElementById("loadingSpinner").style.display = "none";
+        });
+    }
+
+    // Open the modal with pre-filled data for editing
+    function openEditModal(expenseId) {
+        const expensesRef = firebase.database().ref(`expenses/${userId}`).child(expenseId);
+
+        // Fetch the expense data
+        expensesRef.once("value", (snapshot) => {
+            const expense = snapshot.val();
+            expenseDescription.value = expense.description;
+            expenseLabel.value = expense.label;
+            expenseAmount.value = expense.amount;
+            expenseDate.value = expense.date;
+            
+            // Set the correct type radio button
+            if (expense.type === "earnings") {
+                document.getElementById("typeEarnings").checked = true;
+            } else {
+                document.getElementById("typeExpense").checked = true;
+            }
+
+            // Store the expenseId in a global variable to use when saving
+            window.currentExpenseId = expenseId;
+
+            // Open the modal
+            const modal = new bootstrap.Modal(document.getElementById('expenseModal'));
+            modal.show();
+        });
+    }
+
+    // Function to save the edited expense or add a new one
+    addExpenseBtn.addEventListener("click", () => {
+        const description = expenseDescription.value.trim();
+        const label = expenseLabel.value.trim();
+        const amount = parseFloat(expenseAmount.value);
+        const date = expenseDate.value;
+        
+        // Get selected type
+        const type = document.querySelector('input[name="expenseType"]:checked')?.value || "expense";
+
+        if (description && label && !isNaN(amount) && date && userId) {
+            // Disable the button to prevent multiple submissions
+            addExpenseBtn.disabled = true;
+
+            if (window.currentExpenseId) {
+                // Update the existing expense in Firebase (Edit mode)
+                const expensesRef = firebase.database().ref(`expenses/${userId}`).child(window.currentExpenseId);
+                expensesRef.update({
+                    description: description,
+                    label: label,
+                    amount: amount,
+                    date: date,
+                    type: type // Add type to update
+                }).then(() => {
+                    addExpenseBtn.disabled = false;
+                    resetForm();
+                    // Reset type to default (expense)
+                    document.getElementById("typeExpense").checked = true;
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('expenseModal'));
+                    modal.hide();
+                    window.currentExpenseId = null;
+                    loadUserExpenses();
+                    loadLabels();
+                    loadDescriptionSuggestions();
+                    loadLabelSuggestions();
+                    archiveExpenses();
+                }).catch((error) => {
+                    console.error("Error updating expense:", error);
+                    addExpenseBtn.disabled = false;
+                });
+            } else {
+                // Add a new expense to Firebase (Add mode)
+                const expensesRef = firebase.database().ref(`expenses/${userId}`).push();
+                expensesRef.set({
+                    description: description,
+                    label: label,
+                    amount: amount,
+                    date: date,
+                    type: type // Add type to new entry
+                }).then(() => {
+                    addExpenseBtn.disabled = false;
+                    resetForm();
+                    // Reset type to default (expense)
+                    document.getElementById("typeExpense").checked = true;
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('expenseModal'));
+                    modal.hide();
+                    loadUserExpenses();
+                    loadLabels();
+                    loadDescriptionSuggestions();
+                    loadLabelSuggestions();
+                    archiveExpenses();
+                }).catch((error) => {
+                    console.error("Error adding expense:", error);
+                    addExpenseBtn.disabled = false;
+                });
+            }
         } else {
-            // Show message when no expenses are found
-            expensesList.innerHTML = "<li class='list-group-item glass text-light'>No records found</li>";
-            totalAmount.textContent = "0.00"; // Set total to 0 if no expenses
+            alert("Please enter all expense details.");
         }
-
-        // Hide loading spinner after data is loaded
-        document.getElementById("loadingSpinner").style.display = "none";
     });
-}
 
+    // Mouse wheel scroll for horizontal scrolling - Month Filter
+    const monthFilter = document.getElementById("monthFilter");
+    monthFilter.addEventListener("wheel", (event) => {
+        if (event.deltaY !== 0) {
+            monthFilter.scrollLeft += event.deltaY;  // Scroll horizontally
+            event.preventDefault(); // Prevent default vertical scroll
+        }
+    });
 
+    // Event listener for month filter buttons
+    document.querySelectorAll("#monthFilter button").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            // Set selected month based on button's data-month attribute
+            selectedMonth = parseInt(btn.getAttribute("data-month"), 10);
 
-
-// Open the modal with pre-filled data for editing
-function openEditModal(expenseId) {
-            const expensesRef = firebase.database().ref(`expenses/${userId}`).child(expenseId);
-
-            // Fetch the expense data
-            expensesRef.once("value", (snapshot) => {
-                const expense = snapshot.val();
-                expenseDescription.value = expense.description;
-                expenseLabel.value = expense.label;
-                expenseAmount.value = expense.amount;
-                expenseDate.value = expense.date;
-
-                // Store the expenseId in a global variable to use when saving
-                window.currentExpenseId = expenseId;
-
-                // Open the modal
-                const modal = new bootstrap.Modal(document.getElementById('expenseModal'));
-                modal.show();
+            // Highlight selected month button
+            document.querySelectorAll("#monthFilter button").forEach((button) => {
+                button.classList.remove("btn-dark");
+                button.classList.add("btn-outline-secondary");
             });
+            btn.classList.remove("btn-outline-secondary");
+            btn.classList.add("btn-dark");
+
+            loadUserExpenses(); // Reload expenses based on selected month
+        });
+    });
+
+    // Mouse wheel scroll for horizontal scrolling - Button Scroll
+    const buttonScroll = document.getElementById("buttonScroll");
+    buttonScroll.addEventListener("wheel", (event) => {
+        if (event.deltaY !== 0) {
+            buttonScroll.scrollLeft += event.deltaY;  // Scroll horizontally
+            event.preventDefault(); // Prevent default vertical scroll
+        }
+    });
+
+    // Event listeners for filters
+    document.getElementById("searchInput").addEventListener("input", loadUserExpenses);
+    document.getElementById("startDate").addEventListener("input", loadUserExpenses);
+    document.getElementById("endDate").addEventListener("input", loadUserExpenses);
+    document.getElementById("labelFilter").addEventListener("change", loadUserExpenses);
+    
+    // Add event listener for type filter
+    if (document.getElementById("typeFilter")) {
+        document.getElementById("typeFilter").addEventListener("change", function() {
+            loadUserExpenses();
+        });
+    }
+
+    // Reset Filters Button
+    document.getElementById("resetFiltersBtn").addEventListener("click", () => {
+        // Clear all filter fields and reset month selection
+        document.getElementById("searchInput").value = "";
+        document.getElementById("startDate").value = "";
+        document.getElementById("endDate").value = "";
+        selectedMonth = null;
+
+        // Reset label filter
+        document.getElementById("labelFilter").value = "";
+        
+        // Reset type filter
+        if (document.getElementById("typeFilter")) {
+            document.getElementById("typeFilter").value = "";
         }
 
-        // Function to save the edited expense or add a new one
-
-
-addExpenseBtn.addEventListener("click", () => {
-    const description = expenseDescription.value.trim();
-    const label = expenseLabel.value.trim(); // Get label value
-    const amount = parseFloat(expenseAmount.value);
-    const date = expenseDate.value;
-
-    if (description && label && !isNaN(amount) && date && userId) {
-        // Disable the button to prevent multiple submissions
-        addExpenseBtn.disabled = true;
-
-        if (window.currentExpenseId) {
-            // Update the existing expense in Firebase (Edit mode)
-            const expensesRef = firebase.database().ref(`expenses/${userId}`).child(window.currentExpenseId);
-            expensesRef.update({
-                description: description,
-                label: label, // Include label in the update
-                amount: amount,
-                date: date
-            }).then(() => {
-                addExpenseBtn.disabled = false;
-                resetForm();
-                const modal = bootstrap.Modal.getInstance(document.getElementById('expenseModal'));
-                modal.hide();
-                window.currentExpenseId = null;
-                loadUserExpenses();
-                loadLabels();
-                loadDescriptionSuggestions(); // Load description suggestions
-                loadLabelSuggestions();
-                archiveExpenses();
-            }).catch((error) => {
-                console.error("Error updating expense:", error);
-                addExpenseBtn.disabled = false;
-            });
-        } else {
-            // Add a new expense to Firebase (Add mode)
-            const expensesRef = firebase.database().ref(`expenses/${userId}`).push();
-            expensesRef.set({
-                description: description,
-                label: label, // Include label in the new entry
-                amount: amount,
-                date: date
-            }).then(() => {
-                addExpenseBtn.disabled = false;
-                resetForm();
-                const modal = bootstrap.Modal.getInstance(document.getElementById('expenseModal'));
-                modal.hide();
-                loadUserExpenses();
-                loadLabels();
-                loadDescriptionSuggestions(); // Load description suggestions
-                loadLabelSuggestions();
-                archiveExpenses();
-            }).catch((error) => {
-                console.error("Error adding expense:", error);
-                addExpenseBtn.disabled = false;
-            });
-        }
-    } else {
-        alert("Please enter all expense details.");
-    }
-});
-
-        // Mouse wheel scroll for horizontal scrolling
-       const monthFilter = document.getElementById("monthFilter");
-
-monthFilter.addEventListener("wheel", (event) => {
-    if (event.deltaY !== 0) {
-        monthFilter.scrollLeft += event.deltaY;  // Scroll horizontally
-        event.preventDefault(); // Prevent default vertical scroll
-    }
-});
-
-
-        // Event listener for month filter buttons
-     document.querySelectorAll("#monthFilter button").forEach((btn) => {
-    btn.addEventListener("click", () => {
-        // Set selected month based on button's data-month attribute
-        selectedMonth = parseInt(btn.getAttribute("data-month"), 10);
-
-        // Highlight selected month button
+        // Reset month button styling
         document.querySelectorAll("#monthFilter button").forEach((button) => {
             button.classList.remove("btn-dark");
             button.classList.add("btn-outline-secondary");
         });
-        btn.classList.remove("btn-outline-secondary");
-        btn.classList.add("btn-dark");
 
-        loadUserExpenses(); // Reload expenses based on selected month
-    });
-});
-
-
-       // Mouse wheel scroll for horizontal scrolling buttonScroll
-       const buttonScroll = document.getElementById("buttonScroll");
-
-buttonScroll.addEventListener("wheel", (event) => {
-if (event.deltaY !== 0) {
-    buttonScroll.scrollLeft += event.deltaY;  // Scroll horizontally
-    event.preventDefault(); // Prevent default vertical scroll
-}
-});
-
-
-// Reset Filters Button
-document.getElementById("resetFiltersBtn").addEventListener("click", () => {
-    // Clear all filter fields and reset month selection
-    document.getElementById("searchInput").value = "";
-    document.getElementById("startDate").value = "";
-    document.getElementById("endDate").value = "";
-    selectedMonth = null;
-
-    // Reset label filter
-    document.getElementById("labelFilter").value = ""; // Reset label filter to "All Labels"
-
-    // Reset month button styling
-    document.querySelectorAll("#monthFilter button").forEach((button) => {
-        button.classList.remove("btn-dark");
-        button.classList.add("btn-outline-secondary");
+        loadUserExpenses();
     });
 
-    loadUserExpenses(); // Reload expenses without filters
-});
+    // Function to archive previous year expenses
+    function archiveExpenses() {
+        const expensesRef = firebase.database().ref(`expenses/${userId}`);
+        const archiveRef = firebase.database().ref(`archive_expenses/${userId}`);
+        const currentYear = new Date().getFullYear();
 
+        expensesRef.once("value", (snapshot) => {
+            snapshot.forEach((childSnapshot) => {
+                const expense = childSnapshot.val();
+                const expenseYear = new Date(expense.date).getFullYear();
 
-
-// Event listener for the filter fields
-document.getElementById("searchInput").addEventListener("input", loadUserExpenses);
-document.getElementById("startDate").addEventListener("input", loadUserExpenses);
-document.getElementById("endDate").addEventListener("input", loadUserExpenses);
-
-    
-        function archiveExpenses() {
-    const expensesRef = firebase.database().ref(`expenses/${userId}`);
-    const archiveRef = firebase.database().ref(`archive_expenses/${userId}`);
-    const currentYear = new Date().getFullYear();
-
-    expensesRef.once("value", (snapshot) => {
-        snapshot.forEach((childSnapshot) => {
-            const expense = childSnapshot.val();
-            const expenseYear = new Date(expense.date).getFullYear();
-
-            // Move records from previous years
-            if (expenseYear < currentYear) {
-                const expenseId = childSnapshot.key;
-                archiveRef.child(expenseId).set(expense, (error) => {
-                    if (!error) {
-                        expensesRef.child(expenseId).remove(); // Remove from current expenses
-                    } else {
-                        console.error("Error archiving expense:", error);
-                    }
-                });
-            }
+                // Move records from previous years
+                if (expenseYear < currentYear) {
+                    const expenseId = childSnapshot.key;
+                    // Make sure type is included when archiving
+                    archiveRef.child(expenseId).set(expense, (error) => {
+                        if (!error) {
+                            expensesRef.child(expenseId).remove(); // Remove from current expenses
+                        } else {
+                            console.error("Error archiving expense:", error);
+                        }
+                    });
+                }
+            });
+            loadUserExpenses(); // Reload to reflect any changes
         });
-       // console.log("Previous year records have been archived.");
-        loadUserExpenses(); // Reload to reflect any changes
-    });
-}
-firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-        userId = user.uid;
-
-        // Automatically archive previous year records when the user logs in
-        archiveExpenses();
-        
-        loadUserExpenses(); // Load current year's expenses
-    } else {
-        console.log("User not authenticated. Redirecting to login...");
-        window.location.href = "login.html";
     }
-});
-// Function to load unique expense descriptions for suggestions
-function loadDescriptionSuggestions() {
-    const expensesRef = firebase.database().ref(`expenses/${userId}`);
-    const descriptionSuggestions = document.getElementById("descriptionSuggestions");
 
-    expensesRef.once("value", (snapshot) => {
-        const descriptions = new Set(); // Use a Set to avoid duplicates
+    // Function to load unique expense descriptions for suggestions
+    function loadDescriptionSuggestions() {
+        const expensesRef = firebase.database().ref(`expenses/${userId}`);
+        const descriptionSuggestions = document.getElementById("descriptionSuggestions");
 
-        snapshot.forEach((childSnapshot) => {
-            const expense = childSnapshot.val();
-            if (expense.description) {
-                descriptions.add(expense.description); // Store unique descriptions
-            }
-        });
+        expensesRef.once("value", (snapshot) => {
+            const descriptions = new Set(); // Use a Set to avoid duplicates
 
-        // Clear previous suggestions
-        descriptionSuggestions.innerHTML = "";
-
-        // Add new suggestions to the datalist
-        descriptions.forEach((description) => {
-            const option = document.createElement("option");
-            option.value = description;
-            descriptionSuggestions.appendChild(option);
-        });
-    });
-}
-
-// Function to load unique expense labels for suggestions
-function loadLabelSuggestions() {
-    const expensesRef = firebase.database().ref(`expenses/${userId}`);
-    const labelSuggestions = document.getElementById("labelSuggestions");
-
-    expensesRef.once("value", (snapshot) => {
-        const labels = new Set(); // Use a Set to avoid duplicates
-
-        snapshot.forEach((childSnapshot) => {
-            const expense = childSnapshot.val();
-            if (expense.label) {
-                labels.add(expense.label); // Store unique labels
-            }
-        });
-
-        // Clear previous suggestions
-        labelSuggestions.innerHTML = "";
-
-        // Add new suggestions to the datalist
-        labels.forEach((label) => {
-            const option = document.createElement("option");
-            option.value = label;
-            labelSuggestions.appendChild(option);
-        });
-    });
-}
-
-
-
-// Function to export expenses to Excel
-function downloadExcel() {
-    const expensesRef = firebase.database().ref(`expenses/${userId}`);
-    const expensesArray = [];
-
-    expensesRef.once("value", (snapshot) => {
-        snapshot.forEach((childSnapshot) => {
-            const expense = childSnapshot.val();
-            const expenseDate = new Date(expense.date);
-            const expenseDateFormatted = expenseDate.toLocaleDateString("en-GB", {
-                day: "numeric",
-                month: "short",
-                year: "numeric"
+            snapshot.forEach((childSnapshot) => {
+                const expense = childSnapshot.val();
+                if (expense.description) {
+                    descriptions.add(expense.description); // Store unique descriptions
+                }
             });
 
-            expensesArray.push({
-                "Title": expense.description,
-                "Amount (₹)": expense.amount.toFixed(2),
-                "Date": expenseDateFormatted,
-                "Label": expense.label || "No Label"
+            // Clear previous suggestions
+            descriptionSuggestions.innerHTML = "";
+
+            // Add new suggestions to the datalist
+            descriptions.forEach((description) => {
+                const option = document.createElement("option");
+                option.value = description;
+                descriptionSuggestions.appendChild(option);
             });
         });
+    }
 
-        // Create a worksheet from the expenses array
-        const ws = XLSX.utils.json_to_sheet(expensesArray);
+    // Function to load unique expense labels for suggestions
+    function loadLabelSuggestions() {
+        const expensesRef = firebase.database().ref(`expenses/${userId}`);
+        const labelSuggestions = document.getElementById("labelSuggestions");
 
-        // Create a new workbook and append the worksheet
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Expenses");
+        expensesRef.once("value", (snapshot) => {
+            const labels = new Set(); // Use a Set to avoid duplicates
 
-        // Trigger the download of the Excel file
-        XLSX.writeFile(wb, "Expenses_List.xlsx");
-    });
-}
+            snapshot.forEach((childSnapshot) => {
+                const expense = childSnapshot.val();
+                if (expense.label) {
+                    labels.add(expense.label); // Store unique labels
+                }
+            });
 
-// Add event listener to the download button
-document.getElementById("downloadExcelBtn").addEventListener("click", downloadExcel);
+            // Clear previous suggestions
+            labelSuggestions.innerHTML = "";
 
+            // Add new suggestions to the datalist
+            labels.forEach((label) => {
+                const option = document.createElement("option");
+                option.value = label;
+                labelSuggestions.appendChild(option);
+            });
+        });
+    }
 
-    </script>
-    <!-- JavaScript for Calculator Functionality -->
-<script>
+    // Function to export expenses to Excel
+    function downloadExcel() {
+        const expensesRef = firebase.database().ref(`expenses/${userId}`);
+        const expensesArray = [];
+
+        expensesRef.once("value", (snapshot) => {
+            snapshot.forEach((childSnapshot) => {
+                const expense = childSnapshot.val();
+                const expenseDate = new Date(expense.date);
+                const expenseDateFormatted = expenseDate.toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric"
+                });
+
+                expensesArray.push({
+                    "Title": expense.description,
+                    "Amount (₹)": expense.amount.toFixed(2),
+                    "Date": expenseDateFormatted,
+                    "Label": expense.label || "No Label",
+                    "Type": expense.type || "expense"
+                });
+            });
+
+            // Create a worksheet from the expenses array
+            const ws = XLSX.utils.json_to_sheet(expensesArray);
+
+            // Create a new workbook and append the worksheet
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Expenses");
+
+            // Trigger the download of the Excel file
+            XLSX.writeFile(wb, "Expenses_List.xlsx");
+        });
+    }
+
+    // Add event listener to the download button
+    document.getElementById("downloadExcelBtn").addEventListener("click", downloadExcel);
+
+    // Calculator functionality
     const display = document.getElementById("calculatorDisplay");
 
     // Append value to the display
@@ -901,30 +979,24 @@ document.getElementById("downloadExcelBtn").addEventListener("click", downloadEx
     function deleteLast() {
         display.value = display.value.slice(0, -1);
     }
-</script>
 
-<script>
-     // Log out function
-     document.getElementById("logoutButton").addEventListener("click", () => {
-            firebase.auth().signOut().then(() => {
-                window.location.href = "login.html";
-            }).catch((error) => {
-                alert("Error logging out: " + error.message);
-            });
+    // Log out function
+    document.getElementById("logoutButton").addEventListener("click", () => {
+        firebase.auth().signOut().then(() => {
+            window.location.href = "login.html";
+        }).catch((error) => {
+            alert("Error logging out: " + error.message);
         });
+    });
 
-        // For back button
-
-        function goBack() {
-    if (window.history.length > 1) {
-        window.history.back();
-    } else {
-        window.location.href = "defaultPage.html"; // Redirect to a default page
+    // For back button
+    function goBack() {
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            window.location.href = "defaultPage.html"; // Redirect to a default page
+        }
     }
-}
-
-
-
 </script>
 
 

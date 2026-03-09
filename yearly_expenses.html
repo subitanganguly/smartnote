@@ -62,7 +62,7 @@
   <div class="container">
     <a class="navbar-brand" href="#">
     <img src="img/logo.png" alt="Bootstrap" width="40" height="34" class="brand-logo">
-    <span id="greetingMessage" class="mb-0"><span class="mt-3"> <span id="yearTitle"></span></span>
+    <span id="greetingMessage" class="mb-0"><span class="mt-3"> <span id="yearTitle"></span> <span id="recordCount">Records</span></span>
     </a>
     <div class="d-flex align-items-center">
         <a class="dropdown-item" alt="Log Out" href="#" id="logoutButton"><i class="fa-solid fa-right-from-bracket"></i></a>
@@ -122,9 +122,9 @@
         </button><br>
         
         <!-- Record count and total amount display -->
-         <button class="btn btn-outline-light btn-res">
+         <button class="btn btn-outline-light btn-res d-none">
         <span id="totalAmount">₹ Total</span>
-        <span id="recordCount" style="display: none;">Records</span>
+        
         </button>
         <center>
             <div id="loadingSpinner" class="loader mt-3" style="display: none;" role="status">
@@ -133,7 +133,7 @@
         </center>
 
         <!-- Expenses list -->
-        <ul id="yearlyExpensesList" class="list-group mt-3"></ul>
+        <ul id="yearlyExpensesList" class="list-group mt-1"></ul>
 
         <!-- Back button -->
         <!-- <button onclick="window.history.back()" class="btn btn-secondary mt-3">Back to Archived Expenditures</button> -->
@@ -188,7 +188,7 @@
 
         function displayExpenses(expenses) {
             yearlyExpensesList.innerHTML = "";
-            recordCount.textContent = `| Records: ${expenses.length}`;
+            recordCount.textContent = `Records: ${expenses.length}`;
 
             if (expenses.length === 0) {
                 yearlyExpensesList.innerHTML = `<li class="text-center glass zoom text-light">No records found</li>`;
@@ -213,6 +213,8 @@
                    <div class="d-flex justify-content-between align-items-center" style="margin-left: 20px;">
                    <span style="font-size: 12px; color: #ffc107;"><b><i class="fas fa-wallet"></i> ${expense.description} <span style="display: none;">${expense.label}</span></b><span class="text-light"> ₹${expense.amount.toFixed(2)}<br>
                     <span style="font-size: 12px; color: #32CD32;"> ${formattedDate}</span>
+                    <span class="badge category-badge bg-primary">${expense.label}</span>
+                                    <span class="badge ${expense.type === 'earnings' ? 'bg-success' : 'bg-danger'}">${expense.type}</span>
                     </span></span> 
                   <span>
                   <div class="dropstart" style="margin-right: 20px;">
