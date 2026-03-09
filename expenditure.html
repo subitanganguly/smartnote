@@ -15,125 +15,119 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="js/gradient-loader.js"></script>
     <script src="js/auth.js"></script>
     <style>
-
         .glass {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.199);
-  }
-          #monthFilter {
-    -ms-overflow-style: none;  /* For Internet Explorer 10+ */
-    scrollbar-width: none;  /* For Firefox */
-}
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.199);
+        }
+        
+        #monthFilter {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
-#monthFilter::-webkit-scrollbar {
-    display: none;  /* For Chrome, Safari, and newer Edge */
-}
+        #monthFilter::-webkit-scrollbar {
+            display: none;
+        }
 
-#buttonScroll {
-    -ms-overflow-style: none;  /* For Internet Explorer 10+ */
-    scrollbar-width: none;  /* For Firefox */
-}
+        #buttonScroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
+        #buttonScroll::-webkit-scrollbar {
+            display: none;
+        }
 
-#buttonScroll::-webkit-scrollbar {
-    display: none;  /* For Chrome, Safari, and newer Edge */
-}
+        /* Default styles for the button */
+        .btn-outline-warning {
+            padding: 0.3rem 0.8rem;
+            font-size: 1rem;
+            height: auto;
+            border-radius: 20px;
+        }
+        
+        /* Small screen styles (mobile view) */
+        @media (max-width: 768px) {
+            .btn-outline-warning {
+                padding: 0.1rem 0.4rem;
+                font-size: 0.75rem;
+                border-radius: 20px;
+            }
+            
+            #buttonScroll .btn {
+                padding: 0.5rem 0.4rem;
+                font-size: 0.75rem;
+                border-radius: 20px;
+            }
+        }
 
-/* Default styles for the button */
-.btn-outline-warning {
-    padding: 0.3rem 0.8rem; /* Default padding for larger screens */
-    font-size: 1rem; /* Default font size */
-    height: auto; /* Ensure height adjusts automatically */
-    border-radius: 20px; /* Default border radius */
-}
-/* Small screen styles (mobile view) */
-@media (max-width: 768px) {
-    .btn-outline-warning {
-        padding: 0.1rem 0.4rem; /* Smaller padding for mobile */
-        font-size: 0.75rem; /* Smaller font size for mobile */
-        border-radius: 20px; /* More rounded corners for mobile */
-    }
-}
-
-/* Hide button text on small screens */
-@media (max-width: 768px) {
-    #buttonScroll .btn {
-        padding: 0.5rem 0.4rem; /* Smaller padding for mobile */
-        font-size: 0.75rem; /* Smaller font size for mobile */
-        border-radius: 20px; /* More rounded corners for mobile */
-    
-    }
-
-}
-
-
-    /* Style for the main container */
-    .input-container {
-        position: relative;
-        width: 100%; /* Make it responsive */
-    }
+        /* Style for the main container */
+        .input-container {
+            position: relative;
+            width: 100%;
+        }
 
         /* Button Styles */
         .calc-btn, .calc-op-btn, .calc-eq-btn, .calc-clear-btn, .calc-del-btn {
-        font-size: 1.2rem;
-        padding: 15px;
-        margin: 5px;
-        border-radius: 8px;
-        transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
-    }
+            font-size: 1.2rem;
+            padding: 15px;
+            margin: 5px;
+            border-radius: 8px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+        }
 
-    /* General Button Styling */
-    .calc-btn {
-        background: linear-gradient(145deg, #f2f2f2, #e3e3e3);
-        color: #333;
-        box-shadow: 3px 3px 5px #aaa, -3px -3px 5px #fff;
-    }
+        /* General Button Styling */
+        .calc-btn {
+            background: linear-gradient(145deg, #f2f2f2, #e3e3e3);
+            color: #333;
+            box-shadow: 3px 3px 5px #aaa, -3px -3px 5px #fff;
+        }
 
-    /* Operator Buttons */
-    .calc-op-btn {
-        background: linear-gradient(145deg, #f8d9aa, #f4c07d);
-        color: #8c4600;
-        box-shadow: 3px 3px 5px #b38d6b, -3px -3px 5px #ffedcb;
-    }
+        /* Operator Buttons */
+        .calc-op-btn {
+            background: linear-gradient(145deg, #f8d9aa, #f4c07d);
+            color: #8c4600;
+            box-shadow: 3px 3px 5px #b38d6b, -3px -3px 5px #ffedcb;
+        }
 
-    /* Equal Button */
-    .calc-eq-btn {
-        background: linear-gradient(145deg, #a3e4d7, #7fd3c7);
-        color: #004d47;
-        box-shadow: 3px 3px 5px #7bbfb4, -3px -3px 5px #ccf6f3;
-    }
+        /* Equal Button */
+        .calc-eq-btn {
+            background: linear-gradient(145deg, #a3e4d7, #7fd3c7);
+            color: #004d47;
+            box-shadow: 3px 3px 5px #7bbfb4, -3px -3px 5px #ccf6f3;
+        }
 
-    /* Clear Button */
-    .calc-clear-btn {
-        background: linear-gradient(145deg, #f5a3a3, #e07f7f);
-        color: #900;
-        box-shadow: 3px 3px 5px #b36b6b, -3px -3px 5px #ffcccc;
-    }
+        /* Clear Button */
+        .calc-clear-btn {
+            background: linear-gradient(145deg, #f5a3a3, #e07f7f);
+            color: #900;
+            box-shadow: 3px 3px 5px #b36b6b, -3px -3px 5px #ffcccc;
+        }
 
-    /* Delete Button */
-    .calc-del-btn {
-        background: linear-gradient(145deg, #cccccc, #a6a6a6);
-        color: #333;
-        box-shadow: 3px 3px 5px #999, -3px -3px 5px #fff;
-    }
+        /* Delete Button */
+        .calc-del-btn {
+            background: linear-gradient(145deg, #cccccc, #a6a6a6);
+            color: #333;
+            box-shadow: 3px 3px 5px #999, -3px -3px 5px #fff;
+        }
 
-    /* Hover Effects */
-    .calc-btn:hover, .calc-op-btn:hover, .calc-eq-btn:hover, .calc-clear-btn:hover, .calc-del-btn:hover {
-        transform: scale(1.05);
-        box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.2), -4px -4px 6px rgba(255, 255, 255, 0.3);
-        background-color: #ffc107; /* Bootstrap's warning color */
-        color: #343a40; /* Bootstrap's dark color for text */
-    }
+        /* Hover Effects */
+        .calc-btn:hover, .calc-op-btn:hover, .calc-eq-btn:hover, .calc-clear-btn:hover, .calc-del-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.2), -4px -4px 6px rgba(255, 255, 255, 0.3);
+            background-color: #ffc107;
+            color: #343a40;
+        }
 
-    .floating-btn {
-
+        .floating-btn {
             position: fixed;
             bottom: 20px;
             right: 20px;
@@ -153,45 +147,71 @@
             transform: scale(1.1);
         }
 
-/* Gradient animation */
-@keyframes gradientAnimation {
-    0% {
-        background: radial-gradient(ellipse at bottom, #00306b50 0%, #006e7241);
-    }
-    100% {
-        background: radial-gradient(ellipse at bottom, #006e7241 0%, #00306b50);
-    }
-}
-
-
-/* Make the button smaller on mobile screens */
-@media (max-width: 768px) {
-   
-}
-
-@media (max-width: 480px) {
-    .floating-btn {
+        @media (max-width: 480px) {
+            .floating-btn {
                 width: 50px;
                 height: 50px;
                 font-size: 20px;
                 bottom: 15px;
                 right: 15px;
             }
-}
-.dropstart{
-     position: fixed;
-     bottom: 13px;
-     right: 20px;
-     z-index: 1000;
+        }
+        
+        .dropstart {
+            position: fixed;
+            bottom: 13px;
+            right: 20px;
+            z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: center;
-}
-.dropdown-menu{
-    max-height: 40px;
-    max-width: 20px;
-    
-}
+        }
+        
+        .dropdown-menu {
+            max-height: 40px;
+            max-width: 20px;
+        }
+        
+        /* Auto-suggestion styles */
+        .suggest-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        
+        .suggest-box {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            z-index: 9999;
+        }
+        
+        .suggest-list {
+            background: #1a1a1a;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            max-height: 180px;
+            overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,.3);
+        }
+        
+        .suggest-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #fff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-transform: uppercase;
+        }
+        
+        .suggest-item:last-child {
+            border-bottom: none;
+        }
+        
+        .suggest-item:hover {
+            background: linear-gradient(45deg, #6a11cb 0%, #2575fc 100%);
+            color: #fff;
+        }
     </style>
 </head>
   <body>
@@ -210,799 +230,906 @@
         </ul>
 
         <nav class="navbar bg-light fixed-top">
-  <div class="container">
-    <a class="navbar-brand" href="index.html">
-    <img src="img/logo.png" alt="Bootstrap" width="40" height="34" class="brand-logo">
-    <span id="greetingMessage" class="mb-0"><span class="mt-3"><span id="totalAmount" class="bg-light p-1 rounded">0.00</span></span></span>
-    </a>
-    <div class="d-flex align-items-center">
-        <a class="dropdown-item" alt="Log Out" href="#" id="logoutButton"><i class="fa-solid fa-right-from-bracket"></i></a>
-    
-    </div>
-  </div>
-   </nav>
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <img src="img/logo.png" alt="Bootstrap" width="40" height="34" class="brand-logo">
+                    <span id="greetingMessage" class="mb-0"><span class="mt-3"><span id="totalAmount" class="bg-light p-1 rounded">0.00</span></span></span>
+                </a>
+                <div class="d-flex align-items-center">
+                    <a class="dropdown-item" alt="Log Out" href="#" id="logoutButton"><i class="fa-solid fa-right-from-bracket"></i></a>
+                </div>
+            </div>
+        </nav>
   
-   <div class="container main-content" style="margin-top: 80px;">
-     <div class="container mt-1 text-light ">
-   <!-- Payment Summary Boxes -->
-<div class="row mb-1">
-    <div class="col-6">
-        <div class="glass bg-light p-1 text-center">
-            <small class="text-success"><span class="d-none d-lg-inline">Total Earnings</span>(In)</small>
-            <small class="text-success mb-0 fw-bold" id="totalEarnings">₹0.00</small>
-        </div>
-    </div>
-    <div class="col-6">
-        <div class="glass bg-light p-1 text-center">
-            <small class="text-danger"><span class="d-none d-lg-inline">Total Expenses</span>(Out)</small>
-            <small class="text-danger mb-0 fw-bold" id="totalExpenses">₹0.00</small>
-        </div>
-    </div>
-</div>
+        <div class="container main-content" style="margin-top: 80px;">
+            <div class="container mt-1 text-light ">
+                <!-- Payment Summary Boxes -->
+                <div class="row mb-1">
+                    <div class="col-6">
+                        <div class="glass bg-light p-1 text-center">
+                            <small class="text-success"><span class="d-none d-lg-inline">Total Earnings</span>(In)</small>
+                            <small class="text-success mb-0 fw-bold" id="totalEarnings">₹0.00</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="glass bg-light p-1 text-center">
+                            <small class="text-danger"><span class="d-none d-lg-inline">Total Expenses</span>(Out)</small>
+                            <small class="text-danger mb-0 fw-bold" id="totalExpenses">₹0.00</small>
+                        </div>
+                    </div>
+                </div>
 
-    <!-- Filters -->
-    <div class="mb-1">
-        <div class="row g-2">
-  <!-- Search filter input -->
-  <div class="col-md-6">
-    <div class="input-group zoom mb-1">
-      <span class="input-group-text" id="searchIcon">
-        <i class="fas fa-search"></i>
-      </span>
-      <input type="text" id="searchInput" class="form-control" placeholder="Search.......">
-    </div>
-  </div>
+                <!-- Filters -->
+                <div class="mb-1">
+                    <div class="row g-2">
+                        <!-- Search filter input -->
+                        <div class="col-md-6">
+                            <div class="input-group zoom mb-1">
+                                <span class="input-group-text" id="searchIcon">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" id="searchInput" class="form-control" placeholder="Search.......">
+                            </div>
+                        </div>
 
-  <!-- Label filter -->
-  <div class="col-md-6">
-    <select id="labelFilter" class="form-select mb-1 zoom text-uppercase">
-      <option value="">All Labels</option>
-    </select>
-  </div>
+                        <!-- Label filter -->
+                        <div class="col-md-6">
+                            <select id="labelFilter" class="form-select mb-1 zoom text-uppercase">
+                                <option value="">All Labels</option>
+                            </select>
+                        </div>
 
-  <!-- Type Filter -->
-<div class="col-md-6">
-    <select id="typeFilter" class="form-select mb-1 zoom">
-        <option value="">All Types</option>
-        <option value="expense">Expenses Only</option>
-        <option value="earnings">Earnings Only</option>
-    </select>
-</div>
-</div>
+                        <!-- Type Filter -->
+                        <div class="col-md-6">
+                            <select id="typeFilter" class="form-select mb-1 zoom">
+                                <option value="">All Types</option>
+                                <option value="expense">Expenses Only</option>
+                                <option value="earnings">Earnings Only</option>
+                            </select>
+                        </div>
+                    </div>
 
-        <div class="d-flex" style="display: none;">
-            <input type="date" id="startDate" class="form-control mb-2" placeholder="Start Date" style="display: none;">
-            <input type="date" id="endDate" class="form-control mb-2 ms-2" placeholder="End Date" style="display: none;">
-        </div>
-    </div>
+                    <div class="d-flex" style="display: none;">
+                        <input type="date" id="startDate" class="form-control mb-2" placeholder="Start Date" style="display: none;">
+                        <input type="date" id="endDate" class="form-control mb-2 ms-2" placeholder="End Date" style="display: none;">
+                    </div>
+                </div>
  
-    <!-- Month Filter (Horizontal Scrollable) -->
-    <div id="monthFilter" class="d-flex overflow-auto mb-2">
-        <button class="btn btn-outline-warning me-2" data-month="0">Janu</button>
-        <button class="btn btn-outline-warning me-2" data-month="1">Feb</button>
-        <button class="btn btn-outline-warning me-2" data-month="2">Mar</button>
-        <button class="btn btn-outline-warning me-2" data-month="3">Apr</button>
-        <button class="btn btn-outline-warning me-2" data-month="4">May</button>
-        <button class="btn btn-outline-warning me-2" data-month="5">June</button>
-        <button class="btn btn-outline-warning me-2" data-month="6">July</button>
-        <button class="btn btn-outline-warning me-2" data-month="7">Aug</button>
-        <button class="btn btn-outline-warning me-2" data-month="8">Sept</button>
-        <button class="btn btn-outline-warning me-2" data-month="9">Oct</button>
-        <button class="btn btn-outline-warning me-2" data-month="10">Nov</button>
-        <button class="btn btn-outline-warning me-2" data-month="11">Dec</button>
-    </div>
+                <!-- Month Filter (Horizontal Scrollable) -->
+                <div id="monthFilter" class="d-flex overflow-auto mb-2">
+                    <button class="btn btn-outline-warning me-2" data-month="0">Janu</button>
+                    <button class="btn btn-outline-warning me-2" data-month="1">Feb</button>
+                    <button class="btn btn-outline-warning me-2" data-month="2">Mar</button>
+                    <button class="btn btn-outline-warning me-2" data-month="3">Apr</button>
+                    <button class="btn btn-outline-warning me-2" data-month="4">May</button>
+                    <button class="btn btn-outline-warning me-2" data-month="5">June</button>
+                    <button class="btn btn-outline-warning me-2" data-month="6">July</button>
+                    <button class="btn btn-outline-warning me-2" data-month="7">Aug</button>
+                    <button class="btn btn-outline-warning me-2" data-month="8">Sept</button>
+                    <button class="btn btn-outline-warning me-2" data-month="9">Oct</button>
+                    <button class="btn btn-outline-warning me-2" data-month="10">Nov</button>
+                    <button class="btn btn-outline-warning me-2" data-month="11">Dec</button>
+                </div>
     
-    <button type="button" class="btn btn-warning floating-btn" data-bs-toggle="modal" data-bs-target="#expenseModal" id="floatingBtn">
-        <i class="fas fa-plus"></i> <span class="text"></span>
-    </button>
+                <button type="button" class="btn btn-warning floating-btn" data-bs-toggle="modal" data-bs-target="#expenseModal" id="floatingBtn">
+                    <i class="fas fa-plus"></i> <span class="text"></span>
+                </button>
 
-    <!-- Action Buttons -->
-    <div id="buttonScroll" class="d-flex overflow-auto mb-1">
-       
+                <!-- Action Buttons -->
+                <div id="buttonScroll" class="d-flex overflow-auto mb-1">
+                    <button id="resetFiltersBtn" class="btn btn-outline-light me-2 scroll">
+                        <i class="fas fa-filter"></i> <span class="text">Reset</span>
+                    </button>
 
-        <button id="resetFiltersBtn" class="btn btn-outline-light me-2 scroll">
-            <i class="fas fa-filter"></i> <span class="text">Reset</span>
-        </button>
+                    <a href="archive_expenditure.html" class="btn btn-outline-light me-2 scroll">
+                        <i class="fas fa-archive"></i> <span class="text">Archived</span>
+                    </a>
+                    <button id="downloadExcelBtn" class="btn btn-outline-light me-2 scroll">
+                        <i class="fas fa-download"></i> <span class="text">Download</span>
+                    </button>
+                    <!-- Button to open the Calculator Modal -->
+                    <button type="button" class="btn btn-outline-light me-2 scroll" data-bs-toggle="modal" data-bs-target="#calculatorModal">
+                        <i class="fas fa-calculator"></i> Calculator
+                    </button>
+                </div>
 
-        <a href="archive_expenditure.html" class="btn btn-outline-light me-2 scroll">
-            <i class="fas fa-archive"></i> <span class="text">Archived</span>
-        </a>
-        <button id="downloadExcelBtn" class="btn btn-outline-light me-2 scroll">
-            <i class="fas fa-download"></i> <span class="text">Download</span>
-        </button>
-        <!-- Button to open the Calculator Modal -->
-        <button type="button" class="btn btn-outline-light me-2 scroll" data-bs-toggle="modal" data-bs-target="#calculatorModal">
-        <i class="fas fa-calculator"></i> Calculator
-        </button>
-    </div>
-</nav>
-
-
-        <!-- Modal -->
-        <!-- Modal -->
-<div class="modal fade glass" id="expenseModal" tabindex="-1" aria-labelledby="expenseModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content text-dark" style="background-color: #294664;">
-            <div class="modal-header d-flex justify-content-center">
-                <h5 class="modal-title w-100 text-center text-light" id="expenseModalLabel">Expense or Savings</h5>
-            </div>
-            
-            <div class="modal-body">
-    <div class="mb-3">
-        <!-- Type Selector (Expense or Earnings) -->
-        <div class="btn-group w-100 mb-2" role="group" aria-label="Expense type">
-            <input type="radio" class="btn-check" name="expenseType" id="typeExpense" value="expense" checked autocomplete="off">
-            <label class="btn btn-outline-danger" for="typeExpense">
-                <i class="fas fa-arrow-down"></i> Expense (Out)
-            </label>
-            
-            <input type="radio" class="btn-check" name="expenseType" id="typeEarnings" value="earnings" autocomplete="off">
-            <label class="btn btn-outline-success" for="typeEarnings">
-                <i class="fas fa-arrow-up"></i> Earnings (In)
-            </label>
-        </div>
-        
-        <!-- Expense Description -->
-        <input type="text" id="expenseDescription" class="form-control mb-2 text-uppercase" placeholder="Expense description" list="descriptionSuggestions" autocomplete="off">
-        <datalist class="text-lowercase" id="descriptionSuggestions" style="background-color: #c3def8; border: 1px solid #c0c2c3; padding: 5px; max-height: 150px; overflow-y: auto; font-size: 14px;"></datalist>
-        
-        <!-- Label Input -->
-        <input type="text" id="expenseLabel" list="labelSuggestions" class="form-control mb-2 text-uppercase" placeholder="Label (e.g., Food, Travel)" autocomplete="off">
-        <datalist id="labelSuggestions" style="background-color: #c3def8; border: 1px solid #c0c2c3; padding: 5px; max-height: 150px; overflow-y: auto; font-size: 14px;"></datalist>         
-        <!-- Expense Amount -->
-        <input type="number" id="expenseAmount" class="form-control mb-2" placeholder="Amount" min="0">
-        
-        <!-- Expense Date -->
-        <div class="form-floating ">
-            <input type="date" id="expenseDate" class="form-control mb-2">
-            <label for="expenseDate">Date</label>
-        </div>
-    </div>
-</div>
-            <div class="modal-footer d-flex justify-content-center">
-                <button type="button" class="btn btn-secondary " data-bs-dismiss="modal">Close</button>
-                <button type="button" id="addExpenseBtn" class="btn btn-primary">Add</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-        <!-- Total Amount -->
-        
-        <!-- Loading Spinner -->
-         <center>
-        <div id="loadingSpinner" class="loader mt-3" style="display: none;" role="status">
-            <span class="sr-only"></span>
-            </div>
-        </center>
-
-        <!-- Expenses List -->
-        <ul id="expensesList" class="list-group mt-2"></ul>
-
-       <!-- Calculator Modal with Styled Buttons -->
-<div class="modal fade" id="calculatorModal" tabindex="-1" aria-labelledby="calculatorModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content bg-dark">
-            <div class="modal-header">
-                <h5 class="modal-title" id="calculatorModalLabel">Calculator</h5>
-            </div>
-            <div class="modal-body">
-                <!-- Calculator Display -->
-                <input type="text" id="calculatorDisplay" class="form-control text-end mb-3" readonly style="font-size: 1.5rem; padding: 10px;">
-
-                <!-- Calculator Buttons -->
-                <div class="calculator-buttons">
-                    <div class="row">
-                        <button onclick="appendValue('7')" class="col btn calc-btn">7</button>
-                        <button onclick="appendValue('8')" class="col btn calc-btn">8</button>
-                        <button onclick="appendValue('9')" class="col btn calc-btn">9</button>
-                        <button onclick="appendValue('/')" class="col btn calc-op-btn">÷</button>
+                <!-- Modal -->
+                <div class="modal fade glass" id="expenseModal" tabindex="-1" aria-labelledby="expenseModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content text-dark" style="background-color: #294664;">
+                            <div class="modal-header d-flex justify-content-center">
+                                <h5 class="modal-title w-100 text-center text-light" id="expenseModalLabel">Expense or Savings</h5>
+                            </div>
+                            
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <!-- Type Selector (Expense or Earnings) -->
+                                    <div class="btn-group w-100 mb-2" role="group" aria-label="Expense type">
+                                        <input type="radio" class="btn-check" name="expenseType" id="typeExpense" value="expense" checked autocomplete="off">
+                                        <label class="btn btn-outline-danger" for="typeExpense">
+                                            <i class="fas fa-arrow-down"></i> Expense (Out)
+                                        </label>
+                                        
+                                        <input type="radio" class="btn-check" name="expenseType" id="typeEarnings" value="earnings" autocomplete="off">
+                                        <label class="btn btn-outline-success" for="typeEarnings">
+                                            <i class="fas fa-arrow-up"></i> Earnings (In)
+                                        </label>
+                                    </div>
+                                    
+                                    <!-- Expense Description with Auto-suggestion -->
+                                    <div class="suggest-wrapper mb-2">
+                                        <input type="text" id="expenseDescription" class="form-control text-uppercase" placeholder="Expense description" autocomplete="off">
+                                    </div>
+                                    
+                                    <!-- Label Input with Auto-suggestion -->
+                                    <div class="suggest-wrapper mb-2">
+                                        <input type="text" id="expenseLabel" class="form-control text-uppercase" placeholder="Label (e.g., Food, Travel)" autocomplete="off">
+                                    </div>
+                                    
+                                    <!-- Expense Amount -->
+                                    <input type="number" id="expenseAmount" class="form-control mb-2" placeholder="Amount" min="0">
+                                    
+                                    <!-- Expense Date -->
+                                    <div class="form-floating">
+                                        <input type="date" id="expenseDate" class="form-control mb-2">
+                                        <label for="expenseDate">Date</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer d-flex justify-content-center">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" id="addExpenseBtn" class="btn btn-primary">Add</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="row">
-                        <button onclick="appendValue('4')" class="col btn calc-btn">4</button>
-                        <button onclick="appendValue('5')" class="col btn calc-btn">5</button>
-                        <button onclick="appendValue('6')" class="col btn calc-btn">6</button>
-                        <button onclick="appendValue('*')" class="col btn calc-op-btn">×</button>
+                </div>
+
+                <!-- Loading Spinner -->
+                <center>
+                    <div id="loadingSpinner" class="loader mt-3" style="display: none;" role="status">
+                        <span class="sr-only"></span>
                     </div>
-                    <div class="row">
-                        <button onclick="appendValue('1')" class="col btn calc-btn">1</button>
-                        <button onclick="appendValue('2')" class="col btn calc-btn">2</button>
-                        <button onclick="appendValue('3')" class="col btn calc-btn">3</button>
-                        <button onclick="appendValue('-')" class="col btn calc-op-btn">−</button>
+                </center>
+
+                <!-- Expenses List -->
+                <ul id="expensesList" class="list-group mt-2"></ul>
+
+                <!-- Calculator Modal with Styled Buttons -->
+                <div class="modal fade" id="calculatorModal" tabindex="-1" aria-labelledby="calculatorModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content bg-dark">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="calculatorModalLabel">Calculator</h5>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Calculator Display -->
+                                <input type="text" id="calculatorDisplay" class="form-control text-end mb-3" readonly style="font-size: 1.5rem; padding: 10px;">
+
+                                <!-- Calculator Buttons -->
+                                <div class="calculator-buttons">
+                                    <div class="row">
+                                        <button onclick="appendValue('7')" class="col btn calc-btn">7</button>
+                                        <button onclick="appendValue('8')" class="col btn calc-btn">8</button>
+                                        <button onclick="appendValue('9')" class="col btn calc-btn">9</button>
+                                        <button onclick="appendValue('/')" class="col btn calc-op-btn">÷</button>
+                                    </div>
+                                    <div class="row">
+                                        <button onclick="appendValue('4')" class="col btn calc-btn">4</button>
+                                        <button onclick="appendValue('5')" class="col btn calc-btn">5</button>
+                                        <button onclick="appendValue('6')" class="col btn calc-btn">6</button>
+                                        <button onclick="appendValue('*')" class="col btn calc-op-btn">×</button>
+                                    </div>
+                                    <div class="row">
+                                        <button onclick="appendValue('1')" class="col btn calc-btn">1</button>
+                                        <button onclick="appendValue('2')" class="col btn calc-btn">2</button>
+                                        <button onclick="appendValue('3')" class="col btn calc-btn">3</button>
+                                        <button onclick="appendValue('-')" class="col btn calc-op-btn">−</button>
+                                    </div>
+                                    <div class="row">
+                                        <button onclick="appendValue('0')" class="col btn calc-btn">0</button>
+                                        <button onclick="appendValue('.')" class="col btn calc-btn">.</button>
+                                        <button onclick="calculateResult()" class="col btn calc-eq-btn">=</button>
+                                        <button onclick="appendValue('+')" class="col btn calc-op-btn">+</button>
+                                    </div>
+                                    <div class="row d-flex justify-content-between mb-3">
+                                        <button onclick="clearDisplay()" class="col-5 btn calc-clear-btn">Clear</button>
+                                        <button onclick="deleteLast()" class="col-5 btn calc-del-btn">Delete</button>
+                                    </div>
+                                    <button type="button" class="btn-lg btn-outline-light" data-bs-dismiss="modal" style="font-size: larger; padding-left: 30px; padding-right: 30px; border-radius: 20px; margin-left: 35%;"> Close</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="row">
-                        <button onclick="appendValue('0')" class="col btn calc-btn">0</button>
-                        <button onclick="appendValue('.')" class="col btn calc-btn">.</button>
-                        <button onclick="calculateResult()" class="col btn calc-eq-btn">=</button>
-                        <button onclick="appendValue('+')" class="col btn calc-op-btn">+</button>
-                    </div>
-                    <div class="row d-flex justify-content-between mb-3">
-                        <button onclick="clearDisplay()" class="col-5 btn calc-clear-btn">Clear</button>
-                        <button onclick="deleteLast()" class="col-5 btn calc-del-btn">Delete</button>
-                    </div>
-                    <button type="button" class="btn-lg btn-outline-light" data-bs-dismiss="modal" style="font-size: larger; padding-left: 30px; padding-right: 30px; border-radius: 20px; margin-left: 35%;"> Close</button>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
+        <script>
+            // Function to reset the form fields
+            function resetForm() {
+                expenseDescription.value = "";
+                expenseAmount.value = "";
+                expenseDate.value = "";
+                expenseLabel.value = "";
+                document.getElementById("typeExpense").checked = true; // Reset to expense by default
+            }
 
-   <script>
-    // Function to reset the form fields
-    function resetForm() {
-        expenseDescription.value = "";
-        expenseAmount.value = "";
-        expenseDate.value = "";
-        expenseLabel.value = "";
-        document.getElementById("typeExpense").checked = true; // Reset to expense by default
-    }
-
-    // UI Elements
-    const loadingSpinner = document.getElementById("loadingSpinner");
-    const expenseDescription = document.getElementById("expenseDescription");
-    const expenseAmount = document.getElementById("expenseAmount");
-    const expenseDate = document.getElementById("expenseDate");
-    const addExpenseBtn = document.getElementById("addExpenseBtn");
-    const expensesList = document.getElementById("expensesList");
-    const totalAmount = document.getElementById("totalAmount");
-    const expenseLabel = document.getElementById("expenseLabel");
-    
-    // Additional UI Elements
-    const expenseTypeExpense = document.getElementById("typeExpense");
-    const expenseTypeEarnings = document.getElementById("typeEarnings");
-    const typeFilter = document.getElementById("typeFilter");
-    const totalEarnings = document.getElementById("totalEarnings");
-    const totalExpenses = document.getElementById("totalExpenses");
-
-    let userId;
-    let selectedMonth = null; // Track the selected month
-
-    // Listen for authentication state changes
-    firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-            userId = user.uid;
+            // UI Elements
+            const loadingSpinner = document.getElementById("loadingSpinner");
+            const expenseDescription = document.getElementById("expenseDescription");
+            const expenseAmount = document.getElementById("expenseAmount");
+            const expenseDate = document.getElementById("expenseDate");
+            const addExpenseBtn = document.getElementById("addExpenseBtn");
+            const expensesList = document.getElementById("expensesList");
+            const totalAmount = document.getElementById("totalAmount");
+            const expenseLabel = document.getElementById("expenseLabel");
             
-            // Automatically archive previous year records when the user logs in
-            archiveExpenses();
+            // Additional UI Elements
+            const expenseTypeExpense = document.getElementById("typeExpense");
+            const expenseTypeEarnings = document.getElementById("typeEarnings");
+            const typeFilter = document.getElementById("typeFilter");
+            const totalEarnings = document.getElementById("totalEarnings");
+            const totalExpenses = document.getElementById("totalExpenses");
+
+            let userId;
+            let selectedMonth = null; // Track the selected month
+            let descriptionSuggestions = [];
+            let labelSuggestions = [];
+
+            // Listen for authentication state changes
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    userId = user.uid;
+                    
+                    // Automatically archive previous year records when the user logs in
+                    archiveExpenses();
+                    
+                    loadUserExpenses();  // Load the expenses
+                    loadSuggestions(); // Load suggestions from Firebase
+                    
+                    // Attach autocomplete to inputs after they exist
+                    setTimeout(() => {
+                        attachDescriptionAutocomplete(expenseDescription);
+                        attachLabelAutocomplete(expenseLabel);
+                    }, 500);
+                } else {
+                    console.log("User not authenticated. Redirecting to login...");
+                    window.location.href = "login.html";
+                }
+            });
+
+            // Auto-suggestion function for description input
+            // Auto-suggestion function for description input (matches ANY word)
+function attachDescriptionAutocomplete(input) {
+    const wrapper = input.parentElement;
+    wrapper.style.position = "relative";
+
+    // Remove any existing suggestion box
+    const existingBox = wrapper.querySelector(".suggest-box");
+    if (existingBox) existingBox.remove();
+
+    const box = document.createElement("div");
+    box.className = "suggest-box";
+    wrapper.appendChild(box);
+
+    // Input event listener
+    input.addEventListener("input", () => {
+        const val = input.value.trim().toLowerCase();
+        box.innerHTML = "";
+
+        if (!val) return;
+
+        // Split search into individual words
+        const searchWords = val.split(/\s+/).filter(word => word.length > 0);
+        
+        if (searchWords.length === 0) return;
+
+        // Find matches where ANY word from the search appears in the suggestion
+        const matches = descriptionSuggestions.filter(item => {
+            const itemLower = item.toLowerCase();
+            // Check if ANY of the search words is found in the item
+            return searchWords.some(word => itemLower.includes(word));
+        });
+
+        // Limit to first 10 matches for performance
+        const limitedMatches = matches.slice(0, 10);
+
+        if (!limitedMatches.length) return;
+
+        const list = document.createElement("div");
+        list.className = "suggest-list";
+
+        limitedMatches.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "suggest-item";
             
-            loadUserExpenses();  // Load the expenses
-            loadDescriptionSuggestions(); // Load description suggestions
-            loadLabelSuggestions();
-            loadLabels();
-        } else {
-            console.log("User not authenticated. Redirecting to login...");
-            window.location.href = "login.html";
+            // Highlight the matching words
+            let displayText = item;
+            searchWords.forEach(word => {
+                if (word.length > 1) { // Only highlight words longer than 1 character
+                    const regex = new RegExp(`(${word})`, 'gi');
+                    displayText = displayText.replace(regex, '<mark style="background: #ffc107; color: #000; padding: 0;">$1</mark>');
+                }
+            });
+            
+            div.innerHTML = displayText;
+            div.style.textTransform = "uppercase";
+
+            div.onclick = () => {
+                input.value = item;
+                box.innerHTML = "";
+            };
+
+            list.appendChild(div);
+        });
+
+        box.appendChild(list);
+    });
+
+    // Close on outside click
+    document.addEventListener("click", e => {
+        if (!wrapper.contains(e.target)) {
+            box.innerHTML = "";
         }
     });
 
-    // Function to load unique labels for filter dropdown
-    function loadLabels() {
-        const labelFilter = document.getElementById("labelFilter");
-        const expensesRef = firebase.database().ref(`expenses/${userId}`);
+    // Close on escape key
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            box.innerHTML = "";
+        }
+    });
+}
 
-        // Fetch all expenses to extract unique labels
-        expensesRef.once("value", (snapshot) => {
-            const labels = new Set(); // Use a Set to ensure uniqueness
-            snapshot.forEach((childSnapshot) => {
-                const expense = childSnapshot.val();
-                if (expense.label) {
-                    labels.add(expense.label); // Add the label if it exists
-                }
-            });
+// Auto-suggestion function for label input (matches ANY word)
+function attachLabelAutocomplete(input) {
+    const wrapper = input.parentElement;
+    wrapper.style.position = "relative";
 
-            // Clear and repopulate the dropdown
-            labelFilter.innerHTML = '<option value="">All Labels</option>'; // Default option
-            labels.forEach((label) => {
-                const option = document.createElement("option");
-                option.value = label;
-                option.textContent = label;
-                labelFilter.appendChild(option);
-            });
+    // Remove any existing suggestion box
+    const existingBox = wrapper.querySelector(".suggest-box");
+    if (existingBox) existingBox.remove();
+
+    const box = document.createElement("div");
+    box.className = "suggest-box";
+    wrapper.appendChild(box);
+
+    // Input event listener
+    input.addEventListener("input", () => {
+        const val = input.value.trim().toLowerCase();
+        box.innerHTML = "";
+
+        if (!val) return;
+
+        // Split search into individual words
+        const searchWords = val.split(/\s+/).filter(word => word.length > 0);
+        
+        if (searchWords.length === 0) return;
+
+        // Find matches where ANY word from the search appears in the suggestion
+        const matches = labelSuggestions.filter(item => {
+            const itemLower = item.toLowerCase();
+            // Check if ANY of the search words is found in the item
+            return searchWords.some(word => itemLower.includes(word));
         });
-    }
 
-    // Function to load user-specific expenses with filters
-    function loadUserExpenses() {
-        // Show loading spinner
-        document.getElementById("loadingSpinner").style.display = "flex";
+        // Limit to first 10 matches for performance
+        const limitedMatches = matches.slice(0, 10);
 
-        const expensesRef = firebase.database().ref(`expenses/${userId}`);
-        const searchText = document.getElementById("searchInput").value.toLowerCase();
-        const startDate = document.getElementById("startDate").value;
-        const endDate = document.getElementById("endDate").value;
-        const selectedLabel = document.getElementById("labelFilter").value;
-        const selectedType = document.getElementById("typeFilter")?.value || "";
+        if (!limitedMatches.length) return;
 
-        expensesRef.once("value", (snapshot) => {
-            expensesList.innerHTML = "";
-            let totalBalance = 0;
-            let totalEarningsAmount = 0;
-            let totalExpensesAmount = 0;
-            let expensesArray = [];
+        const list = document.createElement("div");
+        list.className = "suggest-list";
 
-            snapshot.forEach((childSnapshot) => {
-                const expense = childSnapshot.val();
-                const expenseDate = new Date(expense.date);
-                const expenseYearMonthDay = expenseDate.toISOString().split("T")[0];
-                const expenseMonth = expenseDate.getMonth();
-                
-                // Set default type if not exists (for backward compatibility)
-                const expenseType = expense.type || "expense";
-
-                // Apply filters: description, date range, month, label, and type
-                const matchesDescription = searchText ? expense.description.toLowerCase().includes(searchText) : true;
-                const matchesStartDate = startDate ? expenseYearMonthDay >= startDate : true;
-                const matchesEndDate = endDate ? expenseYearMonthDay <= endDate : true;
-                const matchesMonth = selectedMonth !== null ? expenseMonth === selectedMonth : true;
-                const matchesLabel = selectedLabel ? expense.label === selectedLabel : true;
-                const matchesType = selectedType ? expenseType === selectedType : true;
-
-                // Include expense only if it matches all active filters
-                if (matchesDescription && matchesStartDate && matchesEndDate && matchesMonth && matchesLabel && matchesType) {
-                    expensesArray.push({
-                        id: childSnapshot.key,
-                        date: expense.date,
-                        description: expense.description,
-                        amount: expense.amount,
-                        label: expense.label || "No Label",
-                        type: expenseType
-                    });
+        limitedMatches.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "suggest-item";
+            
+            // Highlight the matching words
+            let displayText = item;
+            searchWords.forEach(word => {
+                if (word.length > 1) { // Only highlight words longer than 1 character
+                    const regex = new RegExp(`(${word})`, 'gi');
+                    displayText = displayText.replace(regex, '<mark style="background: #ffc107; color: #000; padding: 0;">$1</mark>');
                 }
             });
+            
+            div.innerHTML = displayText;
+            div.style.textTransform = "uppercase";
 
-            // Reverse the array to show the most recent expense first
-            expensesArray.reverse();
+            div.onclick = () => {
+                input.value = item;
+                box.innerHTML = "";
+            };
 
-            // Display expenses in reverse order
-            if (expensesArray.length > 0) {
-                expensesArray.forEach((expense) => {
-                    const expenseDateFormatted = new Date(expense.date).toLocaleDateString("en-GB", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric"
+            list.appendChild(div);
+        });
+
+        box.appendChild(list);
+    });
+
+    // Close on outside click
+    document.addEventListener("click", e => {
+        if (!wrapper.contains(e.target)) {
+            box.innerHTML = "";
+        }
+    });
+
+    // Close on escape key
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            box.innerHTML = "";
+        }
+    });
+}
+            // Function to load suggestions from Firebase
+            function loadSuggestions() {
+                const expensesRef = firebase.database().ref(`expenses/${userId}`);
+                
+                expensesRef.once("value", (snapshot) => {
+                    const descriptions = new Set();
+                    const labels = new Set();
+
+                    snapshot.forEach((childSnapshot) => {
+                        const expense = childSnapshot.val();
+                        if (expense.description) {
+                            descriptions.add(expense.description);
+                        }
+                        if (expense.label) {
+                            labels.add(expense.label);
+                        }
                     });
-                    
-                    // Set color based on type
-                    const typeColor = expense.type === "earnings" ? "text-success" : "text-danger";
-                    const typeIcon = expense.type === "earnings" ? "fa-arrow-up" : "fa-arrow-down";
-                    
-                    const listItem = document.createElement("li");
-                    listItem.classList.add("group-item");
 
-                    listItem.innerHTML = `
-                        <div class="glass mb-1 text-light text-uppercase zoom p-1">
-                            <div class="d-flex justify-content-between align-items-center" style="margin-left: 20px;">
-                                <span style="font-size: 12px; ">
-                                    <b><i class="fas fa-wallet"></i> ${expense.description}</b>
-                                    <span class="${typeColor}"> 
-                                        <i class="fas ${typeIcon}"></i> ₹${expense.amount.toFixed(2)}
-                                    </span><br>
-                                    <span class="me-2" style="font-size: 12px;">${expenseDateFormatted}
-                                    </span>
-                                    <span class="badge category-badge bg-primary">${expense.label}</span>
-                                    <span class="badge ${expense.type === 'earnings' ? 'bg-success' : 'bg-danger'}">${expense.type}</span>
-                                </span> 
-                                <span>
-                                    <div class="dropstart">
-                                        <a class="btn btn-sm text-light" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="fas fa-ellipsis-v"></i>  
-                                        </a>
-                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink" data-bs-boundary="viewport">
-                                            <li>
-                                                <a class="btn btn-sm me-3 edit-btn" data-id="${expense.id}" style="font-size: 12px;">Edit</a>
-                                                <a class="btn btn-sm delete-btn" data-id="${expense.id}" style="font-size: 12px;">Delete</a>
-                                            </li>
-                                        </ul>
+                    descriptionSuggestions = Array.from(descriptions).sort();
+                    labelSuggestions = Array.from(labels).sort();
+                });
+            }
+
+            // Function to load unique labels for filter dropdown
+            function loadLabels() {
+                const labelFilter = document.getElementById("labelFilter");
+                const expensesRef = firebase.database().ref(`expenses/${userId}`);
+
+                // Fetch all expenses to extract unique labels
+                expensesRef.once("value", (snapshot) => {
+                    const labels = new Set(); // Use a Set to ensure uniqueness
+                    snapshot.forEach((childSnapshot) => {
+                        const expense = childSnapshot.val();
+                        if (expense.label) {
+                            labels.add(expense.label); // Add the label if it exists
+                        }
+                    });
+
+                    // Clear and repopulate the dropdown
+                    labelFilter.innerHTML = '<option value="">All Labels</option>'; // Default option
+                    labels.forEach((label) => {
+                        const option = document.createElement("option");
+                        option.value = label;
+                        option.textContent = label;
+                        labelFilter.appendChild(option);
+                    });
+                });
+            }
+
+            // Function to load user-specific expenses with filters
+            function loadUserExpenses() {
+                // Show loading spinner
+                document.getElementById("loadingSpinner").style.display = "flex";
+
+                const expensesRef = firebase.database().ref(`expenses/${userId}`);
+                const searchText = document.getElementById("searchInput").value.toLowerCase();
+                const startDate = document.getElementById("startDate").value;
+                const endDate = document.getElementById("endDate").value;
+                const selectedLabel = document.getElementById("labelFilter").value;
+                const selectedType = document.getElementById("typeFilter")?.value || "";
+
+                expensesRef.once("value", (snapshot) => {
+                    expensesList.innerHTML = "";
+                    let totalBalance = 0;
+                    let totalEarningsAmount = 0;
+                    let totalExpensesAmount = 0;
+                    let expensesArray = [];
+
+                    snapshot.forEach((childSnapshot) => {
+                        const expense = childSnapshot.val();
+                        const expenseDate = new Date(expense.date);
+                        const expenseYearMonthDay = expenseDate.toISOString().split("T")[0];
+                        const expenseMonth = expenseDate.getMonth();
+                        
+                        // Set default type if not exists (for backward compatibility)
+                        const expenseType = expense.type || "expense";
+
+                        // Apply filters: description, date range, month, label, and type
+                        const matchesDescription = searchText ? expense.description.toLowerCase().includes(searchText) : true;
+                        const matchesStartDate = startDate ? expenseYearMonthDay >= startDate : true;
+                        const matchesEndDate = endDate ? expenseYearMonthDay <= endDate : true;
+                        const matchesMonth = selectedMonth !== null ? expenseMonth === selectedMonth : true;
+                        const matchesLabel = selectedLabel ? expense.label === selectedLabel : true;
+                        const matchesType = selectedType ? expenseType === selectedType : true;
+
+                        // Include expense only if it matches all active filters
+                        if (matchesDescription && matchesStartDate && matchesEndDate && matchesMonth && matchesLabel && matchesType) {
+                            expensesArray.push({
+                                id: childSnapshot.key,
+                                date: expense.date,
+                                description: expense.description,
+                                amount: expense.amount,
+                                label: expense.label || "No Label",
+                                type: expenseType
+                            });
+                        }
+                    });
+
+                    // Reverse the array to show the most recent expense first
+                    expensesArray.reverse();
+
+                    // Display expenses in reverse order
+                    if (expensesArray.length > 0) {
+                        expensesArray.forEach((expense) => {
+                            const expenseDateFormatted = new Date(expense.date).toLocaleDateString("en-GB", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric"
+                            });
+                            
+                            // Set color based on type
+                            const typeColor = expense.type === "earnings" ? "text-success" : "text-danger";
+                            const typeIcon = expense.type === "earnings" ? "fa-arrow-up" : "fa-arrow-down";
+                            
+                            const listItem = document.createElement("li");
+                            listItem.classList.add("group-item");
+
+                            listItem.innerHTML = `
+                                <div class="glass mb-1 text-light text-uppercase zoom p-1">
+                                    <div class="d-flex justify-content-between align-items-center" style="margin-left: 20px;">
+                                        <span style="font-size: 12px; ">
+                                            <b><i class="fas fa-wallet"></i> ${expense.description}</b>
+                                            <span class="${typeColor}"> 
+                                                <i class="fas ${typeIcon}"></i> ₹${expense.amount.toFixed(2)}
+                                            </span><br>
+                                            <span class="me-2" style="font-size: 12px;">${expenseDateFormatted}
+                                            </span>
+                                            <span class="badge category-badge bg-primary">${expense.label}</span>
+                                            <span class="badge ${expense.type === 'earnings' ? 'bg-success' : 'bg-danger'}">${expense.type}</span>
+                                        </span> 
+                                        <span>
+                                            <div class="dropstart">
+                                                <a class="btn btn-sm text-light" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="fas fa-ellipsis-v"></i>  
+                                                </a>
+                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink" data-bs-boundary="viewport">
+                                                    <li>
+                                                        <a class="btn btn-sm me-3 edit-btn" data-id="${expense.id}" style="font-size: 12px;">Edit</a>
+                                                        <a class="btn btn-sm delete-btn" data-id="${expense.id}" style="font-size: 12px;">Delete</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </span>
                                     </div>
-                                </span>
-                            </div>
-                        </div>
-                    `;
+                                </div>
+                            `;
 
-                    // Add edit functionality
-                    listItem.querySelector(".edit-btn").addEventListener("click", (e) => {
-                        const expenseId = e.target.getAttribute("data-id");
-                        openEditModal(expenseId);
-                    });
+                            // Add edit functionality
+                            listItem.querySelector(".edit-btn").addEventListener("click", (e) => {
+                                const expenseId = e.target.getAttribute("data-id");
+                                openEditModal(expenseId);
+                            });
 
-                    // Add delete functionality with confirmation alert
-                    listItem.querySelector(".delete-btn").addEventListener("click", () => {
-                        if (confirm("Are you sure you want to delete this expense?")) {
-                            expensesRef.child(expense.id).remove()
-                                .then(() => {
-                                    alert("Expense deleted successfully.");
-                                    loadUserExpenses();
-                                    loadLabels();
-                                    loadDescriptionSuggestions();
-                                    loadLabelSuggestions();
-                                    archiveExpenses();
-                                })
-                                .catch((error) => {
-                                    console.error("Error deleting expense:", error);
-                                    alert("Failed to delete the expense. Please try again.");
-                                });
-                        }
-                    });
+                            // Add delete functionality with confirmation alert
+                            listItem.querySelector(".delete-btn").addEventListener("click", () => {
+                                if (confirm("Are you sure you want to delete this expense?")) {
+                                    expensesRef.child(expense.id).remove()
+                                        .then(() => {
+                                            alert("Expense deleted successfully.");
+                                            loadUserExpenses();
+                                            loadLabels();
+                                            loadSuggestions(); // Reload suggestions
+                                        })
+                                        .catch((error) => {
+                                            console.error("Error deleting expense:", error);
+                                            alert("Failed to delete the expense. Please try again.");
+                                        });
+                                }
+                            });
 
-                    expensesList.appendChild(listItem);
-                    
-                    // Calculate totals based on type
-                    if (expense.type === "earnings") {
-                        totalEarningsAmount += expense.amount;
-                        totalBalance += expense.amount;
+                            expensesList.appendChild(listItem);
+                            
+                            // Calculate totals based on type
+                            if (expense.type === "earnings") {
+                                totalEarningsAmount += expense.amount;
+                                totalBalance += expense.amount;
+                            } else {
+                                totalExpensesAmount += expense.amount;
+                                totalBalance -= expense.amount;
+                            }
+                        });
+
+                        // Update total amount (net balance)
+                        const balanceColor = totalBalance >= 0 ? "text-success" : "text-danger";
+                        totalAmount.innerHTML = `<span class="${balanceColor}">₹${Math.abs(totalBalance).toFixed(2)} ${totalBalance >= 0 ? '(Credit)' : '(Debit)'}</span>`;
+                        
+                        // Update summary boxes
+                        document.getElementById("totalEarnings").innerHTML = `₹${totalEarningsAmount.toFixed(2)}`;
+                        document.getElementById("totalExpenses").innerHTML = `₹${totalExpensesAmount.toFixed(2)}`;
+                        
                     } else {
-                        totalExpensesAmount += expense.amount;
-                        totalBalance -= expense.amount;
+                        // Show message when no expenses are found
+                        expensesList.innerHTML = "<li class='list-group-item glass text-light'>No records found</li>";
+                        totalAmount.innerHTML = "₹0.00";
+                        document.getElementById("totalEarnings").innerHTML = "₹0.00";
+                        document.getElementById("totalExpenses").innerHTML = "₹0.00";
                     }
-                });
 
-                // Update total amount (net balance)
-                const balanceColor = totalBalance >= 0 ? "text-success" : "text-danger";
-                totalAmount.innerHTML = `<span class="${balanceColor}">₹${Math.abs(totalBalance).toFixed(2)} ${totalBalance >= 0 ? '(Credit)' : '(Debit)'}</span>`;
+                    // Hide loading spinner after data is loaded
+                    document.getElementById("loadingSpinner").style.display = "none";
+                });
+            }
+
+            // Open the modal with pre-filled data for editing
+            function openEditModal(expenseId) {
+                const expensesRef = firebase.database().ref(`expenses/${userId}`).child(expenseId);
+
+                // Fetch the expense data
+                expensesRef.once("value", (snapshot) => {
+                    const expense = snapshot.val();
+                    expenseDescription.value = expense.description;
+                    expenseLabel.value = expense.label;
+                    expenseAmount.value = expense.amount;
+                    expenseDate.value = expense.date;
+                    
+                    // Set the correct type radio button
+                    if (expense.type === "earnings") {
+                        document.getElementById("typeEarnings").checked = true;
+                    } else {
+                        document.getElementById("typeExpense").checked = true;
+                    }
+
+                    // Store the expenseId in a global variable to use when saving
+                    window.currentExpenseId = expenseId;
+
+                    // Open the modal
+                    const modal = new bootstrap.Modal(document.getElementById('expenseModal'));
+                    modal.show();
+                });
+            }
+
+            // Function to save the edited expense or add a new one
+            addExpenseBtn.addEventListener("click", () => {
+                const description = expenseDescription.value.trim();
+                const label = expenseLabel.value.trim();
+                const amount = parseFloat(expenseAmount.value);
+                const date = expenseDate.value;
                 
-                // Update summary boxes
-                document.getElementById("totalEarnings").innerHTML = `₹${totalEarningsAmount.toFixed(2)}`;
-                document.getElementById("totalExpenses").innerHTML = `₹${totalExpensesAmount.toFixed(2)}`;
-                
-            } else {
-                // Show message when no expenses are found
-                expensesList.innerHTML = "<li class='list-group-item glass text-light'>No records found</li>";
-                totalAmount.innerHTML = "₹0.00";
-                document.getElementById("totalEarnings").innerHTML = "₹0.00";
-                document.getElementById("totalExpenses").innerHTML = "₹0.00";
-            }
+                // Get selected type
+                const type = document.querySelector('input[name="expenseType"]:checked')?.value || "expense";
 
-            // Hide loading spinner after data is loaded
-            document.getElementById("loadingSpinner").style.display = "none";
-        });
-    }
+                if (description && label && !isNaN(amount) && date && userId) {
+                    // Disable the button to prevent multiple submissions
+                    addExpenseBtn.disabled = true;
 
-    // Open the modal with pre-filled data for editing
-    function openEditModal(expenseId) {
-        const expensesRef = firebase.database().ref(`expenses/${userId}`).child(expenseId);
-
-        // Fetch the expense data
-        expensesRef.once("value", (snapshot) => {
-            const expense = snapshot.val();
-            expenseDescription.value = expense.description;
-            expenseLabel.value = expense.label;
-            expenseAmount.value = expense.amount;
-            expenseDate.value = expense.date;
-            
-            // Set the correct type radio button
-            if (expense.type === "earnings") {
-                document.getElementById("typeEarnings").checked = true;
-            } else {
-                document.getElementById("typeExpense").checked = true;
-            }
-
-            // Store the expenseId in a global variable to use when saving
-            window.currentExpenseId = expenseId;
-
-            // Open the modal
-            const modal = new bootstrap.Modal(document.getElementById('expenseModal'));
-            modal.show();
-        });
-    }
-
-    // Function to save the edited expense or add a new one
-    addExpenseBtn.addEventListener("click", () => {
-        const description = expenseDescription.value.trim();
-        const label = expenseLabel.value.trim();
-        const amount = parseFloat(expenseAmount.value);
-        const date = expenseDate.value;
-        
-        // Get selected type
-        const type = document.querySelector('input[name="expenseType"]:checked')?.value || "expense";
-
-        if (description && label && !isNaN(amount) && date && userId) {
-            // Disable the button to prevent multiple submissions
-            addExpenseBtn.disabled = true;
-
-            if (window.currentExpenseId) {
-                // Update the existing expense in Firebase (Edit mode)
-                const expensesRef = firebase.database().ref(`expenses/${userId}`).child(window.currentExpenseId);
-                expensesRef.update({
-                    description: description,
-                    label: label,
-                    amount: amount,
-                    date: date,
-                    type: type // Add type to update
-                }).then(() => {
-                    addExpenseBtn.disabled = false;
-                    resetForm();
-                    // Reset type to default (expense)
-                    document.getElementById("typeExpense").checked = true;
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('expenseModal'));
-                    modal.hide();
-                    window.currentExpenseId = null;
-                    loadUserExpenses();
-                    loadLabels();
-                    loadDescriptionSuggestions();
-                    loadLabelSuggestions();
-                    archiveExpenses();
-                }).catch((error) => {
-                    console.error("Error updating expense:", error);
-                    addExpenseBtn.disabled = false;
-                });
-            } else {
-                // Add a new expense to Firebase (Add mode)
-                const expensesRef = firebase.database().ref(`expenses/${userId}`).push();
-                expensesRef.set({
-                    description: description,
-                    label: label,
-                    amount: amount,
-                    date: date,
-                    type: type // Add type to new entry
-                }).then(() => {
-                    addExpenseBtn.disabled = false;
-                    resetForm();
-                    // Reset type to default (expense)
-                    document.getElementById("typeExpense").checked = true;
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('expenseModal'));
-                    modal.hide();
-                    loadUserExpenses();
-                    loadLabels();
-                    loadDescriptionSuggestions();
-                    loadLabelSuggestions();
-                    archiveExpenses();
-                }).catch((error) => {
-                    console.error("Error adding expense:", error);
-                    addExpenseBtn.disabled = false;
-                });
-            }
-        } else {
-            alert("Please enter all expense details.");
-        }
-    });
-
-    // Mouse wheel scroll for horizontal scrolling - Month Filter
-    const monthFilter = document.getElementById("monthFilter");
-    monthFilter.addEventListener("wheel", (event) => {
-        if (event.deltaY !== 0) {
-            monthFilter.scrollLeft += event.deltaY;  // Scroll horizontally
-            event.preventDefault(); // Prevent default vertical scroll
-        }
-    });
-
-    // Event listener for month filter buttons
-    document.querySelectorAll("#monthFilter button").forEach((btn) => {
-        btn.addEventListener("click", () => {
-            // Set selected month based on button's data-month attribute
-            selectedMonth = parseInt(btn.getAttribute("data-month"), 10);
-
-            // Highlight selected month button
-            document.querySelectorAll("#monthFilter button").forEach((button) => {
-                button.classList.remove("btn-dark");
-                button.classList.add("btn-outline-secondary");
+                    if (window.currentExpenseId) {
+                        // Update the existing expense in Firebase (Edit mode)
+                        const expensesRef = firebase.database().ref(`expenses/${userId}`).child(window.currentExpenseId);
+                        expensesRef.update({
+                            description: description,
+                            label: label,
+                            amount: amount,
+                            date: date,
+                            type: type
+                        }).then(() => {
+                            addExpenseBtn.disabled = false;
+                            resetForm();
+                            document.getElementById("typeExpense").checked = true;
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('expenseModal'));
+                            modal.hide();
+                            window.currentExpenseId = null;
+                            loadUserExpenses();
+                            loadLabels();
+                            loadSuggestions(); // Reload suggestions
+                            archiveExpenses();
+                        }).catch((error) => {
+                            console.error("Error updating expense:", error);
+                            addExpenseBtn.disabled = false;
+                        });
+                    } else {
+                        // Add a new expense to Firebase (Add mode)
+                        const expensesRef = firebase.database().ref(`expenses/${userId}`).push();
+                        expensesRef.set({
+                            description: description,
+                            label: label,
+                            amount: amount,
+                            date: date,
+                            type: type
+                        }).then(() => {
+                            addExpenseBtn.disabled = false;
+                            resetForm();
+                            document.getElementById("typeExpense").checked = true;
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('expenseModal'));
+                            modal.hide();
+                            loadUserExpenses();
+                            loadLabels();
+                            loadSuggestions(); // Reload suggestions
+                            archiveExpenses();
+                        }).catch((error) => {
+                            console.error("Error adding expense:", error);
+                            addExpenseBtn.disabled = false;
+                        });
+                    }
+                } else {
+                    alert("Please enter all expense details.");
+                }
             });
-            btn.classList.remove("btn-outline-secondary");
-            btn.classList.add("btn-dark");
 
-            loadUserExpenses(); // Reload expenses based on selected month
-        });
-    });
+            // Mouse wheel scroll for horizontal scrolling - Month Filter
+            const monthFilter = document.getElementById("monthFilter");
+            monthFilter.addEventListener("wheel", (event) => {
+                if (event.deltaY !== 0) {
+                    monthFilter.scrollLeft += event.deltaY;
+                    event.preventDefault();
+                }
+            });
 
-    // Mouse wheel scroll for horizontal scrolling - Button Scroll
-    const buttonScroll = document.getElementById("buttonScroll");
-    buttonScroll.addEventListener("wheel", (event) => {
-        if (event.deltaY !== 0) {
-            buttonScroll.scrollLeft += event.deltaY;  // Scroll horizontally
-            event.preventDefault(); // Prevent default vertical scroll
-        }
-    });
+            // Event listener for month filter buttons
+            document.querySelectorAll("#monthFilter button").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    selectedMonth = parseInt(btn.getAttribute("data-month"), 10);
 
-    // Event listeners for filters
-    document.getElementById("searchInput").addEventListener("input", loadUserExpenses);
-    document.getElementById("startDate").addEventListener("input", loadUserExpenses);
-    document.getElementById("endDate").addEventListener("input", loadUserExpenses);
-    document.getElementById("labelFilter").addEventListener("change", loadUserExpenses);
-    
-    // Add event listener for type filter
-    if (document.getElementById("typeFilter")) {
-        document.getElementById("typeFilter").addEventListener("change", function() {
-            loadUserExpenses();
-        });
-    }
+                    document.querySelectorAll("#monthFilter button").forEach((button) => {
+                        button.classList.remove("btn-dark");
+                        button.classList.add("btn-outline-secondary");
+                    });
+                    btn.classList.remove("btn-outline-secondary");
+                    btn.classList.add("btn-dark");
 
-    // Reset Filters Button
-    document.getElementById("resetFiltersBtn").addEventListener("click", () => {
-        // Clear all filter fields and reset month selection
-        document.getElementById("searchInput").value = "";
-        document.getElementById("startDate").value = "";
-        document.getElementById("endDate").value = "";
-        selectedMonth = null;
+                    loadUserExpenses();
+                });
+            });
 
-        // Reset label filter
-        document.getElementById("labelFilter").value = "";
-        
-        // Reset type filter
-        if (document.getElementById("typeFilter")) {
-            document.getElementById("typeFilter").value = "";
-        }
+            // Mouse wheel scroll for horizontal scrolling - Button Scroll
+            const buttonScroll = document.getElementById("buttonScroll");
+            buttonScroll.addEventListener("wheel", (event) => {
+                if (event.deltaY !== 0) {
+                    buttonScroll.scrollLeft += event.deltaY;
+                    event.preventDefault();
+                }
+            });
 
-        // Reset month button styling
-        document.querySelectorAll("#monthFilter button").forEach((button) => {
-            button.classList.remove("btn-dark");
-            button.classList.add("btn-outline-secondary");
-        });
+            // Event listeners for filters
+            document.getElementById("searchInput").addEventListener("input", loadUserExpenses);
+            document.getElementById("startDate").addEventListener("input", loadUserExpenses);
+            document.getElementById("endDate").addEventListener("input", loadUserExpenses);
+            document.getElementById("labelFilter").addEventListener("change", loadUserExpenses);
+            
+            // Add event listener for type filter
+            if (document.getElementById("typeFilter")) {
+                document.getElementById("typeFilter").addEventListener("change", function() {
+                    loadUserExpenses();
+                });
+            }
 
-        loadUserExpenses();
-    });
+            // Reset Filters Button
+            document.getElementById("resetFiltersBtn").addEventListener("click", () => {
+                document.getElementById("searchInput").value = "";
+                document.getElementById("startDate").value = "";
+                document.getElementById("endDate").value = "";
+                selectedMonth = null;
+                document.getElementById("labelFilter").value = "";
+                
+                if (document.getElementById("typeFilter")) {
+                    document.getElementById("typeFilter").value = "";
+                }
 
-    // Function to archive previous year expenses
-    function archiveExpenses() {
-        const expensesRef = firebase.database().ref(`expenses/${userId}`);
-        const archiveRef = firebase.database().ref(`archive_expenses/${userId}`);
-        const currentYear = new Date().getFullYear();
+                document.querySelectorAll("#monthFilter button").forEach((button) => {
+                    button.classList.remove("btn-dark");
+                    button.classList.add("btn-outline-secondary");
+                });
 
-        expensesRef.once("value", (snapshot) => {
-            snapshot.forEach((childSnapshot) => {
-                const expense = childSnapshot.val();
-                const expenseYear = new Date(expense.date).getFullYear();
+                loadUserExpenses();
+            });
 
-                // Move records from previous years
-                if (expenseYear < currentYear) {
-                    const expenseId = childSnapshot.key;
-                    // Make sure type is included when archiving
-                    archiveRef.child(expenseId).set(expense, (error) => {
-                        if (!error) {
-                            expensesRef.child(expenseId).remove(); // Remove from current expenses
-                        } else {
-                            console.error("Error archiving expense:", error);
+            // Function to archive previous year expenses
+            function archiveExpenses() {
+                const expensesRef = firebase.database().ref(`expenses/${userId}`);
+                const archiveRef = firebase.database().ref(`archive_expenses/${userId}`);
+                const currentYear = new Date().getFullYear();
+
+                expensesRef.once("value", (snapshot) => {
+                    snapshot.forEach((childSnapshot) => {
+                        const expense = childSnapshot.val();
+                        const expenseYear = new Date(expense.date).getFullYear();
+
+                        if (expenseYear < currentYear) {
+                            const expenseId = childSnapshot.key;
+                            archiveRef.child(expenseId).set(expense, (error) => {
+                                if (!error) {
+                                    expensesRef.child(expenseId).remove();
+                                } else {
+                                    console.error("Error archiving expense:", error);
+                                }
+                            });
                         }
                     });
-                }
-            });
-            loadUserExpenses(); // Reload to reflect any changes
-        });
-    }
-
-    // Function to load unique expense descriptions for suggestions
-    function loadDescriptionSuggestions() {
-        const expensesRef = firebase.database().ref(`expenses/${userId}`);
-        const descriptionSuggestions = document.getElementById("descriptionSuggestions");
-
-        expensesRef.once("value", (snapshot) => {
-            const descriptions = new Set(); // Use a Set to avoid duplicates
-
-            snapshot.forEach((childSnapshot) => {
-                const expense = childSnapshot.val();
-                if (expense.description) {
-                    descriptions.add(expense.description); // Store unique descriptions
-                }
-            });
-
-            // Clear previous suggestions
-            descriptionSuggestions.innerHTML = "";
-
-            // Add new suggestions to the datalist
-            descriptions.forEach((description) => {
-                const option = document.createElement("option");
-                option.value = description;
-                descriptionSuggestions.appendChild(option);
-            });
-        });
-    }
-
-    // Function to load unique expense labels for suggestions
-    function loadLabelSuggestions() {
-        const expensesRef = firebase.database().ref(`expenses/${userId}`);
-        const labelSuggestions = document.getElementById("labelSuggestions");
-
-        expensesRef.once("value", (snapshot) => {
-            const labels = new Set(); // Use a Set to avoid duplicates
-
-            snapshot.forEach((childSnapshot) => {
-                const expense = childSnapshot.val();
-                if (expense.label) {
-                    labels.add(expense.label); // Store unique labels
-                }
-            });
-
-            // Clear previous suggestions
-            labelSuggestions.innerHTML = "";
-
-            // Add new suggestions to the datalist
-            labels.forEach((label) => {
-                const option = document.createElement("option");
-                option.value = label;
-                labelSuggestions.appendChild(option);
-            });
-        });
-    }
-
-    // Function to export expenses to Excel
-    function downloadExcel() {
-        const expensesRef = firebase.database().ref(`expenses/${userId}`);
-        const expensesArray = [];
-
-        expensesRef.once("value", (snapshot) => {
-            snapshot.forEach((childSnapshot) => {
-                const expense = childSnapshot.val();
-                const expenseDate = new Date(expense.date);
-                const expenseDateFormatted = expenseDate.toLocaleDateString("en-GB", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric"
+                    loadUserExpenses();
                 });
+            }
 
-                expensesArray.push({
-                    "Title": expense.description,
-                    "Amount (₹)": expense.amount.toFixed(2),
-                    "Date": expenseDateFormatted,
-                    "Label": expense.label || "No Label",
-                    "Type": expense.type || "expense"
+            // Function to export expenses to Excel
+            function downloadExcel() {
+                const expensesRef = firebase.database().ref(`expenses/${userId}`);
+                const expensesArray = [];
+
+                expensesRef.once("value", (snapshot) => {
+                    snapshot.forEach((childSnapshot) => {
+                        const expense = childSnapshot.val();
+                        const expenseDate = new Date(expense.date);
+                        const expenseDateFormatted = expenseDate.toLocaleDateString("en-GB", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric"
+                        });
+
+                        expensesArray.push({
+                            "Title": expense.description,
+                            "Amount (₹)": expense.amount.toFixed(2),
+                            "Date": expenseDateFormatted,
+                            "Label": expense.label || "No Label",
+                            "Type": expense.type || "expense"
+                        });
+                    });
+
+                    const ws = XLSX.utils.json_to_sheet(expensesArray);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "Expenses");
+                    XLSX.writeFile(wb, "Expenses_List.xlsx");
+                });
+            }
+
+            // Add event listener to the download button
+            document.getElementById("downloadExcelBtn").addEventListener("click", downloadExcel);
+
+            // Calculator functionality
+            const display = document.getElementById("calculatorDisplay");
+
+            function appendValue(value) {
+                display.value += value;
+            }
+
+            function calculateResult() {
+                try {
+                    display.value = eval(display.value);
+                } catch (error) {
+                    alert("Invalid calculation");
+                }
+            }
+
+            function clearDisplay() {
+                display.value = "";
+            }
+
+            function deleteLast() {
+                display.value = display.value.slice(0, -1);
+            }
+
+            // Log out function
+            document.getElementById("logoutButton").addEventListener("click", () => {
+                firebase.auth().signOut().then(() => {
+                    window.location.href = "login.html";
+                }).catch((error) => {
+                    alert("Error logging out: " + error.message);
                 });
             });
 
-            // Create a worksheet from the expenses array
-            const ws = XLSX.utils.json_to_sheet(expensesArray);
-
-            // Create a new workbook and append the worksheet
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Expenses");
-
-            // Trigger the download of the Excel file
-            XLSX.writeFile(wb, "Expenses_List.xlsx");
-        });
-    }
-
-    // Add event listener to the download button
-    document.getElementById("downloadExcelBtn").addEventListener("click", downloadExcel);
-
-    // Calculator functionality
-    const display = document.getElementById("calculatorDisplay");
-
-    // Append value to the display
-    function appendValue(value) {
-        display.value += value;
-    }
-
-    // Calculate the result
-    function calculateResult() {
-        try {
-            display.value = eval(display.value);
-        } catch (error) {
-            alert("Invalid calculation");
-        }
-    }
-
-    // Clear the display
-    function clearDisplay() {
-        display.value = "";
-    }
-
-    // Delete the last character from the display
-    function deleteLast() {
-        display.value = display.value.slice(0, -1);
-    }
-
-    // Log out function
-    document.getElementById("logoutButton").addEventListener("click", () => {
-        firebase.auth().signOut().then(() => {
-            window.location.href = "login.html";
-        }).catch((error) => {
-            alert("Error logging out: " + error.message);
-        });
-    });
-
-    // For back button
-    function goBack() {
-        if (window.history.length > 1) {
-            window.history.back();
-        } else {
-            window.location.href = "defaultPage.html"; // Redirect to a default page
-        }
-    }
-</script>
-
-
-   </div>
-  </div>
-        <!-- Bootstrap 5 JS -->
+            // For back button
+            function goBack() {
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    window.location.href = "defaultPage.html";
+                }
+            }
+        </script>
+    </div>
+    <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
