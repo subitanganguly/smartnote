@@ -13,10 +13,11 @@
       "type": "image/png"
     },
     {
-      "src": "img/logo512x512.gif", 
+      "src": "img/logo512x512.png", 
       "sizes": "512x512",
       "type": "image/png"
     }
   ]
 
 }
+
