@@ -1,0 +1,139 @@
+@import url('/sg-plugin/sg-plugin.css');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Protest+Revolution&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sevillana&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Protest+Revolution&family=Sevillana&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Creepster&family=Protest+Revolution&family=Sevillana&display=swap');
+
+ /* root variables will be overwritten by js */
+    :root {
+      --color1: #1300c0;
+      --color2: #00b8be;
+      --color3: #c702f8;
+    }
+
+    /* body gradient + smooth transition */
+    body {
+      background: linear-gradient(135deg, var(--color1), var(--color2), var(--color3));
+      min-height: 100vh;
+      transition: background 0.3s, color 0.2s;
+      margin: 0;
+    }
+
+    /* theme navbar base (can be overridden by .bg-dark etc) */
+    .theme-nav {
+      background: linear-gradient(135deg, var(--color1), var(--color2), var(--color3)) !important;
+    }
+
+/* Fix for dark text mode */
+body.text-dark {
+  color: #000000 !important;
+}
+
+body.text-dark .form-control,
+body.text-dark .form-select,
+body.text-dark .form-label,
+body.text-dark .glass-card,
+body.text-dark .card,
+body.text-dark div,
+body.text-dark p,
+body.text-dark h1,
+body.text-dark h2,
+body.text-dark h3,
+body.text-dark h4,
+body.text-dark h5,
+body.text-dark h6,
+body.text-dark .icons-index-text ,
+body.text-dark .icons-index,
+body.text-dark .form-control::placeholder {
+  color: #000000 !important;
+}
+
+
+.icons-index {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.icons-index-text {
+    font-size: 16px;
+    font-family: 'Caveat', cursive;
+
+}
+
+
+/* ----------------------------------buttons card-menu-btn----------------------------- */
+.card-drop {
+    position: fixed;
+    top:10px;
+    right:10px;
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    border:none;
+    background:rgba(29, 189, 252, 0.911);
+    color:rgb(119, 0, 0);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 4px 10px rgba(224, 224, 224, 0.219), inset 0 0 10px 3px rgba(73, 1, 1, 0.363);
+    transition: all .3s ease;
+    z-index:10;
+}
+
+.card-drop:hover{
+    background:rgba(212, 198, 73, 0.808);
+    transform: scale(1.0);
+    box-shadow:0 8px 20px rgba(0,0,0,0.3);
+}
+
+.card-drop:active {
+  background:rgba(231, 186, 103, 0.219);
+  transform: translateX(-50%) scale(0.95);
+}
+
+
+
+
+
+
+
+
+
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #FFF;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  position: relative;
+  animation: pulse 1s linear infinite;
+}
+.loader:after {
+  content: '';
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border: 5px solid #FFF;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  animation: scaleUp 1s linear infinite;
+}
+
+@keyframes scaleUp {
+  0% { transform: translate(-50%, -50%) scale(0) }
+  60% , 100% { transform: translate(-50%, -50%)  scale(1)}
+}
+@keyframes pulse {
+  0% , 60% , 100%{ transform:  scale(1) }
+  80% { transform:  scale(1.2)}
+}
+    
