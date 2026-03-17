@@ -84,10 +84,11 @@
 }
 
  .form-control {
-    border: 1px solid transparent;
+    border: 1px solid #b8b8b8da;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.137);
-    color: #ffffff;
+    background: rgba(236, 236, 236, 0.281);
+    transition: all 0.3s ease;
+    box-shadow: inset 0 0 5px 2px rgba(0, 0, 0, 0.178);
 }
 
 .form-control::placeholder {
