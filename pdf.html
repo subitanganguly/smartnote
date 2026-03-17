@@ -296,15 +296,15 @@
 
                 <div class="row justify-content-center mt-3">
                     <div class="col-md-12">
-                        <div class="glass-card dark p-3">
+                        <div class="glass-card dark p-1">
                             
-                                <p>Total PDFs Converted: <span id="pdfCountDisplay" class="text-info">Loading....</span></p>
+                                <h6 class="fw-bold text-center mt-3">Total PDFs Converted: <span id="pdfCountDisplay" class="badge text-bg-primary">Loading....</span></h6>
                                 
                                 <!-- Settings Panel -->
                                 <div class="settings-panel mb-4">
                                     <h5 class="mb-3">PDF Settings</h5>
-                                    <div class="row">
-                                        <div class="col-md-6">
+                                    <div class="row g-1">
+                                        <div class="col-4">
                                             <div class="mb-3">
                                                 <label for="pageSize" class="form-label">Page Size</label>
                                                 <select class="form-select" id="pageSize">
@@ -315,7 +315,7 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-4">
                                             <div class="mb-3">
                                                 <label for="quality" class="form-label">Image Quality</label>
                                                 <select class="form-select" id="quality">
@@ -325,11 +325,13 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        <div class="col-4">
+                                            <div class="form-check form-switch mb-3 mt-4">
+                                                <label class="form-check-label" for="autoRotate">Auto-rotate</label>
+                                                <input class="form-check-input" type="checkbox" id="autoRotate" checked>                                             </div>
+                                        </div>
                                     </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="autoRotate" checked>
-                                        <label class="form-check-label" for="autoRotate">Auto-rotate images</label>
-                                    </div>
+                                    
                                 </div>
 
                                 <!-- File Upload Section -->
@@ -349,8 +351,8 @@
                                 </div>
 
                                 <!-- Image Adjustment Controls -->
-                                <div class="row">
-                                    <div class="col-md-6">
+                                <div class="row g-1">
+                                    <div class="col-6">
                                         <!-- Brightness Slider -->
                                         <div class="slider-container">
                                             <label for="brightness" class="slider-label">Brightness: </label><span id="brightnessValue">1</span>
@@ -363,7 +365,7 @@
                                             <input type="range" id="contrast" class="form-range" min="0" max="2" step="0.01" value="1">
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-6">
                                         <!-- Saturation Slider -->
                                         <div class="slider-container">
                                             <label for="saturation" class="slider-label">Saturation:</label><span id="saturationValue">1</span>
@@ -381,7 +383,7 @@
                                
                               
                                     <button class="btn button13 w-100 d-none d-md-inline mb-2" id="previewBtn">Preview PDF</button>
-                                    <button class="btn button12 w-100" id="convertBtn">Convert to PDF</button>
+                                    <button class="btn button12 w-100 mb-5" id="convertBtn">Convert to PDF</button>
                               
                           
                         </div>
