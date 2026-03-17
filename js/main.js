@@ -1,4 +1,4 @@
-import * as SGPlugin from 'sg-plugin.js';
+import * as SGPlugin from './sg-plugin.js';
 
 
 
