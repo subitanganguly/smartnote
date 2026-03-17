@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Note| Admin</title>
+    <link rel="icon" type="image/png" href="img/logo.png">
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+     
+     <!-- My All Type of Style Including Icon [font-awesome/6.0.0-beta3/css/all.min.css] in this style.css -->
+    <link href="css/style.css" rel="stylesheet">
+
+  </head>
+  <body>
+
+     <!-- <nav class="navbar bg-light fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="#">
+    
+    </a>
+    <div class="d-flex align-items-center">
+        <a class="dropdown-item" href="https://subitanganguly.github.io/projects/dutr/">DUTR</a>
+    
+    </div>
+  </div>
+   </nav> -->
+
+
+     <div class="container-fluid mt-3" >
+
+     <!-- Code in main.js for Particles -->
+     <div class="particles" id="particles"></div>
+
+
+     
+         <button class="sg-floating-btn" id="mainBtn">
+            <i class="fa-solid fa-bars"></i>
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+
+        <button class="child-btn" onclick="window.location.href='index.html'">
+            <i class="fas fa-home"></i>
+        </button>
+        <button class="child-btn" onclick="window.location.href='theme.html'">
+            <i class="fa-brands fa-themeco"></i>
+        </button>
+        <button class="child-btn" onclick="window.location.href='feedback.html'">
+            <i class="fas fa-thumbs-up"></i>
+        </button>
+        
+       <button class="child-btn" onclick="window.location.href='https://subitanganguly.github.io/projects/dutr/';">
+         E
+       </button>
+
+        <button class="child-btn bg-danger" id="logoutButton" title="logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+
+
+     <div class="mt-1 text-light">
+
+        <span id="greetingMessage" class="mb-0 d-none">Note Found <span class="text-light" id="noteCount">0</span></span>
+
+
+
+        <!-- Search Filter Section -->
+        <div class="mb-3 ">
+            <div class="input-group">
+                <span class="input-group-text" id="searchIcon">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" id="searchInput" class="form-control searchInput" autocomplete="off" placeholder="Search......." onkeyup="filterUsers()">
+                <span class="input-group-text" id="searchIcon">
+                    <span id="userCountHeader">Total Users</span>
+                </span>
+            </div>
+
+            
+            
+        </div>
+        
+        <!-- User Report Section -->
+        <div class="text-light">
+            <div class="mb-3">
+                
+            </div>
+            <center>
+            <div id="loadingSpinner" class="loader mt-5" style="display: none;" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            </center>
+            <div id="userList" style="display:none;"></div>
+        </div>
+
+     </div>
+
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="js/firebasecnfig.js"></script>
+    <script src="js/main.js" type="module" crossorigin="anonymous"></script>
+
+
+     <script>
+        // Firebase Authentication State Check
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                const Name = user.displayName ? user.displayName.split(' ')[0] : 'Admin';
+                document.getElementById("greetingMessage").innerHTML = `Hello, <b>${Name}</b>!`;
+
+                firebase.database().ref(`users/${user.uid}/role`).once('value').then((snapshot) => {
+                    if (snapshot.val() === 'admin') {
+                        loadUsersData();
+                    } else {
+                        alert("Access Denied: You do not have admin privileges.");
+                        window.location.href = "login.html";
+                    }
+                });
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+
+        // Function to format dates
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        // Global users data variable for filtering
+        let usersData = [];
+
+// Function to Load All Users' Data for Admin
+function loadUsersData() {
+    const userListDiv = document.getElementById("userList");
+    const loadingSpinner = document.getElementById("loadingSpinner");
+    const userCountHeader = document.getElementById("userCountHeader");
+
+    loadingSpinner.style.display = "flex";
+    userListDiv.style.display = "none";
+
+    firebase.database().ref("users").once("value", (snapshot) => {
+        const users = snapshot.val();
+        if (users) {
+            usersData = users; // Store users data for filtering
+            let userCount = Object.keys(users).length;
+            userCountHeader.innerHTML = `${userCount}`;
+
+            const userPromises = Object.keys(users).map(async (uid) => {
+                const user = users[uid];
+
+                // Format the last use date
+                const lastUseFormatted = user.lastUse ? formatDate(user.lastUse) : "N/A";
+
+                // Fetch notes count for this user
+                const notesSnapshot = await firebase.database().ref(`notes/${uid}`).once("value");
+                const notes = notesSnapshot.val();
+                const noteCount = notes ? Object.keys(notes).length : 0; // Count notes if any, otherwise 0
+
+                // Fetch expenses count for this user
+                const expensesSnapshot = await firebase.database().ref(`expenses/${uid}`).once("value");
+                const expenses = expensesSnapshot.val();
+                const expensesCount = expenses ? Object.keys(expenses).length : 0; // Corrected: Count expenses if any, otherwise 0
+                
+                 // Fetch archive_expenses count for this user
+                 const archive_expensesSnapshot = await firebase.database().ref(`archive_expenses/${uid}`).once("value");
+                const archive_expenses = archive_expensesSnapshot.val();
+                const archive_expensesCount = archive_expenses ? Object.keys(archive_expenses).length : 0; // Corrected: Count expenses if any, otherwise 0
+
+
+
+
+                let feedback = 'No feedback yet';
+                if (user.feedback) {
+                    feedback = Object.keys(user.feedback).map(feedbackId => {
+                        const fb = user.feedback[feedbackId];
+                        return `<div><strong>Rating:</strong> ${fb.rating}, <strong>Message:</strong> ${fb.message}</div>`;
+                    }).join('');
+                }
+
+                return `
+                    <div class="d-flex justify-content-between align-items-start glass-card dark shine mb-2 p-3">
+    <div class="user-info" style="font-size: 12px; width: 90%;">
+        <span class="user-name" style="font-size: 12px; color: #fb0071;">
+            <i class="fas fa-user"></i><b class="text-uppercase"> ${user.Name} </b>
+            <span class="text-uppercase" style="color: #d3d3d3;"> [${user.role || "user"}]</span>
+        </span>
+        <span class="user-mobile" style="color: #32CD32;"><i class="fas fa-mobile-alt"></i> ${user.mobile || "N/A"}</span><br>
+        <span class="user-email"><i class="fas fa-envelope"></i> ${user.email}</span><br>
+        <span class="user-signup" style="color: #FFD700; font-size: 10px;">Sign-up: ${user.signupDate ? formatDate(user.signupDate) : "N/A"}</span><br>
+        <span class="user-last-login" style="color: #ff8000; font-size: 10px;">Last Login: ${user.lastLoginDate ? formatDate(user.lastLoginDate) : "N/A"}</span><br>
+        <span class="user-last-use" style="color: #00CED1; font-size: 10px;">Last Use: ${user.lastUse ? formatDate(user.lastUse) : "N/A"}</span><br>
+        
+        <div class="feedback text-uppercase" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
+            ${feedback}
+        </div>
+        <div class="note-count" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
+            Notes:📝${noteCount} | Expenses:💵${expensesCount} | Archive:🗑${archive_expensesCount}
+        </div>
+        <!-- New User or Active User Label -->
+       <span class="user-status" style="font-size: 10px; font-weight: bold;">
+            ${isNewUser(user.signupDate) ? '<span class="bouncy">New User</span> | ' : ''} 
+            ${isActiveUser(user.lastUse) ? '<span class="pulsate">Active User</span>' : ''}
+            <spin id="emailStatus-${uid}" style="display: none; font-size: 12px;">
+            Email sent successfully!
+        </span>
+
+       </span>
+
+    </div>
+    
+ 
+    <div class="dropstart card-drop">
+        <a class="btn btn-sm text-light" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-ellipsis-v"></i>  
+        </a>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" onclick="updateUserRole('${uid}', '${user.role}')">Change Role</a></li>
+            <li>
+            <a href="mailto:${user.email}?subject=Thank%20You%20for%20Choosing%20Our%20SmartNote%20App&body=Dear%20${user.Name},%0D%0A%0D%0AThank%20you%20for%20choosing%20SmartNote.%20We%20hope%20you%20enjoy%20using%20our%20app.%20If%20you%20have%20any%20feedback%20or%20questions,%20feel%20free%20to%20reach%20out.%0D%0A%0D%0ABest%20Regards,%0D%0AThe%20SmartNote%20Team"
+             class="dropdown-item" 
+            " 
+             onclick="showEmailConfirmation('${uid}')">Send Thank You Email</a>
+           </li>
+        </ul>
+    </div>
+</div>
+
+
+
+                `;
+            });
+
+            // Use Promise.all to wait for all user promises to resolve
+            Promise.all(userPromises).then(userHtmlArray => {
+                userListDiv.innerHTML = userHtmlArray.join('');
+                loadingSpinner.style.display = "none";
+                userListDiv.style.display = "block";
+            });
+        } else {
+            userListDiv.innerHTML = "<p>No users found in the database.</p>";
+            loadingSpinner.style.display = "none";
+            userListDiv.style.display = "block";
+        }
+    }).catch((error) => {
+        alert("Error loading user data: " + error.message);
+        loadingSpinner.style.display = "none";
+    });
+}
+
+
+function filterUsers() {
+    const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+    const filteredUsers = Object.keys(usersData).filter(uid => {
+        const user = usersData[uid];
+        const signupDate = user.signupDate ? formatDate(user.signupDate).toLowerCase() : "";
+        const lastLoginDate = user.lastLoginDate ? formatDate(user.lastLoginDate).toLowerCase() : "";
+        return (
+            user.Name.toLowerCase().includes(searchTerm) || 
+            user.email.toLowerCase().includes(searchTerm) ||
+            (user.mobile && user.mobile.toLowerCase().includes(searchTerm)) ||
+            signupDate.includes(searchTerm) || // Search by formatted signup date
+            lastLoginDate.includes(searchTerm) // Search by formatted lastLoginDate
+        );
+    });
+
+    // Update the user count header
+    const userCountHeader = document.getElementById("userCountHeader");
+    userCountHeader.innerHTML = `Users (${filteredUsers.length})`;
+
+    // Display filtered users
+    const userListDiv = document.getElementById("userList");
+    let htmlContent = '';
+
+    const userPromises = filteredUsers.map(async (uid) => {
+        const user = usersData[uid];
+        
+        // Fetch the notes count for each user
+        const notesSnapshot = await firebase.database().ref(`notes/${uid}`).once("value");
+        const notes = notesSnapshot.val();
+        const noteCount = notes ? Object.keys(notes).length : 0; // Count notes if any, otherwise 0
+
+        // Fetch expenses count for this user
+        const expensesSnapshot = await firebase.database().ref(`expenses/${uid}`).once("value");
+        const expenses = expensesSnapshot.val();
+        const expensesCount = expenses ? Object.keys(expenses).length : 0; // Count notes if any, otherwise 0
+
+        // Fetch archive_expenses count for this user
+        const archive_expensesSnapshot = await firebase.database().ref(`archive_expenses/${uid}`).once("value");
+        const archive_expenses = archive_expensesSnapshot.val();
+        const archive_expensesCount = archive_expenses ? Object.keys(archive_expenses).length : 0; // Corrected: Count expenses if any, otherwise 0
+
+
+
+        let feedback = 'No feedback yet';
+        if (user.feedback) {
+            feedback = Object.keys(user.feedback).map(feedbackId => {
+                const fb = user.feedback[feedbackId];
+                return `<div><strong>Rating:</strong> ${fb.rating}, <strong>Message:</strong> ${fb.message}</div>`;
+            }).join('');
+        }
+
+        return `
+             <div class="d-flex justify-content-between align-items-start glass-card mb-2 p-3">
+    <div class="user-info" style="font-size: 12px; width: 90%;">
+        <span class="user-name" style="font-size: 12px; color: #fb0071;">
+            <i class="fas fa-user"></i><b class="text-uppercase"> ${user.Name} </b>
+            <span class="text-uppercase" style="color: #d3d3d3;"> [${user.role || "user"}]</span>
+        </span>
+        <span class="user-mobile" style="color: #32CD32;"><i class="fas fa-mobile-alt"></i> ${user.mobile || "N/A"}</span><br>
+        <span class="user-email"><i class="fas fa-envelope"></i> ${user.email}</span><br>
+        <span class="user-signup" style="color: #FFD700; font-size: 10px;">Sign-up: ${user.signupDate ? formatDate(user.signupDate) : "N/A"}</span><br>
+        <span class="user-last-login" style="color: #ff8000; font-size: 10px;">Last Login: ${user.lastLoginDate ? formatDate(user.lastLoginDate) : "N/A"}</span><br>
+        <span class="user-last-use" style="color: #00CED1; font-size: 10px;">Last Use: ${user.lastUse ? formatDate(user.lastUse) : "N/A"}</span><br>
+        
+        <div class="feedback text-uppercase" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
+            ${feedback}
+        </div>
+        <div class="note-count" style="margin-top: 10px; font-size: 12px; color: #d3d3d3;">
+            Notes:📝${noteCount} | Expenses:💵${expensesCount} | Archive:🗑${archive_expensesCount}
+        </div>
+          <!-- New User or Active User Label -->
+       <span class="user-status" style="font-size: 10px; font-weight: bold;">
+    ${isNewUser(user.signupDate) ? '<span class="bouncy">New User</span> | ' : ''} 
+    ${isActiveUser(user.lastUse) ? '<span class="pulsate">Active User</span>' : ''}
+    <spin id="emailStatus-${uid}" style="display: none; font-size: 12px;">
+    Email sent successfully!
+   </span>
+
+</span>
+
+    </div>
+    
+    <div class="dropstart card-drop">
+        <a class="btn btn-sm text-light" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-ellipsis-v"></i>  
+        </a>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" onclick="updateUserRole('${uid}', '${user.role}')">Change Role</a></li>
+            <li>
+            <a href="mailto:${user.email}?subject=Thank%20You%20for%20Choosing%20Our%20SmartNote%20App&body=Dear%20${user.Name},%0D%0A%0D%0AThank%20you%20for%20choosing%20SmartNote.%20We%20hope%20you%20enjoy%20using%20our%20app.%20If%20you%20have%20any%20feedback%20or%20questions,%20feel%20free%20to%20reach%20out.%0D%0A%0D%0ABest%20Regards,%0D%0AThe%20SmartNote%20Team"
+             class="dropdown-item" 
+            " 
+             onclick="showEmailConfirmation('${uid}')">Send Thank You Email</a>
+           </li>
+        </ul>
+    </div>
+</div>
+
+
+        `;
+    });
+
+    // Use Promise.all to wait for all user promises to resolve
+    Promise.all(userPromises).then(userHtmlArray => {
+        userListDiv.innerHTML = userHtmlArray.join('');
+        // Show "No results found" if the filter matches no users
+        if (filteredUsers.length === 0) {
+            userListDiv.innerHTML = "<p>No users match your search criteria.</p>";
+        }
+    }).catch((error) => {
+        alert("Error loading user data: " + error.message);
+    });
+}
+
+
+        // Function to update user role
+        function updateUserRole(uid, currentRole) {
+            const newRole = currentRole === "admin" ? "user" : "admin";
+            if (!confirm(`Are you sure you want to change this user's role to ${newRole}?`)) {
+                return;
+            }
+
+            firebase.database().ref(`users/${uid}`).update({ role: newRole })
+            .then(() => {
+                alert(`User role updated to ${newRole}`);
+                loadUsersData(); 
+            }).catch((error) => {
+                alert("Error updating user role: " + error.message);
+            });
+        }
+
+        // Back Button Functionality
+        function goBack() {
+            window.history.back();
+        }
+
+
+
+       // Function to check if the user is a new user (signed up in the last 30 days)
+function isNewUser(signupDate) {
+    const now = new Date();
+    const signupDateObj = new Date(signupDate);
+    const diffInDays = (now - signupDateObj) / (1000 * 3600 * 24); // Difference in days
+    return diffInDays <= 5; // Consider the user "new" if signed up within the last 30 days
+}
+
+// Function to check if the user is active based on their last use (used the app within the last 7 days)
+function isActiveUser(lastUse) {
+    if (!lastUse) return false;
+    const now = new Date();
+    const lastUseDateObj = new Date(lastUse);
+    const diffInDays = (now - lastUseDateObj) / (1000 * 3600 * 24); // Difference in days
+    return diffInDays <= 7; // Consider the user "active" if they used the app within the last 7 days
+}
+
+
+function showEmailConfirmation(uid) {
+    // Locate the confirmation message container by its ID
+    const emailStatusDiv = document.getElementById(`emailStatus-${uid}`);
+    
+    // Show the confirmation message
+    emailStatusDiv.style.display = "block";
+    
+}
+
+    </script>
+
+  </body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>themes</title>
+  <link rel="icon" type="image/png" href="img/logo.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="css/style.css" rel="stylesheet">
+
+  <style>
+    .theme-box {
+      cursor: pointer;
+      height: 50px;
+      border-radius: 12px ;
+      border: none;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Code in main.js for Particles -->
+     <div class="particles" id="particles"></div>
+
+  <!-- navbar -->
+  <nav class="navbar navbar-expand-lg theme-nav navbar-dark shadow-">
+    <div class="container-fluid">
+      <a class="navbar-brand button10" href="#" onclick="history.go(-1)"><i class="fa-solid fa-arrow-left me-1"></i> Back</a>
+      <a class="navbar-brand" href="#">🎨Theme</a>
+    </div>
+  </nav>
+
+  <div class="container-fluid mt-4">
+        <div class="glass-card dark p-3">
+
+          <div class="card-back-shap"></div>
+
+          <h5 class="mb-3 text-center">_____ 𒆜 Preset Themes 𒆜  _____</h5>
+           
+          <div class="row w-100 g-1">
+            <div class="col-3">
+              <div class="theme-box glass-card shine hover fw-bold text-center p-2" onclick="setTheme(0)" 
+               style="background:linear-gradient(135deg,#1300c0,#00b8be,#c702f8)" 
+               title="Preset 1 (light text, theme nav)">Apply</div>
+            </div>
+            <div class="col-3">
+              <div class="theme-box glass-card shine hover fw-bold text-center p-2" onclick="setTheme(1)" 
+               style="background:linear-gradient(135deg,#ff512f,#dd2476,#ff512f)" 
+               title="Preset 2 (light text, theme nav)">Apply</div>
+              
+            </div>
+            <div class="col-3">
+              <div class="theme-box glass-card shine hover fw-bold text-center p-2" onclick="setTheme(2)" 
+               style="background:linear-gradient(135deg,#11998e,#38ef7d,#11998e)" 
+               title="Preset 3 (light text, dark nav)">Apply</div>
+              
+            </div>
+            <div class="col-3">
+              <div class="theme-box glass-card shine hover fw-bold text-center p-2" onclick="setTheme(3)" 
+               style="background:linear-gradient(135deg,#00c0c0, #ff00c8, #007bff)" 
+               title="Preset 4 (light text, dark nav)">Apply</div>         
+            </div>
+
+            
+          </div>
+         
+          <!-- theme boxes -->
+          
+          
+          
+          
+
+          <hr class="hr-light w-100">
+
+          <h5 class="mt-1 mb-3 text-center">_____ 𒆜 Custom Theme 𒆜  _____</h5>
+          <div class="row g-1 w-100">
+          <div class="col-4 col-md-4 mb-5">
+            <label class="form-label">Color 1</label>
+            <input type="color" class="form-control form-control-color w-100 h-100" id="customColor1" value="#1300c0">
+          </div>
+          <div class="col-4 col-md-4 mb-5">
+            <label class="form-label">Color 2</label>
+            <input type="color" class="form-control form-control-color w-100 h-100" id="customColor2" value="#00b8be">
+          </div>
+          <div class="col-4 col-md-4 mb-5">
+            <label class="form-label">Color 3</label>
+            <input type="color" class="form-control form-control-color w-100 h-100" id="customColor3" value="#c702f8">
+          </div>
+
+          <div class="col-6 col-md-6 mb-3">
+            <label class="form-label">𒆜 Text color style</label>
+            <select class="form-select" id="customTextStyle">
+              <option value="light" selected>🌞 light (text-light)</option>
+              <option class="bg-dark text-light" value="dark">🌙 dark (text-dark)</option>
+            </select>
+          </div>
+
+          <div class="col-6 col-md-6 mb-3">
+            <label class="form-label">𒆜 Navbar style</label>
+            <select class="form-select" id="customNavStyle">
+              <option value="theme" selected>🌈 theme gradient (theme-nav)</option>
+              <option value="light">⚪ light (bg-light, navbar-light)</option>
+              <option class="bg-dark text-light" value="dark">⚫ dark (bg-dark, navbar-dark)</option>
+            </select>
+          </div>
+</div>
+          <button class="btn button10 w-100" onclick="applyCustomTheme()">Apply Custom Theme</button>
+
+          <button class="btn button11 w-100 mt-2" onclick="restoreDefaultTheme()">
+           Restore Default
+          </button>
+
+          <small class="d-block mt-2 text-center text-white-50">Settings saved to localStorage</small>
+        </div>
+
+
+  </div>
+
+
+
+    <button class="sg-floating-btn" id="mainBtn">
+            <i class="fa-solid fa-bars"></i>
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+
+        <button class="child-btn" onclick="window.location.href='index.html'">
+            <i class="fas fa-home"></i>
+        </button>
+        <button class="child-btn" onclick="window.location.href='theme.html'">
+            <i class="fa-brands fa-themeco"></i>
+        </button>
+        <button class="child-btn" onclick="window.location.href='feedback.html'">
+            <i class="fas fa-thumbs-up"></i>
+        </button>
+        
+        <button class="child-btn" id="btn5">
+            <i class="fas fa-user"></i>
+        </button>
+
+        <button class="child-btn bg-danger" id="logoutButton" title="logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script src="js/main.js" type="module" crossorigin="anonymous"></script>
+
+  <script>
+    // ---------- THEME DEFINITIONS (presets) ----------
+    const themes = [
+      { name: "Preset 1", colors: ["#1300c0", "#00b8be", "#c702f8"], text: "light", nav: "theme" },
+      { name: "Preset 2", colors: ["#ff512f", "#dd2476", "#ff512f"], text: "light", nav: "theme" },
+      { name: "Preset 3", colors: ["#11998e", "#38ef7d", "#11998e"], text: "light", nav: "dark" },
+      { name: "Preset 4", colors: ["#00c0c0", "#ff00c8", "#007bff"], text: "light", nav: "theme" }
+    ];
+
+    const root = document.documentElement;
+    const body = document.body;
+
+    // ---------- APPLY THEME (core) ----------
+    function applyTheme(theme) {
+      // set css variables
+      root.style.setProperty("--color1", theme.colors[0]);
+      root.style.setProperty("--color2", theme.colors[1]);
+      root.style.setProperty("--color3", theme.colors[2]);
+
+      // text color
+      if (theme.text === "light") {
+        body.classList.remove("text-dark");
+        body.classList.add("text-light");
+      } else {
+        body.classList.remove("text-light");
+        body.classList.add("text-dark");
+      }
+
+      // navbar
+      const nav = document.querySelector("nav");
+      nav.classList.remove("navbar-light", "navbar-dark", "bg-light", "bg-dark", "theme-nav");
+
+      if (theme.nav === "light") {
+        nav.classList.add("navbar-light", "bg-light");
+      } else if (theme.nav === "dark") {
+        nav.classList.add("navbar-dark", "bg-dark");
+      } else { // 'theme' or fallback
+        nav.classList.add("navbar-dark", "theme-nav");
+      }
+    }
+
+
+    window.setTheme = function(index) {
+
+  const theme = themes[index];
+
+  localStorage.setItem("siteTheme", JSON.stringify(theme));
+
+  applyTheme(theme);
+
+  const c1 = document.getElementById('customColor1');
+  const c2 = document.getElementById('customColor2');
+  const c3 = document.getElementById('customColor3');
+  const text = document.getElementById('customTextStyle');
+  const nav = document.getElementById('customNavStyle');
+
+  if(c1) c1.value = theme.colors[0];
+  if(c2) c2.value = theme.colors[1];
+  if(c3) c3.value = theme.colors[2];
+  if(text) text.value = theme.text;
+  if(nav) nav.value = theme.nav;
+
+};
+
+    // ---------- CUSTOM THEME FROM FORM ----------
+    window.applyCustomTheme = function() {
+      const color1 = document.getElementById('customColor1').value;
+      const color2 = document.getElementById('customColor2').value;
+      const color3 = document.getElementById('customColor3').value;
+      const textStyle = document.getElementById('customTextStyle').value;
+      const navStyle = document.getElementById('customNavStyle').value;
+
+      const customTheme = {
+        name: "custom",
+        colors: [color1, color2, color3],
+        text: textStyle,
+        nav: navStyle
+      };
+
+      localStorage.setItem("siteTheme", JSON.stringify(customTheme));
+      applyTheme(customTheme);
+    };
+
+    
+   
+    function restoreDefaultTheme(){
+   localStorage.removeItem("siteTheme");
+  location.reload();
+}
+  </script>
+
+</body>
+</html>

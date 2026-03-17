@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Note | QR Generator</title>
+    <link rel="icon" type="image/png" href="img/logo.png">
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+     <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+     <!-- My All Type of Style Including Icon [font-awesome/6.0.0-beta3/css/all.min.css] in this style.css -->
+    <link href="css/style.css" rel="stylesheet">
+
+  </head>
+  <body>
+
+
+     <div class="container-fluid" >
+
+     <!-- Code in main.js for Particles -->
+     <div class="particles" id="particles"></div>
+
+
+
+     <button class="sg-floating-btn" id="mainBtn">
+            <i class="fa-solid fa-bars"></i>
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+
+        <button class="child-btn" onclick="window.location.href='index.html'">
+            <i class="fas fa-home"></i>
+        </button>
+        <button class="child-btn" onclick="window.location.href='theme.html'">
+            <i class="fa-brands fa-themeco"></i>
+        </button>
+        <button class="child-btn" onclick="window.location.href='feedback.html'">
+            <i class="fas fa-thumbs-up"></i>
+        </button>
+        
+        <!-- <button class="child-btn" id="btn5">
+            <i class="fas fa-user"></i>
+        </button> -->
+
+        <button class="child-btn bg-danger" id="logoutButton" title="logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+
+
+
+
+
+                <div class="container mt-3 text-light">
+                <div class="row justify-content-center ">
+                <div class="col-md-8 glass-card p-3">  
+                    <h5 class="text-center"><span id="greetingMessage" class="mb-0">QR Generator</span></h5>          
+                <form id="upiForm" class="glass mt-3 mb-5">
+                <!-- UPI ID -->
+                <div class="mb-3">
+                    <label for="upiId" class="form-label">UPI ID <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="upiId" placeholder="Enter UPI ID" required>
+                </div>
+
+                <!-- Amount -->
+                <div class="mb-3">
+                    <label for="amount" class="form-label">Amount (INR) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="amount" placeholder="Enter Amount" required>
+                </div>
+
+                <!-- Switch -->
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
+                    <label class="form-check-label" for="flexSwitchCheckChecked">Off For Without Amount</label>
+                </div>
+
+                <!-- Remember Me -->
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input" id="rememberMe">
+                    <label class="form-check-label" for="rememberMe">Remember UPI ID</label>
+                </div>
+
+                <!-- Buttons -->
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn button2">Generate QR Code</button>
+                    <a href="qr-index.html" class="btn button3">Generate New QR</a>
+                </div>
+                </form>
+
+               
+            </div>
+        </div>
+
+
+     </div>
+
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="js/firebasecnfig.js"></script>
+    <script src="js/main.js" type="module" crossorigin="anonymous"></script>
+
+
+     <script>
+        // Load saved UPI ID when the page is loaded
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedUpiId = localStorage.getItem('upiId');
+            if (savedUpiId) {
+                document.getElementById('upiId').value = savedUpiId;
+                document.getElementById('rememberMe').checked = true;
+            }
+            const switchInput = document.getElementById('flexSwitchCheckChecked');
+            toggleAmountField(switchInput.checked);
+        });
+
+        // Function to toggle the amount field
+      function toggleAmountField(isChecked) {
+    const amountInput = document.getElementById('amount');
+    const amountGroup = amountInput.closest('.mb-3');
+
+    amountInput.required = isChecked;
+    amountInput.disabled = !isChecked;
+
+    amountGroup.style.display = isChecked ? 'block' : 'none';
+}
+
+        // Listen for switch toggle
+        document.getElementById('flexSwitchCheckChecked').addEventListener('change', function () {
+            toggleAmountField(this.checked);
+        });
+
+        // Handle form submission and generate QR Code
+        document.getElementById('upiForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const upiId = document.getElementById('upiId').value.trim();
+            const amount = document.getElementById('amount').value.trim();
+            const isAmountRequired = document.getElementById('flexSwitchCheckChecked').checked;
+
+            if (!upiId || (isAmountRequired && (!amount || isNaN(amount) || amount <= 0))) {
+                alert("Please enter valid UPI ID and amount!");
+                return;
+            }
+
+            const upiLink = isAmountRequired
+                ? `upi://pay?pa=${upiId}&am=${amount}&cu=INR`
+                : `upi://pay?pa=${upiId}&cu=INR`;
+
+            if (document.getElementById('rememberMe').checked) {
+                localStorage.setItem('upiId', upiId);
+            } else {
+                localStorage.removeItem('upiId');
+            }
+
+            QRCode.toDataURL(upiLink, { errorCorrectionLevel: 'H' }, 
+            function (error, url) {
+                if (error) {
+                    console.error(error);
+                    alert('Failed to generate QR Code');
+                } else {
+                    window.location.href = `qr.html?qrCode=${encodeURIComponent(url)}`;
+                }
+            });
+        });
+    </script>
+     <!-- <script>
+        document.getElementById("reloadButton").addEventListener("click", function () {
+            location.reload(); // Reloads the current page
+        });
+    </script> -->
+  </body>
+</html>
