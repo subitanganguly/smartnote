@@ -343,61 +343,138 @@ document.getElementById("backToLogin").onclick = function(e){
 
 
     // Sign up function with Confirm Password check and loading spinner in button
+    // document.getElementById("signupForm").addEventListener("submit", async function (event) {
+    //     event.preventDefault();
+
+    //     const Name = document.getElementById("SignupName").value;
+    //     const email = document.getElementById("signupEmail").value;
+    //     const mobile = document.getElementById("signupMobile").value;
+    //     const password = document.getElementById("signupPassword").value;
+    //     const confirmPassword = document.getElementById("confirmPassword").value;
+    //     const signupButton = document.getElementById("signupButton");
+
+    //     // Check if passwords match
+    //     if (password !== confirmPassword) {
+    //         alert("Passwords do not match. Please try again.");
+    //         return;
+    //     }
+
+    //     // Show loading spinner and disable button
+    //     signupButton.classList.add("loading");
+    //     signupButton.disabled = true;
+
+    //     try {
+    //         const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+    //         const user = userCredential.user;
+
+    //         const signUpDate = new Date().toISOString(); // ISO format for date-time
+
+    //         await firebase.database().ref("users/" + user.uid).set({
+    //         Name: Name,
+    //         email: email,
+    //         mobile: mobile,
+    //         signupDate: signUpDate,
+    //         lastLoginDate: signUpDate,  // Initialize with sign-up date
+    //         role: "user"
+    //      });
+
+
+    //         // Set user display name
+    //         await user.updateProfile({
+    //             displayName: `${Name} `
+    //         });
+
+    //         alert("Sign up successful! You can now log in.");
+
+    //         // Hide signup card and show login card
+    //         document.getElementById("signupCard").classList.add("d-none");
+    //         document.getElementById("loginCard").classList.remove("d-none");
+    //     } catch (error) {
+    //         console.error("Error during sign up:", error); // Log the error for debugging
+    //         alert("Error: " + error.message);
+    //     } finally {
+    //         // Hide loading spinner and re-enable button
+    //         signupButton.classList.remove("loading");
+    //         signupButton.disabled = false;
+    //     }
+    // });
+
+
+
     document.getElementById("signupForm").addEventListener("submit", async function (event) {
-        event.preventDefault();
+    event.preventDefault();
 
-        const Name = document.getElementById("SignupName").value;
-        const email = document.getElementById("signupEmail").value;
-        const mobile = document.getElementById("signupMobile").value;
-        const password = document.getElementById("signupPassword").value;
-        const confirmPassword = document.getElementById("confirmPassword").value;
-        const signupButton = document.getElementById("signupButton");
+    const Name = document.getElementById("SignupName").value;
+    const email = document.getElementById("signupEmail").value;
+    const mobile = document.getElementById("signupMobile").value;
+    const password = document.getElementById("signupPassword").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    const signupButton = document.getElementById("signupButton");
 
-        // Check if passwords match
-        if (password !== confirmPassword) {
-            alert("Passwords do not match. Please try again.");
-            return;
-        }
+    // ✅ Extract First Name
+    const firstName = Name.trim().split(" ")[0];
 
-        // Show loading spinner and disable button
-        signupButton.classList.add("loading");
-        signupButton.disabled = true;
+    // Check password match
+    if (password !== confirmPassword) {
+        alert("Passwords do not match. Please try again.");
+        return;
+    }
 
-        try {
-            const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
-            const user = userCredential.user;
+    // Show loading
+    signupButton.classList.add("loading");
+    signupButton.disabled = true;
 
-            const signUpDate = new Date().toISOString(); // ISO format for date-time
+    try {
+        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
 
-            await firebase.database().ref("users/" + user.uid).set({
+        const signUpDate = new Date().toISOString();
+
+        // ✅ Save user in database
+        await firebase.database().ref("users/" + user.uid).set({
             Name: Name,
+            firstName: firstName, // ⭐ store first name
             email: email,
             mobile: mobile,
             signupDate: signUpDate,
-            lastLoginDate: signUpDate,  // Initialize with sign-up date
+            lastLoginDate: signUpDate,
             role: "user"
-         });
+        });
 
+        // ✅ Set display name
+        await user.updateProfile({
+            displayName: Name
+        });
 
-            // Set user display name
-            await user.updateProfile({
-                displayName: `${Name} `
-            });
+        // =========================
+        // ✅ SEND WELCOME EMAIL
+        // =========================
+        fetch("https://script.google.com/macros/s/AKfycbyZNT38nWIhRL9UlCmhKkTkYfj0aANzqgkCP2fEVB4uouB7hcSOrxpz6BxPrDKo-_TbXQ/exec", {
+            method: "POST",
+            body: JSON.stringify({
+                email: email,
+                type: "welcome",
+                name: firstName   // ⭐ send first name
+            })
+        })
+        .then(res => res.json())
+        .then(data => console.log("Welcome email sent:", data))
+        .catch(err => console.error("Email error:", err));
 
-            alert("Sign up successful! You can now log in.");
+        alert("Sign up successful! You can now log in.");
 
-            // Hide signup card and show login card
-            document.getElementById("signupCard").classList.add("d-none");
-            document.getElementById("loginCard").classList.remove("d-none");
-        } catch (error) {
-            console.error("Error during sign up:", error); // Log the error for debugging
-            alert("Error: " + error.message);
-        } finally {
-            // Hide loading spinner and re-enable button
-            signupButton.classList.remove("loading");
-            signupButton.disabled = false;
-        }
-    });
+        // Switch UI
+        document.getElementById("signupCard").classList.add("d-none");
+        document.getElementById("loginCard").classList.remove("d-none");
+
+    } catch (error) {
+        console.error("Error during sign up:", error);
+        alert("Error: " + error.message);
+    } finally {
+        signupButton.classList.remove("loading");
+        signupButton.disabled = false;
+    }
+});
 
 
         // Forgot password function
